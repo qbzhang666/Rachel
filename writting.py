@@ -221,13 +221,105 @@ STOP_WORDS = {
     "your",
 }
 
-SAMPLE_WRITING = (
-    "I think school uniforms are good because they make students look the same. "
-    "Uniforms can stop people from showing off expensive clothes. This is important because some students feel left out.\n\n"
-    "Another reason is that uniforms save time in the morning. Students do not need to choose what to wear, so they can focus on school.\n\n"
-    "Some people say uniforms are bad because they stop students from showing personality. However, students can still show personality through their actions, ideas and friendships.\n\n"
-    "In conclusion, school uniforms should stay because they are fair and useful."
-)
+SAMPLE_LIBRARY = [
+    {
+        "key": "school-uniforms",
+        "label": "School uniforms",
+        "topic": "school uniforms",
+        "audience": "Year 8 students",
+        "writing": (
+            "I think school uniforms are good because they make students look the same. "
+            "Uniforms can stop people from showing off expensive clothes. This is important because some students feel left out.\n\n"
+            "Another reason is that uniforms save time in the morning. Students do not need to choose what to wear, so they can focus on school.\n\n"
+            "Some people say uniforms are bad because they stop students from showing personality. However, students can still show personality through their actions, ideas and friendships.\n\n"
+            "In conclusion, school uniforms should stay because they are fair and useful."
+        ),
+    },
+    {
+        "key": "homework-limits",
+        "label": "Homework limits",
+        "topic": "homework limits",
+        "audience": "school leaders",
+        "writing": (
+            "Schools should limit homework because students need time to rest, practise hobbies and connect with their families. "
+            "When homework becomes excessive, it can create stress instead of meaningful learning.\n\n"
+            "Firstly, balanced homework is more effective than large amounts of repetitive tasks. For example, a short revision activity can help students remember key ideas, while hours of worksheets may only make them tired. "
+            "This shows that quality matters more than quantity.\n\n"
+            "Furthermore, students who have time for sport, music and reading often return to class with better focus. "
+            "If schools want students to be responsible and motivated, they must protect time for wellbeing.\n\n"
+            "Although some people argue that more homework always leads to better results, this ignores the importance of sleep and mental health. "
+            "Ultimately, schools should set reasonable homework limits so learning remains useful, fair and sustainable."
+        ),
+    },
+    {
+        "key": "phones-at-school",
+        "label": "Phones at school",
+        "topic": "mobile phones at school",
+        "audience": "parents and teachers",
+        "writing": (
+            "Mobile phones should be restricted during class because learning requires attention. "
+            "How can students fully listen, think and contribute if notifications are constantly pulling their focus away?\n\n"
+            "Firstly, phones can interrupt concentration. According to many classroom observations, even a quick message can distract not only one student but also the people around them. "
+            "This means phone use affects the whole learning environment, not just the individual.\n\n"
+            "Secondly, a clear phone rule can make school fairer. Students who feel pressured to reply online deserve a break from that stress during lessons. "
+            "We need classrooms that are calm, respectful and focused.\n\n"
+            "Some people argue that phones are necessary for safety. However, schools can still provide office phones and emergency contact systems. "
+            "Therefore, restricting phones in class is a responsible choice that protects learning while still keeping students safe."
+        ),
+    },
+    {
+        "key": "daily-reading",
+        "label": "Daily reading",
+        "topic": "daily reading",
+        "audience": "Year 8 students",
+        "writing": (
+            "Every student should read for at least ten minutes each day. "
+            "Reading is not just a school task; it is a powerful habit that builds vocabulary, imagination and confidence.\n\n"
+            "Firstly, daily reading helps students become stronger writers. For example, students who regularly read novels, articles and essays see more sentence patterns and persuasive techniques. "
+            "This evidence matters because writers improve when they notice how language works.\n\n"
+            "Secondly, reading can improve focus. In a world filled with fast videos and constant alerts, quiet reading trains the mind to stay with one idea for longer. "
+            "That skill is valuable in every subject.\n\n"
+            "Although some students say they are too busy, ten minutes is realistic and practical. "
+            "Ultimately, daily reading is a small action with lasting benefits, so we should make it a normal part of student life."
+        ),
+    },
+    {
+        "key": "school-sport",
+        "label": "School sport",
+        "topic": "school sport",
+        "audience": "the school community",
+        "writing": (
+            "School sport must remain an important part of education because healthy bodies support healthy minds. "
+            "It is unfair to treat sport as a break from learning when it teaches discipline, teamwork and resilience.\n\n"
+            "To begin with, regular physical activity can improve student wellbeing. For instance, exercise can reduce stress and help students return to class more alert. "
+            "This shows that sport supports academic learning instead of competing with it.\n\n"
+            "In addition, sport gives students a chance to practise leadership and cooperation. "
+            "A team succeeds when players communicate, encourage each other and keep trying after setbacks.\n\n"
+            "Critics may argue that sport takes time away from core subjects. However, this view overlooks the fact that students learn best when their routines include movement, challenge and belonging. "
+            "For this reason, schools should protect sport as a vital part of a balanced education."
+        ),
+    },
+]
+
+SAMPLE_WRITING = SAMPLE_LIBRARY[0]["writing"]
+
+
+def get_sample(sample_key: str | None = None) -> dict[str, str]:
+    for sample in SAMPLE_LIBRARY:
+        if sample["key"] == sample_key:
+            return sample
+    return SAMPLE_LIBRARY[0]
+
+
+def get_sample_labels() -> list[str]:
+    return [sample["label"] for sample in SAMPLE_LIBRARY]
+
+
+def get_sample_by_label(label: str) -> dict[str, str]:
+    for sample in SAMPLE_LIBRARY:
+        if sample["label"] == label:
+            return sample
+    return SAMPLE_LIBRARY[0]
 
 
 @dataclass
@@ -959,6 +1051,7 @@ def render_http_page(
     topic: str = "",
     audience: str = "",
     analysis: Analysis | None = None,
+    selected_sample_key: str | None = None,
 ) -> str:
     report = ""
     improved = ""
@@ -966,6 +1059,13 @@ def render_http_page(
     technique_rows = ""
     weak_words = ""
     overclaims = ""
+    selected_sample = get_sample(selected_sample_key)
+    sample_options = "".join(
+        f"<option value=\"{escape_html(sample['key'])}\""
+        f"{' selected' if sample['key'] == selected_sample['key'] else ''}>"
+        f"{escape_html(sample['label'])}</option>"
+        for sample in SAMPLE_LIBRARY
+    )
 
     if analysis is not None:
         improved = build_improved_draft(writing, topic, audience)
@@ -1084,7 +1184,7 @@ def render_http_page(
             align-items: start;
         }}
         label {{ display: block; font-weight: 700; margin-bottom: 8px; }}
-        textarea, input {{
+        textarea, input, select {{
             width: 100%;
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -1100,7 +1200,7 @@ def render_http_page(
             border-radius: 8px;
             padding: 16px;
         }}
-        .side label + input {{ margin-bottom: 14px; }}
+        .side label + input, .side label + select {{ margin-bottom: 14px; }}
         .actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }}
         button, .sample-link {{
             border: 0;
@@ -1200,9 +1300,11 @@ def render_http_page(
             <input id="topic" name="topic" value="{escape_html(topic)}" placeholder="Example: school uniforms">
             <label for="audience">Audience</label>
             <input id="audience" name="audience" value="{escape_html(audience)}" placeholder="Example: Year 8 students">
+            <label for="sample_key">Example</label>
+            <select id="sample_key" name="sample_key">{sample_options}</select>
             <div class="actions">
                 <button type="submit">Analyse writing</button>
-                <a class="sample-link" href="/sample">Load sample</a>
+                <button class="sample-link" type="submit" formaction="/sample">Load selected sample</button>
             </div>
         </div>
     </form>
@@ -1214,14 +1316,18 @@ def render_http_page(
 
 class WritingCoachHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
-        path = urlparse(self.path).path
+        parsed = urlparse(self.path)
+        path = parsed.path
         if path == "/sample":
+            fields = parse_qs(parsed.query)
+            sample = get_sample(fields.get("sample_key", [""])[0])
             self.send_html(
                 render_http_page(
-                    writing=SAMPLE_WRITING,
-                    topic="school uniforms",
-                    audience="Year 8 students",
-                    analysis=analyse_text(SAMPLE_WRITING),
+                    writing=sample["writing"],
+                    topic=sample["topic"],
+                    audience=sample["audience"],
+                    analysis=analyse_text(sample["writing"]),
+                    selected_sample_key=sample["key"],
                 )
             )
             return
@@ -1229,17 +1335,32 @@ class WritingCoachHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path
-        if path != "/analyse":
+        if path not in {"/analyse", "/sample"}:
             self.send_error(404)
             return
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8", errors="replace")
         fields = parse_qs(body)
+
+        if path == "/sample":
+            sample = get_sample(fields.get("sample_key", [""])[0])
+            self.send_html(
+                render_http_page(
+                    writing=sample["writing"],
+                    topic=sample["topic"],
+                    audience=sample["audience"],
+                    analysis=analyse_text(sample["writing"]),
+                    selected_sample_key=sample["key"],
+                )
+            )
+            return
+
         writing = fields.get("writing", [""])[0]
         topic = fields.get("topic", [""])[0]
         audience = fields.get("audience", [""])[0]
+        sample_key = fields.get("sample_key", [""])[0]
         analysis = analyse_text(writing) if writing.strip() else None
-        self.send_html(render_http_page(writing, topic, audience, analysis))
+        self.send_html(render_http_page(writing, topic, audience, analysis, sample_key))
 
     def send_html(self, content: str) -> None:
         encoded = content.encode("utf-8")
@@ -1280,9 +1401,10 @@ def get_cli_port(default: int = 8501) -> int:
 
 
 def load_sample() -> None:
-    st.session_state["writing_text"] = SAMPLE_WRITING
-    st.session_state["topic_text"] = "school uniforms"
-    st.session_state["audience_text"] = "Year 8 students"
+    sample = get_sample_by_label(st.session_state.get("sample_label", SAMPLE_LIBRARY[0]["label"]))
+    st.session_state["writing_text"] = sample["writing"]
+    st.session_state["topic_text"] = sample["topic"]
+    st.session_state["audience_text"] = sample["audience"]
 
 
 def main() -> None:
@@ -1329,7 +1451,8 @@ def main() -> None:
     with right:
         topic = st.text_input("Topic", placeholder="Example: school uniforms", key="topic_text")
         audience = st.text_input("Audience", placeholder="Example: Year 8 students", key="audience_text")
-        st.button("Load sample", on_click=load_sample)
+        st.selectbox("Example", get_sample_labels(), key="sample_label")
+        st.button("Load selected sample", on_click=load_sample)
 
     if not writing.strip():
         st.info("Paste a draft or load the sample to begin.")
