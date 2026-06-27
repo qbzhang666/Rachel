@@ -1936,6 +1936,15 @@ def load_sample() -> None:
     st.session_state["writing_text"] = sample["writing"]
     st.session_state["topic_text"] = sample["topic"]
     st.session_state["audience_text"] = sample["audience"]
+    st.session_state["submitted_writing"] = sample["writing"]
+    st.session_state["submitted_topic"] = sample["topic"]
+    st.session_state["submitted_audience"] = sample["audience"]
+
+
+def submit_writing() -> None:
+    st.session_state["submitted_writing"] = st.session_state.get("writing_text", "")
+    st.session_state["submitted_topic"] = st.session_state.get("topic_text", "")
+    st.session_state["submitted_audience"] = st.session_state.get("audience_text", "")
 
 
 def main() -> None:
@@ -1979,17 +1988,25 @@ def main() -> None:
             placeholder="Paste an introduction, body paragraphs, or full persuasive essay here.",
             key="writing_text",
         )
+        st.button("Submit writing", type="primary", use_container_width=True, on_click=submit_writing)
     with right:
         topic = st.text_input("Topic", placeholder="Example: school uniforms", key="topic_text")
         audience = st.text_input("Audience", placeholder="Example: Year 8 students", key="audience_text")
         st.selectbox("Example", get_sample_labels(), key="sample_label")
         st.button("Load selected sample", on_click=load_sample)
 
-    if not writing.strip():
-        st.info("Paste a draft or load the sample to begin.")
+    submitted_writing = st.session_state.get("submitted_writing", "")
+    submitted_topic = st.session_state.get("submitted_topic", "")
+    submitted_audience = st.session_state.get("submitted_audience", "")
+
+    if not submitted_writing.strip():
+        st.info("Paste a draft or load a sample, then click Submit writing.")
         return
 
-    analysis = analyse_text(writing)
+    if writing.strip() and writing != submitted_writing:
+        st.warning("Draft changed since the last submission. Click Submit writing to refresh the feedback.")
+
+    analysis = analyse_text(submitted_writing)
 
     st.divider()
     metric_columns = st.columns(6)
@@ -2028,12 +2045,12 @@ def main() -> None:
 
     with tabs[1]:
         render_score_card("Persuasive use of words", analysis.strong_words)
-        render_word_choice_scan(writing, analysis.weak_word_hits)
+        render_word_choice_scan(submitted_writing, analysis.weak_word_hits)
 
     with tabs[2]:
-        improved = build_improved_draft(writing, topic, audience)
+        improved = build_improved_draft(submitted_writing, submitted_topic, submitted_audience)
         st.text_area("Improved draft", improved, height=420)
-        report = build_feedback_report(analysis, writing, topic, audience)
+        report = build_feedback_report(analysis, submitted_writing, submitted_topic, submitted_audience)
         st.download_button(
             "Download feedback",
             data=report,
