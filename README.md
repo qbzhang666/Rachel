@@ -1,6 +1,6 @@
 # Student Practice Apps
 
-Streamlit apps for students to practise grammar, improve persuasive writing and prepare for Year 7 AMC-style maths.
+Streamlit apps for students to practise grammar, improve persuasive writing and prepare for Years 7-9 AMC-style maths.
 
 ## Grammar practice
 
@@ -25,15 +25,17 @@ Streamlit apps for students to practise grammar, improve persuasive writing and 
 - Self-check checklist with next-step guidance
 - Improved draft and downloadable feedback report
 
-## AMC Year 7 maths prep
+## AMC Years 7-9 maths prep
 
 - Original AMC-style practice questions
-- Year 7 topics including number, fractions, algebra, geometry, measurement, data and problem solving
-- Topic and difficulty filters
+- Years 7, 8 and 9 levels
+- Topics including number, fractions, algebra, geometry, measurement, data and problem solving
+- AMC level, topic, difficulty and question-count filters
 - Blank answer choices so students can see what they have answered
-- Clear Submit answers button
+- Bright Take challenge button
+- Clear Submit answers button with confirmation
 - Worked solutions after submission
-- Score, accuracy and topic summary
+- Score, accuracy, topic summary and solution review table
 
 ## Run locally
 
@@ -48,7 +50,7 @@ For the persuasive writing coach:
 python -m streamlit run writting.py
 ```
 
-For the AMC Year 7 maths prep app:
+For the AMC Years 7-9 maths prep app:
 
 ```powershell
 python -m streamlit run Math.py

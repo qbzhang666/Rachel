@@ -433,25 +433,374 @@ QUESTION_BANK = [
     },
 ]
 
+QUESTION_BANK.extend(
+    [
+        {
+            "id": "y8n01",
+            "level": "AMC 8",
+            "topic": "Number",
+            "difficulty": "Warm-up",
+            "prompt": "What is the prime factorisation of 180?",
+            "choices": ["2 x 2 x 3 x 3 x 5", "2 x 3 x 3 x 10", "2 x 2 x 5 x 9", "3 x 3 x 4 x 5"],
+            "answer": "2 x 2 x 3 x 3 x 5",
+            "hint": "",
+            "solution": "180 = 18 x 10 = 2 x 3 x 3 x 2 x 5, so the prime factorisation is 2 x 2 x 3 x 3 x 5.",
+        },
+        {
+            "id": "y8n02",
+            "level": "AMC 8",
+            "topic": "Number",
+            "difficulty": "Core",
+            "prompt": "The lowest common multiple of 12 and 18 is:",
+            "choices": ["24", "30", "36", "72"],
+            "answer": "36",
+            "hint": "",
+            "solution": "Multiples of 12 are 12, 24, 36. Multiples of 18 are 18, 36. The lowest common multiple is 36.",
+        },
+        {
+            "id": "y8f01",
+            "level": "AMC 8",
+            "topic": "Fractions, decimals and percentages",
+            "difficulty": "Warm-up",
+            "prompt": "A ratio of 3:5 has a total of 64. What is the larger share?",
+            "choices": ["24", "32", "40", "48"],
+            "answer": "40",
+            "hint": "",
+            "solution": "There are 3 + 5 = 8 parts. Each part is 64 divided by 8 = 8. The larger share is 5 x 8 = 40.",
+        },
+        {
+            "id": "y8f02",
+            "level": "AMC 8",
+            "topic": "Fractions, decimals and percentages",
+            "difficulty": "Core",
+            "prompt": "A price increases from $80 to $92. What is the percentage increase?",
+            "choices": ["12%", "15%", "18%", "20%"],
+            "answer": "15%",
+            "hint": "",
+            "solution": "The increase is $12. The percentage increase is 12/80 x 100 = 15%.",
+        },
+        {
+            "id": "y8a01",
+            "level": "AMC 8",
+            "topic": "Algebra and patterns",
+            "difficulty": "Warm-up",
+            "prompt": "Simplify 4x + 7x - 3x.",
+            "choices": ["8x", "11x", "14x", "8x squared"],
+            "answer": "8x",
+            "hint": "",
+            "solution": "Combine like terms: 4x + 7x - 3x = 8x.",
+        },
+        {
+            "id": "y8a02",
+            "level": "AMC 8",
+            "topic": "Algebra and patterns",
+            "difficulty": "Core",
+            "prompt": "Solve 5p + 4 = 39.",
+            "choices": ["5", "7", "8", "9"],
+            "answer": "7",
+            "hint": "",
+            "solution": "Subtract 4 from both sides to get 5p = 35. Divide by 5, so p = 7.",
+        },
+        {
+            "id": "y8g01",
+            "level": "AMC 8",
+            "topic": "Geometry",
+            "difficulty": "Core",
+            "prompt": "Two angles on a straight line are in the ratio 2:3. What is the larger angle?",
+            "choices": ["72 degrees", "90 degrees", "108 degrees", "120 degrees"],
+            "answer": "108 degrees",
+            "hint": "",
+            "solution": "Angles on a straight line add to 180 degrees. There are 5 parts, so each part is 36 degrees. The larger angle is 3 x 36 = 108 degrees.",
+        },
+        {
+            "id": "y8g02",
+            "level": "AMC 8",
+            "topic": "Geometry",
+            "difficulty": "Challenge",
+            "prompt": "A right triangle has shorter sides 6 cm and 8 cm. What is the hypotenuse?",
+            "choices": ["9 cm", "10 cm", "12 cm", "14 cm"],
+            "answer": "10 cm",
+            "hint": "",
+            "solution": "Use Pythagoras: 6 squared + 8 squared = 36 + 64 = 100. The square root of 100 is 10.",
+        },
+        {
+            "id": "y8m01",
+            "level": "AMC 8",
+            "topic": "Measurement",
+            "difficulty": "Core",
+            "prompt": "A car travels 180 km in 3 hours. What is its average speed?",
+            "choices": ["45 km/h", "50 km/h", "60 km/h", "75 km/h"],
+            "answer": "60 km/h",
+            "hint": "",
+            "solution": "Average speed = distance divided by time = 180 divided by 3 = 60 km/h.",
+        },
+        {
+            "id": "y8m02",
+            "level": "AMC 8",
+            "topic": "Measurement",
+            "difficulty": "Challenge",
+            "prompt": "The area of a circle is 49 pi square cm. What is its radius?",
+            "choices": ["5 cm", "6 cm", "7 cm", "14 cm"],
+            "answer": "7 cm",
+            "hint": "",
+            "solution": "Area = pi r squared. Since pi r squared = 49 pi, r squared = 49, so r = 7 cm.",
+        },
+        {
+            "id": "y8d01",
+            "level": "AMC 8",
+            "topic": "Data and chance",
+            "difficulty": "Core",
+            "prompt": "A bag has 2 red, 3 blue and 5 yellow counters. What is the probability of not choosing yellow?",
+            "choices": ["1/2", "2/5", "3/5", "5/10"],
+            "answer": "1/2",
+            "hint": "",
+            "solution": "There are 10 counters in total. Not yellow means red or blue, which is 2 + 3 = 5 counters. The probability is 5/10 = 1/2.",
+        },
+        {
+            "id": "y8d02",
+            "level": "AMC 8",
+            "topic": "Data and chance",
+            "difficulty": "Challenge",
+            "prompt": "The mean of five numbers is 18. Four of the numbers are 11, 15, 20 and 22. What is the fifth number?",
+            "choices": ["18", "20", "22", "24"],
+            "answer": "22",
+            "hint": "",
+            "solution": "The total of five numbers is 5 x 18 = 90. The four known numbers total 68. The fifth number is 90 - 68 = 22.",
+        },
+        {
+            "id": "y8p01",
+            "level": "AMC 8",
+            "topic": "Problem solving",
+            "difficulty": "Core",
+            "prompt": "How many different two-letter codes can be made from A, B, C and D if letters cannot repeat?",
+            "choices": ["8", "10", "12", "16"],
+            "answer": "12",
+            "hint": "",
+            "solution": "There are 4 choices for the first letter and 3 choices for the second letter. That gives 4 x 3 = 12 codes.",
+        },
+        {
+            "id": "y8p02",
+            "level": "AMC 8",
+            "topic": "Problem solving",
+            "difficulty": "Challenge",
+            "prompt": "A train leaves every 12 minutes and a bus leaves every 18 minutes. They leave together at 9:00 am. When do they next leave together?",
+            "choices": ["9:24 am", "9:30 am", "9:36 am", "9:48 am"],
+            "answer": "9:36 am",
+            "hint": "",
+            "solution": "Find the lowest common multiple of 12 and 18, which is 36. They next leave together 36 minutes after 9:00 am, at 9:36 am.",
+        },
+        {
+            "id": "y9n01",
+            "level": "AMC 9",
+            "topic": "Number",
+            "difficulty": "Core",
+            "prompt": "Simplify 2 cubed x 2 to the power of 5.",
+            "choices": ["2 to the power of 8", "2 to the power of 15", "4 to the power of 8", "8 to the power of 5"],
+            "answer": "2 to the power of 8",
+            "hint": "",
+            "solution": "When multiplying powers with the same base, add the indices: 2 cubed x 2 to the power of 5 = 2 to the power of 8.",
+        },
+        {
+            "id": "y9n02",
+            "level": "AMC 9",
+            "topic": "Number",
+            "difficulty": "Challenge",
+            "prompt": "A number written in scientific notation is 3.6 x 10 to the power of 4. What is the ordinary number?",
+            "choices": ["3600", "36000", "360000", "3600000"],
+            "answer": "36000",
+            "hint": "",
+            "solution": "10 to the power of 4 is 10000. 3.6 x 10000 = 36000.",
+        },
+        {
+            "id": "y9f01",
+            "level": "AMC 9",
+            "topic": "Fractions, decimals and percentages",
+            "difficulty": "Core",
+            "prompt": "A value decreases by 20% and then increases by 20%. What percentage of the original value is the final value?",
+            "choices": ["96%", "100%", "104%", "120%"],
+            "answer": "96%",
+            "hint": "",
+            "solution": "Start with 100. Decreasing by 20% gives 80. Increasing 80 by 20% gives 96. The final value is 96% of the original.",
+        },
+        {
+            "id": "y9f02",
+            "level": "AMC 9",
+            "topic": "Fractions, decimals and percentages",
+            "difficulty": "Challenge",
+            "prompt": "If 3/4 of a number is 27, what is 5/6 of the same number?",
+            "choices": ["24", "30", "36", "40"],
+            "answer": "30",
+            "hint": "",
+            "solution": "If 3/4 of the number is 27, then 1/4 is 9 and the whole number is 36. Then 5/6 of 36 is 30.",
+        },
+        {
+            "id": "y9a01",
+            "level": "AMC 9",
+            "topic": "Algebra and patterns",
+            "difficulty": "Core",
+            "prompt": "Expand 3(x + 4) - 2x.",
+            "choices": ["x + 4", "x + 12", "5x + 12", "3x + 10"],
+            "answer": "x + 12",
+            "hint": "",
+            "solution": "3(x + 4) - 2x = 3x + 12 - 2x = x + 12.",
+        },
+        {
+            "id": "y9a02",
+            "level": "AMC 9",
+            "topic": "Algebra and patterns",
+            "difficulty": "Challenge",
+            "prompt": "Solve 4x - 7 = 2x + 15.",
+            "choices": ["8", "9", "10", "11"],
+            "answer": "11",
+            "hint": "",
+            "solution": "Subtract 2x from both sides to get 2x - 7 = 15. Add 7 to get 2x = 22, so x = 11.",
+        },
+        {
+            "id": "y9g01",
+            "level": "AMC 9",
+            "topic": "Geometry",
+            "difficulty": "Core",
+            "prompt": "A right triangle has hypotenuse 13 cm and one shorter side 5 cm. What is the other shorter side?",
+            "choices": ["8 cm", "10 cm", "12 cm", "14 cm"],
+            "answer": "12 cm",
+            "hint": "",
+            "solution": "Use Pythagoras: 5 squared + x squared = 13 squared. So 25 + x squared = 169, x squared = 144, and x = 12.",
+        },
+        {
+            "id": "y9g02",
+            "level": "AMC 9",
+            "topic": "Geometry",
+            "difficulty": "Challenge",
+            "prompt": "Two similar triangles have corresponding side lengths 6 cm and 15 cm. The smaller triangle has area 24 square cm. What is the larger area?",
+            "choices": ["60 square cm", "120 square cm", "150 square cm", "180 square cm"],
+            "answer": "150 square cm",
+            "hint": "",
+            "solution": "The scale factor is 15/6 = 2.5. Areas scale by the square of the scale factor, so 24 x 2.5 squared = 24 x 6.25 = 150 square cm.",
+        },
+        {
+            "id": "y9m01",
+            "level": "AMC 9",
+            "topic": "Measurement",
+            "difficulty": "Core",
+            "prompt": "A cylinder has radius 3 cm and height 10 cm. What is its volume?",
+            "choices": ["30 pi cubic cm", "60 pi cubic cm", "90 pi cubic cm", "120 pi cubic cm"],
+            "answer": "90 pi cubic cm",
+            "hint": "",
+            "solution": "Volume = pi r squared h = pi x 3 squared x 10 = 90 pi cubic cm.",
+        },
+        {
+            "id": "y9m02",
+            "level": "AMC 9",
+            "topic": "Measurement",
+            "difficulty": "Challenge",
+            "prompt": "A map scale is 1:25000. A distance on the map is 4 cm. What is the real distance?",
+            "choices": ["100 m", "500 m", "1 km", "10 km"],
+            "answer": "1 km",
+            "hint": "",
+            "solution": "4 cm on the map represents 4 x 25000 = 100000 cm. Since 100000 cm is 1000 m, the real distance is 1 km.",
+        },
+        {
+            "id": "y9d01",
+            "level": "AMC 9",
+            "topic": "Data and chance",
+            "difficulty": "Core",
+            "prompt": "Two fair coins are tossed. What is the probability of getting exactly one head?",
+            "choices": ["1/4", "1/3", "1/2", "3/4"],
+            "answer": "1/2",
+            "hint": "",
+            "solution": "The possible outcomes are HH, HT, TH and TT. Exactly one head occurs in HT and TH, so the probability is 2/4 = 1/2.",
+        },
+        {
+            "id": "y9d02",
+            "level": "AMC 9",
+            "topic": "Data and chance",
+            "difficulty": "Challenge",
+            "prompt": "A set of six numbers has mean 10. If one number, 5, is removed, what is the mean of the remaining five numbers?",
+            "choices": ["10", "11", "12", "14"],
+            "answer": "11",
+            "hint": "",
+            "solution": "The total of the six numbers is 6 x 10 = 60. Removing 5 leaves 55. The new mean is 55 divided by 5 = 11.",
+        },
+        {
+            "id": "y9p01",
+            "level": "AMC 9",
+            "topic": "Problem solving",
+            "difficulty": "Core",
+            "prompt": "How many three-digit numbers can be made using 1, 2, 3 and 4 if no digit is repeated?",
+            "choices": ["12", "18", "24", "64"],
+            "answer": "24",
+            "hint": "",
+            "solution": "There are 4 choices for the hundreds digit, 3 for the tens digit and 2 for the ones digit. That gives 4 x 3 x 2 = 24.",
+        },
+        {
+            "id": "y9p02",
+            "level": "AMC 9",
+            "topic": "Problem solving",
+            "difficulty": "Challenge",
+            "prompt": "A sequence starts 2, 5, 11, 23, ... Each term is double the previous term plus 1. What is the next term?",
+            "choices": ["45", "46", "47", "48"],
+            "answer": "47",
+            "hint": "",
+            "solution": "Double 23 and add 1: 2 x 23 + 1 = 47.",
+        },
+    ]
+)
+
+for question in QUESTION_BANK:
+    question.setdefault("level", "AMC 7")
+
+
+def answer_choices(question):
+    choices = []
+    distractor_count = 0
+    for choice in question["choices"]:
+        if choice == question["answer"]:
+            if choice not in choices:
+                choices.append(choice)
+        elif distractor_count < 3:
+            choices.append(choice)
+            distractor_count += 1
+    if question["answer"] not in choices:
+        if len(choices) >= 4:
+            choices[-1] = question["answer"]
+        else:
+            choices.append(question["answer"])
+    return choices[:4]
+
+
+for question in QUESTION_BANK:
+    question["choices"] = answer_choices(question)
+
+
+AMC_LEVELS = ["All levels", "AMC 7", "AMC 8", "AMC 9"]
 TOPICS = ["All topics"] + sorted({question["topic"] for question in QUESTION_BANK})
-DIFFICULTIES = ["All levels", "Warm-up", "Core", "Challenge"]
+DIFFICULTIES = ["All difficulties", "Warm-up", "Core", "Challenge"]
 
 
 def get_question(question_id):
     return next(question for question in QUESTION_BANK if question["id"] == question_id)
 
 
-def filter_questions(topic, difficulty):
+def topics_for_level(level):
     questions = QUESTION_BANK
+    if level != "All levels":
+        questions = [question for question in questions if question["level"] == level]
+    return ["All topics"] + sorted({question["topic"] for question in questions})
+
+
+def filter_questions(level, topic, difficulty):
+    questions = QUESTION_BANK
+    if level != "All levels":
+        questions = [question for question in questions if question["level"] == level]
     if topic != "All topics":
         questions = [question for question in questions if question["topic"] == topic]
-    if difficulty != "All levels":
+    if difficulty != "All difficulties":
         questions = [question for question in questions if question["difficulty"] == difficulty]
     return questions
 
 
-def choose_quiz(topic, difficulty, length, seed=None):
-    questions = filter_questions(topic, difficulty)
+def choose_quiz(level, topic, difficulty, length, seed=None):
+    questions = filter_questions(level, topic, difficulty)
     rng = random.Random(seed)
     length = min(length, len(questions))
     return rng.sample(questions, length)
@@ -497,7 +846,7 @@ def topic_summary(results):
 
 
 def render_streamlit_app():
-    st.set_page_config(page_title="AMC Year 7 Maths Prep", layout="wide")
+    st.set_page_config(page_title="AMC Years 7-9 Maths Prep", layout="wide")
     st.markdown(
         """
         <style>
@@ -553,59 +902,83 @@ def render_streamlit_app():
     st.markdown(
         """
         <div class="math-hero">
-            <h1>AMC Year 7 Maths Prep</h1>
+            <h1>AMC Years 7-9 Maths Prep</h1>
             <p>Choose answers carefully, submit when ready, then learn from the worked solutions.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    st.caption("Original AMC-style practice questions for Year 7. These are not official AMC questions.")
+    st.caption("Original AMC-style practice questions for Years 7 to 9. These are not official AMC questions.")
 
+    if "math_level" not in st.session_state:
+        st.session_state["math_level"] = "AMC 7"
     if "math_topic" not in st.session_state:
         st.session_state["math_topic"] = "All topics"
     if "math_difficulty" not in st.session_state:
-        st.session_state["math_difficulty"] = "All levels"
+        st.session_state["math_difficulty"] = "All difficulties"
     if "math_length" not in st.session_state:
         st.session_state["math_length"] = 10
     if "math_quiz_ids" not in st.session_state:
         st.session_state["math_quiz_ids"] = [
             question["id"]
-            for question in choose_quiz("All topics", "All levels", 10, seed=7)
+            for question in choose_quiz("AMC 7", "All topics", "All difficulties", 10, seed=7)
         ]
     if "math_submitted" not in st.session_state:
         st.session_state["math_submitted"] = False
+    if "math_confirming" not in st.session_state:
+        st.session_state["math_confirming"] = False
+    if st.session_state["math_level"] not in AMC_LEVELS:
+        st.session_state["math_level"] = "AMC 7"
+    if st.session_state["math_difficulty"] not in DIFFICULTIES:
+        st.session_state["math_difficulty"] = "All difficulties"
 
     def new_quiz():
+        level = st.session_state["math_level"]
         topic = st.session_state["math_topic"]
         difficulty = st.session_state["math_difficulty"]
         length = st.session_state["math_length"]
-        questions = choose_quiz(topic, difficulty, length)
+        questions = choose_quiz(level, topic, difficulty, length)
         st.session_state["math_quiz_ids"] = [question["id"] for question in questions]
         st.session_state["math_submitted"] = False
+        st.session_state["math_confirming"] = False
         for question in QUESTION_BANK:
             st.session_state.pop(f"answer_{question['id']}", None)
 
-    def submit_quiz():
+    def request_submit():
+        st.session_state["math_confirming"] = True
+
+    def confirm_submit():
         st.session_state["math_submitted"] = True
+        st.session_state["math_confirming"] = False
+
+    def cancel_submit():
+        st.session_state["math_confirming"] = False
 
     controls, tips = st.columns([2, 1])
     with controls:
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.selectbox("Topic", TOPICS, key="math_topic")
+            st.selectbox("AMC Level", AMC_LEVELS, key="math_level")
         with c2:
-            st.selectbox("Difficulty", DIFFICULTIES, key="math_difficulty")
+            topic_options = topics_for_level(st.session_state["math_level"])
+            if st.session_state["math_topic"] not in topic_options:
+                st.session_state["math_topic"] = "All topics"
+            st.selectbox("Topic", topic_options, key="math_topic")
         with c3:
-            available_count = len(filter_questions(st.session_state["math_topic"], st.session_state["math_difficulty"]))
+            st.selectbox("Difficulty", DIFFICULTIES, key="math_difficulty")
+        with c4:
+            available_count = len(
+                filter_questions(
+                    st.session_state["math_level"],
+                    st.session_state["math_topic"],
+                    st.session_state["math_difficulty"],
+                )
+            )
             max_length = max(1, min(20, available_count))
             if st.session_state["math_length"] > max_length:
                 st.session_state["math_length"] = max_length
             st.number_input("Questions", min_value=1, max_value=max_length, step=1, key="math_length")
-        b1, b2 = st.columns(2)
-        with b1:
-            st.button("New quiz", use_container_width=True, on_click=new_quiz)
-        with b2:
-            st.button("Submit answers", type="primary", use_container_width=True, on_click=submit_quiz)
+        st.button("Take challenge!", type="primary", use_container_width=True, on_click=new_quiz)
     with tips:
         st.markdown(
             """
@@ -626,7 +999,7 @@ def render_streamlit_app():
     for index, question in enumerate(questions, start=1):
         with st.container(border=True):
             st.markdown(f"**Question {index}. {question['prompt']}**")
-            st.caption(f"{question['topic']} | {question['difficulty']}")
+            st.caption(f"{question['level']} | {question['topic']} | {question['difficulty']}")
             answers[question["id"]] = st.radio(
                 "Choose one answer",
                 question["choices"],
@@ -643,10 +1016,30 @@ def render_streamlit_app():
                     st.error(f"Not quite. Correct answer: {question['answer']}")
                 st.write(f"**Worked solution:** {question['solution']}")
 
+    st.divider()
+    unanswered = [
+        question["id"]
+        for question in questions
+        if st.session_state.get(f"answer_{question['id']}") is None
+    ]
+
+    if not st.session_state["math_submitted"]:
+        if st.session_state["math_confirming"]:
+            if unanswered:
+                st.warning(f"You still have {len(unanswered)} unanswered question(s). Submit anyway?")
+            else:
+                st.warning("Ready to submit? You will see your score and worked solutions.")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.button("Yes, submit now", type="primary", use_container_width=True, on_click=confirm_submit)
+            with c2:
+                st.button("Keep working", use_container_width=True, on_click=cancel_submit)
+        else:
+            st.button("Submit answers", type="primary", use_container_width=True, on_click=request_submit)
+
     if st.session_state["math_submitted"]:
         results = mark_quiz(questions, answers)
         score = sum(1 for result in results if result["correct"])
-        st.divider()
         m1, m2, m3 = st.columns(3)
         m1.metric("Score", f"{score}/{len(questions)}")
         m2.metric("Accuracy", f"{round(score / len(questions) * 100)}%")
@@ -665,15 +1058,36 @@ def render_streamlit_app():
             )
         st.dataframe(rows, hide_index=True, use_container_width=True)
 
+        review_rows = []
+        for index, result in enumerate(results, start=1):
+            question = result["question"]
+            review_rows.append(
+                {
+                    "Q": index,
+                    "Level": question["level"],
+                    "Topic": question["topic"],
+                    "Your answer": result["selected"] or "Not answered",
+                    "Correct answer": question["answer"],
+                    "Result": "Correct" if result["correct"] else "Review",
+                    "Steps to solve": question["solution"],
+                }
+            )
+        st.subheader("Solution review")
+        st.dataframe(review_rows, hide_index=True, use_container_width=True)
+
 
 def escape_html(value):
     return html.escape(str(value), quote=True)
 
 
-def render_http_page(questions=None, results=None, topic="All topics", difficulty="All levels", length=10):
+def render_http_page(questions=None, results=None, level="AMC 7", topic="All topics", difficulty="All difficulties", length=10):
     if questions is None:
-        questions = choose_quiz(topic, difficulty, int(length), seed=11)
-    options = "".join(f"<option {'selected' if t == topic else ''}>{escape_html(t)}</option>" for t in TOPICS)
+        questions = choose_quiz(level, topic, difficulty, int(length), seed=11)
+    topic_options = topics_for_level(level)
+    if topic not in topic_options:
+        topic = "All topics"
+    level_options = "".join(f"<option {'selected' if item == level else ''}>{escape_html(item)}</option>" for item in AMC_LEVELS)
+    options = "".join(f"<option {'selected' if t == topic else ''}>{escape_html(t)}</option>" for t in topic_options)
     difficulty_options = "".join(f"<option {'selected' if d == difficulty else ''}>{escape_html(d)}</option>" for d in DIFFICULTIES)
     question_inputs = []
     for index, question in enumerate(questions, start=1):
@@ -696,7 +1110,7 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
             <section class="question">
                 <h2>Question {index}</h2>
                 <p>{escape_html(question['prompt'])}</p>
-                <small>{escape_html(question['topic'])} | {escape_html(question['difficulty'])}</small>
+                <small>{escape_html(question['level'])} | {escape_html(question['topic'])} | {escape_html(question['difficulty'])}</small>
                 <div class="choices">{''.join(choices)}</div>
                 {feedback}
                 <input type="hidden" name="qid" value="{escape_html(question['id'])}">
@@ -707,11 +1121,46 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
     if results:
         score = sum(1 for result in results if result["correct"])
         total = len(results)
+        topic_rows = "".join(
+            "<tr>"
+            f"<td>{escape_html(topic_name)}</td>"
+            f"<td>{data['correct']}</td>"
+            f"<td>{data['total']}</td>"
+            f"<td>{round(data['correct'] / data['total'] * 100)}%</td>"
+            "</tr>"
+            for topic_name, data in topic_summary(results).items()
+        )
+        review_rows = "".join(
+            "<tr>"
+            f"<td>{index}</td>"
+            f"<td>{escape_html(result['question']['level'])}</td>"
+            f"<td>{escape_html(result['question']['topic'])}</td>"
+            f"<td>{escape_html(result['selected'] or 'Not answered')}</td>"
+            f"<td>{escape_html(result['question']['answer'])}</td>"
+            f"<td>{escape_html('Correct' if result['correct'] else 'Review')}</td>"
+            f"<td>{escape_html(result['question']['solution'])}</td>"
+            "</tr>"
+            for index, result in enumerate(results, start=1)
+        )
         result_html = f"""
         <section class="summary">
             <div><span>Score</span><strong>{score}/{total}</strong></div>
             <div><span>Accuracy</span><strong>{round(score / total * 100)}%</strong></div>
             <div><span>Message</span><strong>{escape_html(score_message(score, total))}</strong></div>
+        </section>
+        <section class="review">
+            <h2>Topic summary</h2>
+            <table>
+                <thead><tr><th>Topic</th><th>Correct</th><th>Total</th><th>Accuracy</th></tr></thead>
+                <tbody>{topic_rows}</tbody>
+            </table>
+        </section>
+        <section class="review">
+            <h2>Solution review</h2>
+            <table>
+                <thead><tr><th>Q</th><th>Level</th><th>Topic</th><th>Your answer</th><th>Correct answer</th><th>Result</th><th>Steps to solve</th></tr></thead>
+                <tbody>{review_rows}</tbody>
+            </table>
         </section>
         """
     return f"""<!doctype html>
@@ -719,7 +1168,7 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AMC Year 7 Maths Prep</title>
+    <title>AMC Years 7-9 Maths Prep</title>
     <style>
         :root {{ --ink:#172033; --muted:#5b6472; --line:#d9e2ec; --soft:#f8fafc; --blue:#2563eb; --green:#0f766e; --red:#b42318; --gold:#f59e0b; --mint:#ccfbf1; }}
         * {{ box-sizing:border-box; }}
@@ -731,7 +1180,7 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
                 var(--soft);
             color:var(--ink);
         }}
-        header, form, .summary {{ width:min(1100px, calc(100% - 32px)); margin:22px auto; }}
+        header, form, .summary, .review {{ width:min(1100px, calc(100% - 32px)); margin:22px auto; }}
         header {{
             background:white;
             border:1px solid var(--line);
@@ -740,12 +1189,15 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
             padding:20px 22px;
         }}
         h1 {{ font-size:2.2rem; margin:0 0 8px; }}
-        .controls, .question, .summary div {{ background:white; border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:0 10px 24px rgba(23,32,51,0.06); }}
-        .controls {{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px; align-items:end; }}
+        .controls, .question, .summary div, .review {{ background:white; border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:0 10px 24px rgba(23,32,51,0.06); }}
+        .controls {{ display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:12px; align-items:end; }}
         label {{ font-weight:700; display:block; margin-bottom:6px; }}
         select, input[type="number"] {{ width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }}
         button {{ min-height:44px; border:0; border-radius:8px; background:var(--blue); color:white; font-weight:700; padding:10px 14px; cursor:pointer; }}
         button:hover {{ background:#1e40af; }}
+        .challenge {{ background:linear-gradient(90deg, var(--blue), var(--green)); font-size:1rem; }}
+        .submit-bar {{ display:block; text-align:center; }}
+        .submit-bar button {{ width:min(100%, 420px); min-height:52px; font-size:1.05rem; }}
         .question {{ margin-top:16px; }}
         .question h2 {{ margin:0 0 8px; font-size:1.1rem; color:var(--blue); }}
         .question p {{ font-size:1.05rem; line-height:1.5; }}
@@ -759,30 +1211,35 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
         .summary {{ display:grid; grid-template-columns:1fr 1fr 2fr; gap:12px; }}
         .summary span {{ color:var(--muted); display:block; }}
         .summary strong {{ font-size:1.3rem; }}
+        table {{ width:100%; border-collapse:collapse; margin-top:10px; }}
+        th, td {{ border-bottom:1px solid var(--line); padding:10px; text-align:left; vertical-align:top; }}
+        th {{ color:#1e40af; }}
         @media (max-width:760px) {{ .controls, .summary {{ grid-template-columns:1fr; }} .choices {{ display:block; }} .choice {{ margin:8px 0; }} }}
     </style>
 </head>
 <body>
     <header>
-        <h1>AMC Year 7 Maths Prep</h1>
-        <p>Original AMC-style practice questions for Year 7. These are not official AMC questions.</p>
+        <h1>AMC Years 7-9 Maths Prep</h1>
+        <p>Original AMC-style practice questions for Years 7 to 9. These are not official AMC questions.</p>
     </header>
     {result_html}
     <form method="post" action="/quiz">
         <section class="controls">
+            <div><label>AMC Level</label><select name="level">{level_options}</select></div>
             <div><label>Topic</label><select name="topic">{options}</select></div>
             <div><label>Difficulty</label><select name="difficulty">{difficulty_options}</select></div>
             <div><label>Questions</label><input type="number" name="length" min="1" max="20" value="{escape_html(length)}"></div>
-            <button type="submit" name="action" value="new">New quiz</button>
+            <button class="challenge" type="submit" name="action" value="new">Take challenge!</button>
         </section>
     </form>
     <form method="post" action="/submit">
+        <input type="hidden" name="level" value="{escape_html(level)}">
         <input type="hidden" name="topic" value="{escape_html(topic)}">
         <input type="hidden" name="difficulty" value="{escape_html(difficulty)}">
         <input type="hidden" name="length" value="{escape_html(length)}">
         {''.join(question_inputs)}
-        <section class="controls">
-            <button type="submit">Submit answers</button>
+        <section class="controls submit-bar">
+            <button type="submit" onclick="return confirm('Submit your answers now? You will see your score and worked solutions.');">Submit answers</button>
         </section>
     </form>
 </body>
@@ -798,13 +1255,14 @@ class MathHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(length).decode("utf-8", errors="replace")
         fields = parse_qs(body)
         path = urlparse(self.path).path
+        level = fields.get("level", ["AMC 7"])[0]
         topic = fields.get("topic", ["All topics"])[0]
-        difficulty = fields.get("difficulty", ["All levels"])[0]
+        difficulty = fields.get("difficulty", ["All difficulties"])[0]
         quiz_length = int(fields.get("length", ["10"])[0])
 
         if path == "/quiz":
-            questions = choose_quiz(topic, difficulty, quiz_length)
-            self.send_html(render_http_page(questions=questions, topic=topic, difficulty=difficulty, length=quiz_length))
+            questions = choose_quiz(level, topic, difficulty, quiz_length)
+            self.send_html(render_http_page(questions=questions, level=level, topic=topic, difficulty=difficulty, length=quiz_length))
             return
 
         if path == "/submit":
@@ -812,7 +1270,7 @@ class MathHandler(BaseHTTPRequestHandler):
             questions = [get_question(question_id) for question_id in question_ids]
             answers = {question_id: fields.get(f"answer_{question_id}", [""])[0] for question_id in question_ids}
             results = mark_quiz(questions, answers)
-            self.send_html(render_http_page(questions=questions, results=results, topic=topic, difficulty=difficulty, length=quiz_length))
+            self.send_html(render_http_page(questions=questions, results=results, level=level, topic=topic, difficulty=difficulty, length=quiz_length))
             return
 
         self.send_error(404)
@@ -848,7 +1306,7 @@ def run_http_app(start_port=8508):
             continue
     else:
         raise RuntimeError("No free local port found between 8508 and 8527.")
-    print("AMC Year 7 Maths Prep")
+    print("AMC Years 7-9 Maths Prep")
     print("Streamlit is not installed, so the built-in web app is running.")
     print(f"Open http://127.0.0.1:{server.server_port}")
     server.serve_forever()
