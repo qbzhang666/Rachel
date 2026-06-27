@@ -22,6 +22,7 @@ Streamlit apps for Australian Year 8 and above students to practise grammar and 
 - 15 sample persuasive writing examples
 - Topic idea lists for extra practice
 - Child-friendly Submit writing button
+- Self-check checklist with next-step guidance
 - Improved draft and downloadable feedback report
 
 ## Run locally

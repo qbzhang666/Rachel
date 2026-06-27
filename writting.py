@@ -1415,20 +1415,73 @@ def render_topic_ideas() -> None:
             st.write(f"- {topic}")
 
 
-def render_checklist(analysis: Analysis) -> None:
-    checklist = [
-        ("Clear contention in the introduction", has_position(" ".join(analysis.sentences[:3]))),
-        ("At least three organised paragraphs", len(analysis.paragraphs) >= 3),
-        ("Evidence or examples are included", count_terms(" ".join(analysis.sentences), EVIDENCE_MARKERS) >= 1),
-        ("Reasoning links are visible", count_terms(" ".join(analysis.sentences), REASONING_MARKERS) >= 2),
-        ("Counterargument is addressed", contains_any(" ".join(analysis.sentences), COUNTER_ARGUMENT_MARKERS)),
-        ("High modality language is used", count_terms(" ".join(analysis.sentences), PERSUASIVE_TECHNIQUES["High modality"]) >= 1),
-        ("At least three persuasive techniques are used", len([hits for hits in analysis.technique_hits.values() if hits]) >= 3),
-        ("Formal tone is mostly controlled", not contains_any(" ".join(analysis.sentences), FORMAL_TONE_WARNINGS)),
+def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
+    text = " ".join(analysis.sentences)
+    evidence_count = count_terms(text, EVIDENCE_MARKERS)
+    reasoning_count = count_terms(text, REASONING_MARKERS)
+    high_modality_count = count_terms(text, PERSUASIVE_TECHNIQUES["High modality"])
+    technique_count = len([hits for hits in analysis.technique_hits.values() if hits])
+    has_counterargument = contains_any(text, COUNTER_ARGUMENT_MARKERS)
+    has_refutation = contains_any(text, REFUTATION_MARKERS)
+
+    return [
+        {
+            "label": "Clear contention",
+            "done": has_position(" ".join(analysis.sentences[:3])),
+            "checks": "The introduction clearly states what the writer believes.",
+            "next": "Add a sentence with should, must, need to, or it is clear that.",
+        },
+        {
+            "label": "Organised structure",
+            "done": len(analysis.paragraphs) >= 4 and len(analysis.words) >= 180,
+            "checks": "The draft has an introduction, developed body paragraphs, and a conclusion.",
+            "next": "Use at least four paragraphs and develop each body paragraph with more detail.",
+        },
+        {
+            "label": "Evidence is specific",
+            "done": evidence_count >= 2,
+            "checks": "Examples, facts, research, statistics, or expert views support the claims.",
+            "next": "Add at least two specific examples or evidence phrases.",
+        },
+        {
+            "label": "Reasoning is explained",
+            "done": reasoning_count >= 4,
+            "checks": "The writing explains why the evidence proves the point.",
+            "next": "Use because, this shows, therefore, and as a result to explain ideas.",
+        },
+        {
+            "label": "Opposing view is challenged",
+            "done": has_counterargument and has_refutation,
+            "checks": "A counterargument is included and answered.",
+            "next": "Add although some people argue..., however this overlooks...",
+        },
+        {
+            "label": "Persuasive word choice",
+            "done": analysis.strong_words.score >= 70 and high_modality_count >= 2,
+            "checks": "The writing uses strong, precise, high-modality words.",
+            "next": "Add words such as must, essential, harmful, responsible, and beneficial.",
+        },
+        {
+            "label": "Technique variety",
+            "done": technique_count >= 4,
+            "checks": "Several persuasive techniques are used, not just one.",
+            "next": "Add emotive language, inclusive language, evidence appeal, or a rhetorical question.",
+        },
+        {
+            "label": "Formal Year 8 tone",
+            "done": not contains_any(text, FORMAL_TONE_WARNINGS) and analysis.curriculum.score >= 60,
+            "checks": "The writing sounds formal and controlled.",
+            "next": "Remove slang, avoid texting language, and use more precise vocabulary.",
+        },
     ]
 
-    for item, done in checklist:
-        st.checkbox(item, value=done, disabled=True)
+
+def render_checklist(analysis: Analysis) -> None:
+    st.caption("This is a self-check for the submitted draft. Unticked items show what to improve next.")
+    for item in build_checklist_items(analysis):
+        status = "Ready" if item["done"] else "Keep working"
+        st.checkbox(f"{item['label']} - {status}", value=bool(item["done"]), disabled=True)
+        st.caption(item["checks"] if item["done"] else item["next"])
 
 
 def run_console_app() -> None:
@@ -2017,7 +2070,7 @@ def main() -> None:
     metric_columns[4].metric("Strong words", f"{analysis.strong_words.score}/100")
     metric_columns[5].metric("Techniques", f"{analysis.techniques.score}/100")
 
-    tabs = st.tabs(["Feedback", "Word choice", "Improved draft", "Checklist", "Word bank", "Topic ideas"])
+    tabs = st.tabs(["Feedback", "Word choice", "Improved draft", "Self-check", "Word bank", "Topic ideas"])
 
     with tabs[0]:
         col_a, col_b = st.columns(2)
