@@ -481,7 +481,7 @@ def score_message(score, total):
         return "Strong work. Review the missed solutions."
     if percent >= 0.5:
         return "Good practice. Focus on one topic at a time."
-    return "Keep building confidence. Hints and worked solutions will help."
+    return "Keep building confidence. The worked solutions will help."
 
 
 def topic_summary(results):
@@ -501,9 +501,41 @@ def render_streamlit_app():
     st.markdown(
         """
         <style>
-        .block-container { max-width: 1180px; padding-top: 2rem; }
+        [data-testid="stAppViewContainer"] {
+            background:
+                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
+                #f8fafc;
+        }
+        .block-container { max-width: 1180px; padding-top: 1.5rem; }
+        .math-hero {
+            background: #ffffff;
+            border: 1px solid #d9e2ec;
+            border-left: 10px solid #2563eb;
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .math-hero h1 {
+            margin: 0 0 0.35rem 0;
+            color: #172033;
+            font-size: 2.25rem;
+        }
+        .math-hero p {
+            margin: 0;
+            color: #4b5563;
+            font-size: 1rem;
+        }
+        .focus-panel {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .focus-panel strong {
+            color: #9a3412;
+        }
         [data-testid="stMetric"] {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #d9e2ec;
             border-radius: 8px;
             padding: 0.75rem 1rem;
@@ -511,13 +543,22 @@ def render_streamlit_app():
         div.stButton > button[kind="primary"] {
             min-height: 48px;
             font-weight: 700;
+            background: #2563eb;
         }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-    st.title("AMC Year 7 Maths Prep")
+    st.markdown(
+        """
+        <div class="math-hero">
+            <h1>AMC Year 7 Maths Prep</h1>
+            <p>Choose answers carefully, submit when ready, then learn from the worked solutions.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.caption("Original AMC-style practice questions for Year 7. These are not official AMC questions.")
 
     if "math_topic" not in st.session_state:
@@ -566,10 +607,15 @@ def render_streamlit_app():
         with b2:
             st.button("Submit answers", type="primary", use_container_width=True, on_click=submit_quiz)
     with tips:
-        st.markdown("**Practice focus**")
-        st.write("- Read each question carefully.")
-        st.write("- Try a hint before checking the solution.")
-        st.write("- After submitting, redo missed questions.")
+        st.markdown(
+            """
+            <div class="focus-panel">
+                <strong>Practice focus</strong>
+                <p>Read carefully, choose an answer for each question, then use the worked solutions after submitting.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     questions = [get_question(question_id) for question_id in st.session_state["math_quiz_ids"]]
     if not questions:
@@ -584,12 +630,11 @@ def render_streamlit_app():
             answers[question["id"]] = st.radio(
                 "Choose one answer",
                 question["choices"],
+                index=None,
                 key=f"answer_{question['id']}",
                 horizontal=True,
                 label_visibility="collapsed",
             )
-            with st.expander("Hint"):
-                st.write(question["hint"])
 
             if st.session_state["math_submitted"]:
                 if answers[question["id"]] == question["answer"]:
@@ -653,7 +698,6 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
                 <p>{escape_html(question['prompt'])}</p>
                 <small>{escape_html(question['topic'])} | {escape_html(question['difficulty'])}</small>
                 <div class="choices">{''.join(choices)}</div>
-                <details><summary>Hint</summary><p>{escape_html(question['hint'])}</p></details>
                 {feedback}
                 <input type="hidden" name="qid" value="{escape_html(question['id'])}">
             </section>
@@ -677,22 +721,38 @@ def render_http_page(questions=None, results=None, topic="All topics", difficult
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AMC Year 7 Maths Prep</title>
     <style>
-        :root {{ --ink:#172033; --muted:#5b6472; --line:#d9e2ec; --soft:#f5f7fa; --blue:#2563eb; --green:#0f766e; --red:#b42318; }}
+        :root {{ --ink:#172033; --muted:#5b6472; --line:#d9e2ec; --soft:#f8fafc; --blue:#2563eb; --green:#0f766e; --red:#b42318; --gold:#f59e0b; --mint:#ccfbf1; }}
         * {{ box-sizing:border-box; }}
-        body {{ margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--soft); color:var(--ink); }}
+        body {{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:
+                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
+                var(--soft);
+            color:var(--ink);
+        }}
         header, form, .summary {{ width:min(1100px, calc(100% - 32px)); margin:22px auto; }}
-        h1 {{ font-size:2rem; margin:0 0 8px; }}
-        .controls, .question, .summary div {{ background:white; border:1px solid var(--line); border-radius:8px; padding:16px; }}
+        header {{
+            background:white;
+            border:1px solid var(--line);
+            border-left:10px solid var(--blue);
+            border-radius:8px;
+            padding:20px 22px;
+        }}
+        h1 {{ font-size:2.2rem; margin:0 0 8px; }}
+        .controls, .question, .summary div {{ background:white; border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:0 10px 24px rgba(23,32,51,0.06); }}
         .controls {{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:12px; align-items:end; }}
         label {{ font-weight:700; display:block; margin-bottom:6px; }}
         select, input[type="number"] {{ width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }}
-        button {{ min-height:42px; border:0; border-radius:8px; background:var(--blue); color:white; font-weight:700; padding:10px 14px; cursor:pointer; }}
+        button {{ min-height:44px; border:0; border-radius:8px; background:var(--blue); color:white; font-weight:700; padding:10px 14px; cursor:pointer; }}
+        button:hover {{ background:#1e40af; }}
         .question {{ margin-top:16px; }}
-        .question h2 {{ margin:0 0 8px; font-size:1.1rem; }}
+        .question h2 {{ margin:0 0 8px; font-size:1.1rem; color:var(--blue); }}
+        .question p {{ font-size:1.05rem; line-height:1.5; }}
         small {{ color:var(--muted); }}
         .choices {{ display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }}
-        .choice {{ border:1px solid var(--line); border-radius:8px; padding:9px 12px; background:#f8fafc; font-weight:400; }}
-        details {{ margin-top:8px; }}
+        .choice {{ border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#f8fafc; font-weight:700; min-width:86px; }}
+        .choice:has(input:checked) {{ background:var(--mint); border-color:var(--green); color:#134e4a; }}
         .feedback {{ margin-top:12px; padding:12px; border-radius:8px; border:1px solid var(--line); }}
         .feedback.ok {{ background:#ecfdf3; color:var(--green); }}
         .feedback.no {{ background:#fef3f2; color:var(--red); }}

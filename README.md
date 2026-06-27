@@ -30,7 +30,7 @@ Streamlit apps for students to practise grammar, improve persuasive writing and 
 - Original AMC-style practice questions
 - Year 7 topics including number, fractions, algebra, geometry, measurement, data and problem solving
 - Topic and difficulty filters
-- Hints before submission
+- Blank answer choices so students can see what they have answered
 - Clear Submit answers button
 - Worked solutions after submission
 - Score, accuracy and topic summary
