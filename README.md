@@ -1,6 +1,6 @@
-# Year 8+ English Practice Apps
+# Student Practice Apps
 
-Streamlit apps for Australian Year 8 and above students to practise grammar and improve persuasive writing.
+Streamlit apps for students to practise grammar, improve persuasive writing and prepare for Year 7 AMC-style maths.
 
 ## Grammar practice
 
@@ -25,6 +25,16 @@ Streamlit apps for Australian Year 8 and above students to practise grammar and 
 - Self-check checklist with next-step guidance
 - Improved draft and downloadable feedback report
 
+## AMC Year 7 maths prep
+
+- Original AMC-style practice questions
+- Year 7 topics including number, fractions, algebra, geometry, measurement, data and problem solving
+- Topic and difficulty filters
+- Hints before submission
+- Clear Submit answers button
+- Worked solutions after submission
+- Score, accuracy and topic summary
+
 ## Run locally
 
 ```powershell
@@ -36,6 +46,12 @@ For the persuasive writing coach:
 
 ```powershell
 python -m streamlit run writting.py
+```
+
+For the AMC Year 7 maths prep app:
+
+```powershell
+python -m streamlit run Math.py
 ```
 
 Then open the local URL shown in the terminal, usually `http://localhost:8501`.
