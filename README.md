@@ -17,9 +17,10 @@ Streamlit apps for Australian Year 8 and above students to practise grammar and 
 - Valid reasoning feedback
 - Level 8 Australia Curriculum alignment checks
 - Strong argument structure feedback
-- Strong word suggestions and weak word replacements
+- Strong word suggestions, weak word replacements and persuasive phrase banks
 - Persuasive technique scan
-- Multiple sample persuasive writing examples
+- 15 sample persuasive writing examples
+- Topic idea lists for extra practice
 - Improved draft and downloadable feedback report
 
 ## Run locally

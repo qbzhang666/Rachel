@@ -31,6 +31,13 @@ PERSUASIVE_TECHNIQUES = {
         "should",
         "will",
         "cannot",
+        "have to",
+        "essential",
+        "vital",
+        "crucial",
+        "necessary",
+        "urgent",
+        "unacceptable",
         "undeniably",
         "certainly",
     ],
@@ -39,21 +46,30 @@ PERSUASIVE_TECHNIQUES = {
         "devastating",
         "urgent",
         "unfair",
+        "alarming",
+        "concerning",
+        "damaging",
+        "inspiring",
+        "hopeful",
+        "respectful",
         "powerful",
         "dangerous",
         "valuable",
         "vital",
         "responsible",
         "shocking",
-        "hopeful",
     ],
     "Evidence appeal": [
         "research",
         "evidence",
         "data",
         "statistics",
+        "facts",
+        "findings",
         "expert",
+        "experts",
         "study",
+        "studies",
         "survey",
         "according to",
     ],
@@ -116,6 +132,10 @@ STRONG_WORDS = [
     "essential",
     "vital",
     "urgent",
+    "crucial",
+    "unacceptable",
+    "undeniable",
+    "compelling",
     "significant",
     "responsible",
     "effective",
@@ -141,11 +161,31 @@ STRONG_WORDS = [
     "proven",
     "reliable",
     "thoughtful",
+    "alarming",
+    "concerning",
+    "avoidable",
+    "preventable",
+    "unjust",
+    "inexcusable",
+    "transformative",
+    "inclusive",
+    "respectful",
+    "resilient",
+    "accountable",
+    "ethical",
+    "constructive",
+    "informed",
+    "decisive",
+    "balanced",
+    "harmonious",
+    "empowering",
+    "protective",
+    "lifelong",
 ]
 
 WEAK_WORD_REPLACEMENTS = {
-    "good": ["effective", "valuable", "beneficial"],
-    "bad": ["harmful", "damaging", "unfair"],
+    "good": ["effective", "valuable", "beneficial", "worthwhile"],
+    "bad": ["harmful", "damaging", "unfair", "unacceptable"],
     "very": ["extremely", "deeply", "significantly"],
     "really": ["genuinely", "clearly", "strongly"],
     "thing": ["issue", "reason", "factor"],
@@ -153,8 +193,136 @@ WEAK_WORD_REPLACEMENTS = {
     "stuff": ["evidence", "details", "materials"],
     "nice": ["positive", "respectful", "encouraging"],
     "big": ["significant", "major", "substantial"],
+    "small": ["minor", "limited", "manageable"],
+    "sad": ["concerning", "distressing", "disheartening"],
+    "happy": ["confident", "hopeful", "encouraged"],
+    "hard": ["challenging", "demanding", "difficult"],
+    "easy": ["simple", "practical", "manageable"],
+    "important": ["essential", "vital", "crucial"],
+    "better": ["more effective", "more responsible", "more beneficial"],
+    "worse": ["more harmful", "less effective", "more damaging"],
+    "help": ["support", "strengthen", "benefit"],
+    "stop": ["prevent", "reduce", "discourage"],
+    "make": ["encourage", "create", "produce"],
+    "show": ["demonstrate", "reveal", "prove"],
+    "say": ["argue", "claim", "suggest"],
+    "get": ["gain", "receive", "achieve"],
+    "use": ["apply", "adopt", "employ"],
     "a lot": ["many", "frequently", "a significant amount"],
     "I think": ["It is clear that", "The evidence suggests that"],
+    "in my opinion": ["The evidence suggests that", "A reasonable conclusion is that"],
+}
+
+PERSUASIVE_WORD_BANK = {
+    "High modality": [
+        "must",
+        "should",
+        "need to",
+        "cannot ignore",
+        "it is essential that",
+        "it is vital that",
+        "there is no doubt that",
+    ],
+    "Emotive words": [
+        "alarming",
+        "unfair",
+        "harmful",
+        "damaging",
+        "distressing",
+        "hopeful",
+        "empowering",
+        "inspiring",
+    ],
+    "Evaluative words": [
+        "effective",
+        "responsible",
+        "reasonable",
+        "ethical",
+        "sustainable",
+        "practical",
+        "beneficial",
+        "constructive",
+    ],
+    "Evidence words": [
+        "research shows",
+        "evidence suggests",
+        "statistics reveal",
+        "experts argue",
+        "studies indicate",
+        "for example",
+        "this demonstrates",
+    ],
+    "Cause and effect": [
+        "therefore",
+        "as a result",
+        "consequently",
+        "this leads to",
+        "this creates",
+        "this reduces",
+        "this strengthens",
+    ],
+    "Counterargument": [
+        "although",
+        "however",
+        "this overlooks",
+        "this ignores",
+        "in reality",
+        "a stronger view is",
+        "more importantly",
+    ],
+    "Call to action": [
+        "we must act",
+        "it is time to",
+        "schools should",
+        "the community needs to",
+        "students deserve",
+        "leaders must",
+    ],
+}
+
+PERSUASIVE_SENTENCE_STARTERS = [
+    "It is clear that...",
+    "The evidence suggests that...",
+    "A responsible solution would be...",
+    "This issue matters because...",
+    "We cannot ignore the fact that...",
+    "Although some people argue that..., this overlooks...",
+    "This demonstrates that...",
+    "For this reason, we must...",
+    "Ultimately, the most reasonable choice is...",
+]
+
+TOPIC_IDEAS = {
+    "School life": [
+        "School uniforms should be compulsory",
+        "Homework should be limited",
+        "Mobile phones should be restricted during class",
+        "Students should read every day",
+        "School sport should be protected",
+        "School lunches should be healthier",
+        "Students should have more choice in subjects",
+    ],
+    "Technology": [
+        "Social media should have stronger age limits",
+        "AI tools should be used carefully in schools",
+        "Video games can be beneficial when balanced",
+        "Screen time should be reduced before bedtime",
+        "Cyberbullying needs stronger consequences",
+    ],
+    "Environment": [
+        "Schools should reduce plastic waste",
+        "Public transport should be cheaper for students",
+        "Every school should plant more trees",
+        "Food waste should be reduced in canteens",
+        "Communities should protect local wildlife habitats",
+    ],
+    "Community": [
+        "Volunteering should be encouraged for teenagers",
+        "Libraries remain essential in modern communities",
+        "Local parks should receive more funding",
+        "Students should learn basic first aid",
+        "Public spaces should be safer and more inclusive",
+    ],
 }
 
 OVERCLAIM_WORDS = [
@@ -297,6 +465,175 @@ SAMPLE_LIBRARY = [
             "A team succeeds when players communicate, encourage each other and keep trying after setbacks.\n\n"
             "Critics may argue that sport takes time away from core subjects. However, this view overlooks the fact that students learn best when their routines include movement, challenge and belonging. "
             "For this reason, schools should protect sport as a vital part of a balanced education."
+        ),
+    },
+    {
+        "key": "healthy-school-lunches",
+        "label": "Healthy school lunches",
+        "topic": "healthy school lunches",
+        "audience": "school leaders",
+        "writing": (
+            "Schools should provide healthier lunch options because students deserve food that supports their learning and wellbeing. "
+            "It is concerning when canteens offer mostly sugary snacks instead of balanced, nourishing meals.\n\n"
+            "Firstly, healthy food can improve concentration. For example, students who eat a balanced lunch are more likely to feel alert in afternoon classes. "
+            "This demonstrates that food choices affect learning, not just hunger.\n\n"
+            "Furthermore, schools have a responsibility to encourage lifelong habits. "
+            "If students regularly see practical, affordable and appealing healthy choices, they are more likely to make responsible decisions outside school.\n\n"
+            "Although some people argue that unhealthy food is more popular, this overlooks the power of creative menus and student feedback. "
+            "Ultimately, healthier school lunches are a fair and beneficial step towards a stronger school community."
+        ),
+    },
+    {
+        "key": "plastic-waste",
+        "label": "Plastic waste",
+        "topic": "plastic waste at school",
+        "audience": "students and teachers",
+        "writing": (
+            "Our school must reduce plastic waste because the current amount of rubbish is unnecessary and harmful. "
+            "Every wrapper, bottle and container that is thrown away creates a problem that does not disappear when the bell rings.\n\n"
+            "To begin with, reducing plastic waste is a practical way to protect the environment. "
+            "For example, reusable bottles and lunch containers can prevent hundreds of single-use items from entering bins each week. "
+            "This shows that small daily choices can create meaningful change.\n\n"
+            "In addition, a cleaner school environment builds pride and responsibility. "
+            "Students are more likely to respect shared spaces when we all contribute to keeping them tidy.\n\n"
+            "Some people may argue that reducing plastic is inconvenient. However, this ignores the long-term cost of waste and pollution. "
+            "For this reason, our school should adopt a stronger, clearer and more sustainable waste policy."
+        ),
+    },
+    {
+        "key": "social-media-age-limits",
+        "label": "Social media age limits",
+        "topic": "social media age limits",
+        "audience": "parents and policymakers",
+        "writing": (
+            "Social media platforms should have stronger age limits because young people need safer online spaces. "
+            "It is unacceptable for children to face harmful content, pressure and cyberbullying without enough protection.\n\n"
+            "Firstly, stronger age limits can reduce exposure to damaging online behaviour. "
+            "Research suggests that constant comparison and negative comments can affect confidence and wellbeing. "
+            "This evidence shows why safety should be more important than convenience.\n\n"
+            "Secondly, clear rules support parents and schools. "
+            "When expectations are consistent, adults can guide students more effectively and reduce conflict about online access.\n\n"
+            "Although critics may claim that age limits are difficult to enforce, this overlooks the value of better platform design and education. "
+            "Ultimately, stronger age limits are a responsible step towards protecting young people."
+        ),
+    },
+    {
+        "key": "ai-in-schools",
+        "label": "AI in schools",
+        "topic": "AI tools in schools",
+        "audience": "teachers and students",
+        "writing": (
+            "AI tools should be used carefully in schools because they can support learning while also creating serious risks. "
+            "The most responsible approach is not to ban AI completely, but to teach students how to use it ethically.\n\n"
+            "Firstly, AI can help students plan, revise and practise skills. "
+            "For instance, a student might use feedback from an AI tool to improve sentence clarity before writing their own final response. "
+            "This demonstrates that technology can strengthen learning when students remain active thinkers.\n\n"
+            "However, AI can also weaken learning if students copy answers without understanding them. "
+            "This is why schools need clear expectations, honest discussion and practical guidance.\n\n"
+            "Some people argue that AI should be removed from classrooms entirely. Nevertheless, this ignores the fact that students will meet AI in future workplaces. "
+            "Ultimately, schools must teach careful, informed and ethical AI use."
+        ),
+    },
+    {
+        "key": "student-volunteering",
+        "label": "Student volunteering",
+        "topic": "student volunteering",
+        "audience": "Year 8 students",
+        "writing": (
+            "Students should be encouraged to volunteer because service builds empathy, confidence and responsibility. "
+            "Helping others is not only generous; it is a powerful way to become more connected to the community.\n\n"
+            "Firstly, volunteering teaches students to understand different experiences. "
+            "For example, helping at a local food drive can reveal how many families rely on community support. "
+            "This shows that volunteering can make students more thoughtful and compassionate.\n\n"
+            "Furthermore, volunteering develops practical skills such as communication, teamwork and organisation. "
+            "These skills are valuable in school, sport, friendships and future work.\n\n"
+            "Although some students may feel too busy, even one hour a month can make a meaningful difference. "
+            "Ultimately, volunteering should be encouraged because it creates stronger students and a kinder community."
+        ),
+    },
+    {
+        "key": "public-transport",
+        "label": "Cheaper public transport",
+        "topic": "cheaper public transport for students",
+        "audience": "local government",
+        "writing": (
+            "Public transport should be cheaper for students because travel costs can unfairly limit opportunities. "
+            "When transport is affordable, students can reach school, sport, libraries and community activities more easily.\n\n"
+            "Firstly, cheaper transport supports fairness. "
+            "For example, families with several children may spend a significant amount each week on buses or trains. "
+            "This evidence demonstrates that transport costs can become a real barrier.\n\n"
+            "In addition, affordable public transport can reduce traffic and pollution. "
+            "If more students use buses and trains, fewer cars are needed around schools during busy times.\n\n"
+            "Some people may argue that discounts cost too much. However, this ignores the long-term benefits of safer roads, cleaner air and stronger student participation. "
+            "Therefore, cheaper public transport is a practical and responsible investment."
+        ),
+    },
+    {
+        "key": "school-libraries",
+        "label": "School libraries",
+        "topic": "school libraries",
+        "audience": "school leaders",
+        "writing": (
+            "School libraries remain essential because they give students a calm, inclusive and resource-rich place to learn. "
+            "In a world full of screens and distractions, libraries offer something valuable: focus.\n\n"
+            "Firstly, libraries support reading, research and independent learning. "
+            "For instance, students can access books, databases and expert help when preparing assignments. "
+            "This demonstrates that a library is more than a room of books; it is a learning centre.\n\n"
+            "Secondly, libraries create a safe space for students who need quiet at lunch or before school. "
+            "That matters because every student deserves somewhere respectful and welcoming.\n\n"
+            "Although some people claim that online information makes libraries unnecessary, this overlooks the importance of guidance and reliable sources. "
+            "Ultimately, school libraries should be protected because they strengthen literacy, wellbeing and fairness."
+        ),
+    },
+    {
+        "key": "later-school-start",
+        "label": "Later school start",
+        "topic": "later school start times",
+        "audience": "school leaders and parents",
+        "writing": (
+            "Schools should consider later start times because tired students cannot learn as effectively as rested students. "
+            "Sleep is not a luxury; it is essential for memory, concentration and emotional health.\n\n"
+            "Firstly, a later start could improve focus in morning classes. "
+            "Research often shows that teenagers need substantial sleep, yet many struggle to get enough when school begins early. "
+            "This suggests that timetable design can directly affect learning.\n\n"
+            "Furthermore, rested students are more likely to manage stress and participate positively. "
+            "A small change in routine could create a more alert, respectful and productive classroom environment.\n\n"
+            "Some people argue that later starts would inconvenience families. However, this concern can be addressed through careful planning and before-school supervision. "
+            "Ultimately, later start times deserve serious consideration because student wellbeing must be a priority."
+        ),
+    },
+    {
+        "key": "first-aid",
+        "label": "First aid lessons",
+        "topic": "first aid lessons",
+        "audience": "school leaders",
+        "writing": (
+            "Every student should learn basic first aid because emergency skills can save lives. "
+            "It is alarming that many young people would not know how to respond confidently if someone was injured or unwell.\n\n"
+            "Firstly, first aid lessons build practical confidence. "
+            "For example, students could learn how to call for help, treat minor injuries and respond safely in urgent situations. "
+            "This knowledge is valuable because emergencies can happen anywhere.\n\n"
+            "In addition, first aid education encourages responsibility. "
+            "Students who understand how to help others are more prepared, calm and useful in difficult moments.\n\n"
+            "Although some people may argue that the curriculum is already crowded, first aid does not need to take many lessons. "
+            "Ultimately, teaching first aid is a sensible and ethical choice for every school."
+        ),
+    },
+    {
+        "key": "screen-time",
+        "label": "Screen time",
+        "topic": "screen time before bed",
+        "audience": "teenagers",
+        "writing": (
+            "Teenagers should reduce screen time before bed because sleep is too important to sacrifice. "
+            "Endless scrolling may feel relaxing, but it can become a harmful habit that leaves students tired the next day.\n\n"
+            "Firstly, reducing screen time can improve rest. "
+            "Studies often suggest that bright screens and late notifications make it harder for the brain to switch off. "
+            "This shows why a phone-free routine before sleep can be beneficial.\n\n"
+            "Secondly, better sleep supports learning, mood and motivation. "
+            "Students who wake up refreshed are more likely to listen carefully, remember information and treat others respectfully.\n\n"
+            "Although some teenagers argue that phones help them relax, this ignores the way apps are designed to hold attention. "
+            "For this reason, reducing screen time before bed is a practical step towards healthier routines."
         ),
     },
 ]
@@ -461,6 +798,18 @@ def find_weak_words(text: str) -> dict[str, int]:
     for weak_word in WEAK_WORD_REPLACEMENTS:
         hits[weak_word] = len(re.findall(rf"\b{re.escape(weak_word)}\b", lower))
     return {word: count for word, count in hits.items() if count > 0}
+
+
+def get_word_bank_hits(text: str) -> dict[str, list[str]]:
+    return {
+        category: unique_terms_found(text, words)
+        for category, words in PERSUASIVE_WORD_BANK.items()
+    }
+
+
+def get_missing_word_categories(text: str) -> list[str]:
+    hits = get_word_bank_hits(text)
+    return [category for category, found in hits.items() if not found]
 
 
 def find_overclaims(sentences: list[str]) -> list[str]:
@@ -650,33 +999,54 @@ def score_arguments(text: str, paragraphs: list[str]) -> ScoreCard:
 
 
 def score_strong_words(text: str, words: list[str], weak_word_hits: dict[str, int]) -> ScoreCard:
-    score = 25
+    score = 15
     strengths = []
     improvements = []
 
     strong_hits = unique_terms_found(text, STRONG_WORDS)
-    if len(strong_hits) >= 10:
-        score += 35
-        strengths.append("Strong vocabulary is used frequently.")
-    elif len(strong_hits) >= 5:
+    if len(strong_hits) >= 14:
         score += 25
+        strengths.append("Strong vocabulary is used frequently.")
+    elif len(strong_hits) >= 7:
+        score += 18
         strengths.append("There is some strong vocabulary.")
         improvements.append("Add more precise high-impact words to key claims.")
-    elif len(strong_hits) >= 2:
-        score += 12
+    elif len(strong_hits) >= 3:
+        score += 10
         improvements.append("Use more strong, specific words in the topic sentences and conclusion.")
     else:
         improvements.append("Replace simple words with stronger persuasive vocabulary.")
 
-    high_modality_count = count_terms(text, PERSUASIVE_TECHNIQUES["High modality"])
-    if high_modality_count >= 4:
+    word_bank_hits = get_word_bank_hits(text)
+    category_count = len([hits for hits in word_bank_hits.values() if hits])
+    if category_count >= 6:
+        score += 35
+        strengths.append("Persuasive word choices are varied across several purposes.")
+    elif category_count >= 4:
         score += 25
+        strengths.append("The writing uses several types of persuasive language.")
+        improvements.append("Add one or two missing word types, such as evidence language or a call to action.")
+    elif category_count >= 2:
+        score += 15
+        improvements.append("Use a wider mix of persuasive words, not only general strong adjectives.")
+    else:
+        improvements.append("Add high modality, emotive, evidence, and cause-and-effect language.")
+
+    high_modality_count = len(word_bank_hits["High modality"])
+    if high_modality_count >= 3:
+        score += 15
         strengths.append("High modality words make the stance confident.")
     elif high_modality_count >= 1:
-        score += 12
-        improvements.append("Use more high modality words such as must, should, cannot, and need.")
+        score += 8
+        improvements.append("Use more high modality words such as must, should, cannot ignore, essential, and vital.")
     else:
         improvements.append("Add high modality language to sound more decisive.")
+
+    if word_bank_hits["Emotive words"] and word_bank_hits["Evaluative words"]:
+        score += 10
+        strengths.append("Emotive and evaluative words help shape the reader's judgement.")
+    else:
+        improvements.append("Combine emotive words with evaluative words so the reader feels and judges the issue clearly.")
 
     weak_total = sum(weak_word_hits.values())
     if weak_total == 0:
@@ -750,10 +1120,10 @@ def analyse_text(text: str) -> Analysis:
 
     overall_score = round(
         (
-            reasoning.score * 0.25
-            + curriculum.score * 0.2
-            + arguments.score * 0.25
-            + strong_words.score * 0.15
+            reasoning.score * 0.2
+            + curriculum.score * 0.15
+            + arguments.score * 0.2
+            + strong_words.score * 0.3
             + techniques.score * 0.15
         )
     )
@@ -797,6 +1167,21 @@ def replace_weak_phrases(text: str) -> str:
         "stuff": "evidence",
         "things": "factors",
         "thing": "issue",
+        "nice": "encouraging",
+        "big": "significant",
+        "sad": "concerning",
+        "happy": "hopeful",
+        "hard": "challenging",
+        "easy": "practical",
+        "important": "essential",
+        "better": "more effective",
+        "worse": "more harmful",
+        "help": "support",
+        "stop": "prevent",
+        "show": "demonstrate",
+        "say": "argue",
+        "get": "gain",
+        "use": "apply",
     }
     for weak, replacement in direct_replacements.items():
         improved = re.sub(rf"\b{re.escape(weak)}\b", replacement, improved, flags=re.IGNORECASE)
@@ -914,6 +1299,20 @@ def build_feedback_report(analysis: Analysis, text: str, topic: str, audience: s
             lines.append(f"  - {word} ({count}): try {replacements}")
         lines.append("")
 
+    word_bank_hits = get_word_bank_hits(text)
+    lines.append("Persuasive word choice scan:")
+    for category, hits in word_bank_hits.items():
+        if hits:
+            lines.append(f"  - {category}: {', '.join(hits[:6])}")
+        else:
+            lines.append(f"  - {category}: add one or two phrases from this category")
+    lines.append("")
+
+    lines.append("Useful sentence starters:")
+    for starter in PERSUASIVE_SENTENCE_STARTERS:
+        lines.append(f"  - {starter}")
+    lines.append("")
+
     lines.append("Improved draft:")
     lines.append(build_improved_draft(text, topic, audience))
     return "\n".join(lines)
@@ -949,6 +1348,33 @@ def render_technique_table(analysis: Analysis) -> None:
     st.dataframe(rows, hide_index=True, use_container_width=True)
 
 
+def render_word_choice_scan(text: str, weak_word_hits: dict[str, int]) -> None:
+    word_bank_hits = get_word_bank_hits(text)
+    rows = []
+    for category, hits in word_bank_hits.items():
+        rows.append(
+            {
+                "Word purpose": category,
+                "Detected": ", ".join(hits[:6]) if hits else "Not detected",
+                "Try adding": ", ".join(PERSUASIVE_WORD_BANK[category][:4]),
+            }
+        )
+    st.dataframe(rows, hide_index=True, use_container_width=True)
+
+    if weak_word_hits:
+        st.markdown("**Weak-to-strong upgrades found in this draft**")
+        upgrade_rows = []
+        for weak, count in weak_word_hits.items():
+            upgrade_rows.append(
+                {
+                    "Weak word": weak,
+                    "Count": count,
+                    "Stronger options": ", ".join(WEAK_WORD_REPLACEMENTS[weak]),
+                }
+            )
+        st.dataframe(upgrade_rows, hide_index=True, use_container_width=True)
+
+
 def render_word_bank() -> None:
     st.markdown("**Upgrade common weak words**")
     rows = []
@@ -961,10 +1387,32 @@ def render_word_bank() -> None:
         )
     st.dataframe(rows, hide_index=True, use_container_width=True)
 
+    st.markdown("**Persuasive words by purpose**")
+    bank_rows = []
+    for category, phrases in PERSUASIVE_WORD_BANK.items():
+        bank_rows.append(
+            {
+                "Purpose": category,
+                "Words and phrases": ", ".join(phrases),
+            }
+        )
+    st.dataframe(bank_rows, hide_index=True, use_container_width=True)
+
+    st.markdown("**Sentence starters**")
+    for starter in PERSUASIVE_SENTENCE_STARTERS:
+        st.write(f"- {starter}")
+
     st.markdown("**Strong persuasive words**")
-    columns = st.columns(4)
+    columns = st.columns(5)
     for index, word in enumerate(STRONG_WORDS):
-        columns[index % 4].write(f"- {word}")
+        columns[index % 5].write(f"- {word}")
+
+
+def render_topic_ideas() -> None:
+    for category, topics in TOPIC_IDEAS.items():
+        st.markdown(f"**{category}**")
+        for topic in topics:
+            st.write(f"- {topic}")
 
 
 def render_checklist(analysis: Analysis) -> None:
@@ -1046,6 +1494,78 @@ def render_html_score(title: str, card: ScoreCard) -> str:
     """
 
 
+def render_html_word_bank() -> str:
+    bank_rows = "".join(
+        "<tr>"
+        f"<td>{escape_html(category)}</td>"
+        f"<td>{escape_html(', '.join(phrases))}</td>"
+        "</tr>"
+        for category, phrases in PERSUASIVE_WORD_BANK.items()
+    )
+    starters = "".join(f"<li>{escape_html(starter)}</li>" for starter in PERSUASIVE_SENTENCE_STARTERS)
+    return f"""
+    <section class="panel full">
+        <h2>Persuasive word bank</h2>
+        <table>
+            <thead><tr><th>Purpose</th><th>Words and phrases</th></tr></thead>
+            <tbody>{bank_rows}</tbody>
+        </table>
+        <h3>Sentence starters</h3>
+        <ul>{starters}</ul>
+    </section>
+    """
+
+
+def render_html_topic_ideas() -> str:
+    category_blocks = []
+    for category, topics in TOPIC_IDEAS.items():
+        topic_items = "".join(f"<li>{escape_html(topic)}</li>" for topic in topics)
+        category_blocks.append(f"<div class=\"panel\"><h2>{escape_html(category)}</h2><ul>{topic_items}</ul></div>")
+    return f"""
+    <section class="panel full">
+        <h2>Topic ideas</h2>
+    </section>
+    <section class="topic-grid">
+        {''.join(category_blocks)}
+    </section>
+    """
+
+
+def render_html_word_choice_scan(text: str, weak_word_hits: dict[str, int]) -> str:
+    word_rows = "".join(
+        "<tr>"
+        f"<td>{escape_html(category)}</td>"
+        f"<td>{escape_html(', '.join(hits[:6]) if hits else 'Not detected')}</td>"
+        f"<td>{escape_html(', '.join(PERSUASIVE_WORD_BANK[category][:4]))}</td>"
+        "</tr>"
+        for category, hits in get_word_bank_hits(text).items()
+    )
+    weak_rows = "".join(
+        "<tr>"
+        f"<td>{escape_html(word)}</td>"
+        f"<td>{count}</td>"
+        f"<td>{escape_html(', '.join(WEAK_WORD_REPLACEMENTS[word]))}</td>"
+        "</tr>"
+        for word, count in weak_word_hits.items()
+    )
+    if not weak_rows:
+        weak_rows = "<tr><td colspan=\"3\">No common weak words detected.</td></tr>"
+    return f"""
+    <section class="panel full">
+        <h2>Persuasive use of words</h2>
+        <table>
+            <thead><tr><th>Word purpose</th><th>Detected</th><th>Try adding</th></tr></thead>
+            <tbody>{word_rows}</tbody>
+        </table>
+        <h3>Weak-to-strong upgrades</h3>
+        <table>
+            <thead><tr><th>Weak word</th><th>Count</th><th>Stronger options</th></tr></thead>
+            <tbody>{weak_rows}</tbody>
+        </table>
+    </section>
+    """
+
+
 def render_http_page(
     writing: str = "",
     topic: str = "",
@@ -1109,6 +1629,8 @@ def render_http_page(
         <main class="grid">
             {scores}
         </main>
+
+        {render_html_word_choice_scan(writing, analysis.weak_word_hits)}
 
         <section class="panel full">
             <h2>Technique scan</h2>
@@ -1244,6 +1766,13 @@ def render_http_page(
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
         }}
+        .topic-grid {{
+            width: min(1180px, calc(100% - 32px));
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }}
         .panel-head {{
             display: flex;
             justify-content: space-between;
@@ -1277,7 +1806,7 @@ def render_http_page(
         th {{ color: var(--accent-dark); }}
         .full textarea {{ min-height: 260px; margin-top: 12px; }}
         @media (max-width: 780px) {{
-            form, .grid, .two-col, .summary {{
+            form, .grid, .two-col, .summary, .topic-grid {{
                 grid-template-columns: 1fr;
             }}
             h1 {{ font-size: 1.6rem; }}
@@ -1310,6 +1839,8 @@ def render_http_page(
     </form>
 
     {results_html}
+    {render_html_word_bank()}
+    {render_html_topic_ideas()}
 </body>
 </html>"""
 
@@ -1469,7 +2000,7 @@ def main() -> None:
     metric_columns[4].metric("Strong words", f"{analysis.strong_words.score}/100")
     metric_columns[5].metric("Techniques", f"{analysis.techniques.score}/100")
 
-    tabs = st.tabs(["Feedback", "Improved draft", "Checklist", "Word bank"])
+    tabs = st.tabs(["Feedback", "Word choice", "Improved draft", "Checklist", "Word bank", "Topic ideas"])
 
     with tabs[0]:
         col_a, col_b = st.columns(2)
@@ -1496,6 +2027,10 @@ def main() -> None:
                 st.write(f"- **{word}** appeared {count} time(s). Try: {replacements}.")
 
     with tabs[1]:
+        render_score_card("Persuasive use of words", analysis.strong_words)
+        render_word_choice_scan(writing, analysis.weak_word_hits)
+
+    with tabs[2]:
         improved = build_improved_draft(writing, topic, audience)
         st.text_area("Improved draft", improved, height=420)
         report = build_feedback_report(analysis, writing, topic, audience)
@@ -1506,11 +2041,14 @@ def main() -> None:
             mime="text/plain",
         )
 
-    with tabs[2]:
+    with tabs[3]:
         render_checklist(analysis)
 
-    with tabs[3]:
+    with tabs[4]:
         render_word_bank()
+
+    with tabs[5]:
+        render_topic_ideas()
 
 
 if __name__ == "__main__":
