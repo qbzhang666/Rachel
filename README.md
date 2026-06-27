@@ -1,8 +1,8 @@
-# Year 8+ Advanced Grammar Practice
+# Year 8+ English Practice Apps
 
-A Streamlit app for Australian Year 8 and above students to practise grammar through random 10-question multiple choice tests.
+Streamlit apps for Australian Year 8 and above students to practise grammar and improve persuasive writing.
 
-## Features
+## Grammar practice
 
 - 10 random questions per test
 - Expanded grammar bank with beginner-to-advanced coverage
@@ -12,11 +12,26 @@ A Streamlit app for Australian Year 8 and above students to practise grammar thr
 - Question-by-question feedback with explanations
 - New random test button
 
+## Persuasive writing coach
+
+- Valid reasoning feedback
+- Level 8 Australia Curriculum alignment checks
+- Strong argument structure feedback
+- Strong word suggestions and weak word replacements
+- Persuasive technique scan
+- Improved draft and downloadable feedback report
+
 ## Run locally
 
 ```powershell
 python -m pip install -r requirements.txt
 python -m streamlit run grammar.py
+```
+
+For the persuasive writing coach:
+
+```powershell
+python -m streamlit run writting.py
 ```
 
 Then open the local URL shown in the terminal, usually `http://localhost:8501`.
