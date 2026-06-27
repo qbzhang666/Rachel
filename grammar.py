@@ -1102,9 +1102,76 @@ QUESTIONS = [
 ]
 
 QUIZ_SIZE = 10
+YEAR_LEVELS = ["Year 7", "Year 8", "Year 9"]
+
+YEAR_SKILLS = {
+    "Year 7": {
+        "Apostrophes",
+        "Articles",
+        "Capitalisation",
+        "Commas",
+        "Commonly confused words",
+        "Comparatives",
+        "Conjunctions",
+        "Direct speech",
+        "Prepositions",
+        "Pronouns",
+        "Quantifiers",
+        "Run-on sentences",
+        "Sentence fragments",
+        "Subject-verb agreement",
+        "Tense consistency",
+        "Their, there, they're",
+        "Your and you're",
+    },
+    "Year 8": {
+        "Active and passive voice",
+        "Apostrophes",
+        "Articles",
+        "Capitalisation",
+        "Clause types",
+        "Cohesion",
+        "Colons",
+        "Commas",
+        "Commonly confused words",
+        "Comparatives",
+        "Conjunctions",
+        "Determiners",
+        "Direct speech",
+        "Formal language",
+        "Misplaced modifiers",
+        "Modal verbs",
+        "Modifiers",
+        "Noun phrases",
+        "Parallel structure",
+        "Prepositional phrases",
+        "Prepositions",
+        "Pronouns",
+        "Quantifiers",
+        "Relative clauses",
+        "Reported speech",
+        "Run-on sentences",
+        "Semicolons",
+        "Sentence fragments",
+        "Subject-verb agreement",
+        "Tense consistency",
+    },
+}
+YEAR_SKILLS["Year 9"] = {question["skill"] for question in QUESTIONS}
+
+
+def available_indexes_for_level(level: str) -> list[int]:
+    skills = YEAR_SKILLS.get(level, YEAR_SKILLS["Year 9"])
+    return [
+        index
+        for index, question in enumerate(QUESTIONS)
+        if question["skill"] in skills
+    ]
 
 
 def initialise_state() -> None:
+    if "grammar_level" not in st.session_state:
+        st.session_state.grammar_level = "Year 7"
     if "quiz_number" not in st.session_state:
         st.session_state.quiz_number = 0
         start_new_quiz()
@@ -1112,7 +1179,9 @@ def initialise_state() -> None:
 
 def start_new_quiz() -> None:
     st.session_state.quiz_number = st.session_state.get("quiz_number", 0) + 1
-    st.session_state.quiz_indexes = random.sample(range(len(QUESTIONS)), QUIZ_SIZE)
+    available_indexes = available_indexes_for_level(st.session_state.get("grammar_level", "Year 7"))
+    quiz_size = min(QUIZ_SIZE, len(available_indexes))
+    st.session_state.quiz_indexes = random.sample(available_indexes, quiz_size)
     st.session_state.choice_orders = {
         question_index: random.sample(
             QUESTIONS[question_index]["choices"],
@@ -1153,23 +1222,23 @@ def get_score(answers: dict[int, str | None]) -> int:
     )
 
 
-def encouragement(score: int) -> tuple[str, str]:
-    if score == QUIZ_SIZE:
+def encouragement(score: int, total: int) -> tuple[str, str]:
+    if score == total:
         return (
             "Outstanding work.",
             "You handled every grammar point in this set. Try another round and see if you can keep the streak going.",
         )
-    if score >= 8:
+    if score >= total * 0.8:
         return (
             "Great effort.",
             "You have strong control of these skills. Review the feedback for the couple of items that need polishing.",
         )
-    if score >= 6:
+    if score >= total * 0.6:
         return (
             "Good progress.",
             "You are building solid habits. Focus on the skill areas listed below, then try a fresh set.",
         )
-    if score >= 4:
+    if score >= total * 0.4:
         return (
             "Keep going.",
             "You have some useful foundations here. The explanations below will help you spot the patterns next time.",
@@ -1182,8 +1251,9 @@ def encouragement(score: int) -> tuple[str, str]:
 
 def show_results(answers: dict[int, str | None]) -> None:
     score = get_score(answers)
-    percentage = round(score / QUIZ_SIZE * 100)
-    title, message = encouragement(score)
+    total = len(st.session_state.quiz_indexes)
+    percentage = round(score / total * 100)
+    title, message = encouragement(score, total)
     missed_skills = Counter(
         QUESTIONS[question_index]["skill"]
         for question_index in st.session_state.quiz_indexes
@@ -1195,10 +1265,10 @@ def show_results(answers: dict[int, str | None]) -> None:
     st.success(f"{title} {message}")
 
     col_score, col_accuracy, col_bank = st.columns(3)
-    col_score.metric("Score", f"{score}/{QUIZ_SIZE}")
+    col_score.metric("Score", f"{score}/{total}")
     col_accuracy.metric("Accuracy", f"{percentage}%")
     col_bank.metric("Question set", f"#{st.session_state.quiz_number}")
-    st.progress(score / QUIZ_SIZE)
+    st.progress(score / total)
 
     if missed_skills:
         focus = ", ".join(skill for skill, _ in missed_skills.most_common(3))
@@ -1224,30 +1294,67 @@ def show_results(answers: dict[int, str | None]) -> None:
 
 
 st.set_page_config(
-    page_title="Year 8+ Advanced Grammar Practice",
-    layout="centered",
+    page_title="Year 7-9 Grammar Studio",
+    layout="wide",
 )
 
 st.markdown(
     """
     <style>
-    .stApp {
-        background: #f7f8fb;
+    [data-testid="stAppViewContainer"] {
+        background:
+            linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
+            #f8fafc;
     }
-    h1, h2, h3 {
-        letter-spacing: 0;
+    .block-container {
+        max-width: 1180px;
+        padding-top: 1.5rem;
+    }
+    .grammar-hero {
+        background: #ffffff;
+        border: 1px solid #d9e2ec;
+        border-left: 10px solid #0f766e;
+        border-radius: 8px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+    }
+    .grammar-hero h1 {
+        margin: 0 0 0.35rem 0;
+        color: #172033;
+        font-size: 2.25rem;
+    }
+    .grammar-hero p {
+        margin: 0;
+        color: #4b5563;
     }
     div[data-testid="stForm"] {
         background: #ffffff;
-        border: 1px solid #d9deea;
+        border: 1px solid #d9e2ec;
         border-radius: 8px;
         padding: 1rem 1.1rem;
+        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
     }
     div[data-testid="stMetric"] {
         background: #ffffff;
-        border: 1px solid #d9deea;
+        border: 1px solid #d9e2ec;
         border-radius: 8px;
         padding: 0.8rem;
+    }
+    div.stButton > button[kind="primary"], div[data-testid="stFormSubmitButton"] button {
+        min-height: 46px;
+        font-weight: 700;
+    }
+    .skill-pill {
+        display: inline-block;
+        background: #ecfeff;
+        color: #155e75;
+        border: 1px solid #a5f3fc;
+        border-radius: 999px;
+        padding: 0.2rem 0.65rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
     }
     </style>
     """,
@@ -1256,27 +1363,39 @@ st.markdown(
 
 initialise_state()
 
-st.title("Year 8+ Advanced Grammar Practice")
-st.write(
-    "Answer 10 random multiple choice questions from an expanded grammar bank. Submit your test to see your score, encouragement and targeted feedback."
+st.markdown(
+    """
+    <div class="grammar-hero">
+        <h1>Year 7-9 Grammar Studio</h1>
+        <p>Targeted Australian English practice with instant feedback after submission.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
-sidebar_col_1, sidebar_col_2 = st.sidebar.columns(2)
-sidebar_col_1.metric("Questions", QUIZ_SIZE)
-sidebar_col_2.metric("Bank", len(QUESTIONS))
-st.sidebar.write(
-    "Designed for Australian Year 8 and above grammar practice, with advanced coverage of clauses, verb forms, punctuation, cohesion and formal style."
-)
-if st.sidebar.button("New random test", use_container_width=True):
-    start_new_quiz()
-    st.rerun()
+control_col, metric_col = st.columns([2, 1])
+with control_col:
+    st.selectbox(
+        "Year level",
+        YEAR_LEVELS,
+        key="grammar_level",
+        on_change=start_new_quiz,
+    )
+    st.button("Start fresh grammar challenge", type="primary", use_container_width=True, on_click=start_new_quiz)
+with metric_col:
+    level_bank = len(available_indexes_for_level(st.session_state.grammar_level))
+    metric_1, metric_2 = st.columns(2)
+    metric_1.metric("Questions", len(st.session_state.quiz_indexes))
+    metric_2.metric("Level bank", level_bank)
+    st.caption(f"Current set #{st.session_state.quiz_number} for {st.session_state.grammar_level}.")
 
 if st.session_state.submitted:
-    st.info("This test has been submitted. Start a new random test when you are ready for another set.")
+    st.info("This challenge has been submitted. Start a fresh grammar challenge when you are ready for another set.")
 
 with st.form("grammar_quiz"):
     for display_number, question_index in enumerate(st.session_state.quiz_indexes, start=1):
         question = QUESTIONS[question_index]
+        st.markdown(f"<span class='skill-pill'>{question['skill']}</span>", unsafe_allow_html=True)
         st.markdown(f"**{display_number}. {question['prompt']}**")
         st.radio(
             label=f"Question {display_number} options",
@@ -1286,9 +1405,10 @@ with st.form("grammar_quiz"):
             disabled=st.session_state.submitted,
             label_visibility="collapsed",
         )
+        st.divider()
 
     submitted = st.form_submit_button(
-        "Submit test",
+        "Submit grammar challenge",
         use_container_width=True,
         disabled=st.session_state.submitted,
     )

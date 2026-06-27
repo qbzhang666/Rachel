@@ -1,9 +1,10 @@
 # Student Practice Apps
 
-Streamlit apps for students to practise grammar, improve persuasive writing and prepare for Years 7-9 AMC-style maths.
+Streamlit apps for students to practise Years 7-9 grammar, improve persuasive writing and prepare for Years 7-9 AMC-style maths.
 
 ## Grammar practice
 
+- Year 7, 8 and 9 level selector
 - 10 random questions per test
 - Expanded grammar bank with beginner-to-advanced coverage
 - Australian English examples
@@ -15,7 +16,7 @@ Streamlit apps for students to practise grammar, improve persuasive writing and 
 ## Persuasive writing coach
 
 - Valid reasoning feedback
-- Level 8 Australia Curriculum alignment checks
+- Year 7, 8 and 9 Australian Curriculum alignment checks
 - Strong argument structure feedback
 - Strong word suggestions, weak word replacements and persuasive phrase banks
 - Persuasive technique scan

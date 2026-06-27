@@ -639,6 +639,48 @@ SAMPLE_LIBRARY = [
 ]
 
 SAMPLE_WRITING = SAMPLE_LIBRARY[0]["writing"]
+WRITING_LEVELS = ["Year 7", "Year 8", "Year 9"]
+
+WRITING_LEVEL_SETTINGS = {
+    "Year 7": {
+        "label": "Year 7 Australian Curriculum",
+        "developed_words": 260,
+        "workable_words": 120,
+        "paragraphs": 3,
+        "advanced_vocab": 5,
+        "cohesive_devices": 3,
+        "sentence_min": 8,
+        "sentence_max": 26,
+    },
+    "Year 8": {
+        "label": "Year 8 Australian Curriculum",
+        "developed_words": 350,
+        "workable_words": 180,
+        "paragraphs": 4,
+        "advanced_vocab": 10,
+        "cohesive_devices": 4,
+        "sentence_min": 10,
+        "sentence_max": 28,
+    },
+    "Year 9": {
+        "label": "Year 9 Australian Curriculum",
+        "developed_words": 450,
+        "workable_words": 250,
+        "paragraphs": 5,
+        "advanced_vocab": 14,
+        "cohesive_devices": 5,
+        "sentence_min": 12,
+        "sentence_max": 30,
+    },
+}
+
+
+def get_writing_level_settings(year_level: str) -> dict[str, int | str]:
+    return WRITING_LEVEL_SETTINGS.get(year_level, WRITING_LEVEL_SETTINGS["Year 8"])
+
+
+def curriculum_label(year_level: str) -> str:
+    return str(get_writing_level_settings(year_level)["label"])
 
 
 def get_sample(sample_key: str | None = None) -> dict[str, str]:
@@ -869,26 +911,40 @@ def score_reasoning(text: str, sentences: list[str], overclaims: list[str]) -> S
     return ScoreCard(clamp_score(score), strengths, improvements)
 
 
-def score_curriculum(text: str, words: list[str], sentences: list[str], paragraphs: list[str]) -> ScoreCard:
+def score_curriculum(
+    text: str,
+    words: list[str],
+    sentences: list[str],
+    paragraphs: list[str],
+    year_level: str,
+) -> ScoreCard:
     score = 20
     strengths = []
     improvements = []
+    settings = get_writing_level_settings(year_level)
+    developed_words = int(settings["developed_words"])
+    workable_words = int(settings["workable_words"])
+    target_paragraphs = int(settings["paragraphs"])
+    target_vocab = int(settings["advanced_vocab"])
+    target_cohesion = int(settings["cohesive_devices"])
+    sentence_min = int(settings["sentence_min"])
+    sentence_max = int(settings["sentence_max"])
 
     word_count = len(words)
-    if word_count >= 350:
+    if word_count >= developed_words:
         score += 15
-        strengths.append("The draft has enough length for developed Year 8 argument writing.")
-    elif word_count >= 180:
+        strengths.append(f"The draft has enough length for developed {year_level} argument writing.")
+    elif word_count >= workable_words:
         score += 10
         strengths.append("The draft has a workable length.")
-        improvements.append("Develop the body paragraphs further for a stronger Year 8 response.")
+        improvements.append(f"Develop the body paragraphs further for a stronger {year_level} response.")
     else:
         improvements.append("Aim for a fuller persuasive response with an introduction, body paragraphs, and conclusion.")
 
-    if len(paragraphs) >= 4:
+    if len(paragraphs) >= target_paragraphs:
         score += 20
         strengths.append("Paragraphing supports a clear persuasive structure.")
-    elif len(paragraphs) >= 2:
+    elif len(paragraphs) >= max(2, target_paragraphs - 2):
         score += 10
         improvements.append("Separate the writing into introduction, body paragraphs, and conclusion.")
     else:
@@ -909,20 +965,20 @@ def score_curriculum(text: str, words: list[str], sentences: list[str], paragrap
             "consequently",
         ],
     )
-    if cohesive_devices >= 4:
+    if cohesive_devices >= target_cohesion:
         score += 20
         strengths.append("Cohesive devices help ideas flow.")
-    elif cohesive_devices >= 2:
+    elif cohesive_devices >= max(2, target_cohesion - 2):
         score += 10
         improvements.append("Use more linking phrases to guide the reader through the argument.")
     else:
         improvements.append("Add linking phrases such as firstly, furthermore, however, and therefore.")
 
     advanced_words = [word for word in words if len(word) >= 9 and word not in STOP_WORDS]
-    if len(set(advanced_words)) >= 10:
+    if len(set(advanced_words)) >= target_vocab:
         score += 15
-        strengths.append("Vocabulary shows a developing Year 8 level.")
-    elif len(set(advanced_words)) >= 5:
+        strengths.append(f"Vocabulary shows a developing {year_level} level.")
+    elif len(set(advanced_words)) >= max(3, target_vocab // 2):
         score += 8
         improvements.append("Upgrade repeated simple words with more precise vocabulary.")
     else:
@@ -932,10 +988,10 @@ def score_curriculum(text: str, words: list[str], sentences: list[str], paragrap
     if sentence_lengths:
         average_length = sum(sentence_lengths) / len(sentence_lengths)
         has_variety = max(sentence_lengths) - min(sentence_lengths) >= 10 if len(sentence_lengths) > 1 else False
-        if 10 <= average_length <= 28 and has_variety:
+        if sentence_min <= average_length <= sentence_max and has_variety:
             score += 15
             strengths.append("Sentence length is controlled and varied.")
-        elif 8 <= average_length <= 32:
+        elif max(7, sentence_min - 3) <= average_length <= sentence_max + 4:
             score += 8
             improvements.append("Vary sentence openings and lengths for stronger control.")
         else:
@@ -1104,7 +1160,7 @@ def score_techniques(technique_hits: dict[str, list[str]]) -> ScoreCard:
     return ScoreCard(clamp_score(score), strengths, improvements)
 
 
-def analyse_text(text: str) -> Analysis:
+def analyse_text(text: str, year_level: str = "Year 8") -> Analysis:
     words = tokenize_words(text)
     sentences = split_sentences(text)
     paragraphs = split_paragraphs(text)
@@ -1113,7 +1169,7 @@ def analyse_text(text: str) -> Analysis:
     technique_hits = detect_techniques(text, sentences, words)
 
     reasoning = score_reasoning(text, sentences, overclaims)
-    curriculum = score_curriculum(text, words, sentences, paragraphs)
+    curriculum = score_curriculum(text, words, sentences, paragraphs, year_level)
     arguments = score_arguments(text, paragraphs)
     strong_words = score_strong_words(text, words, weak_word_hits)
     techniques = score_techniques(technique_hits)
@@ -1258,10 +1314,16 @@ def build_improved_draft(text: str, topic: str, audience: str) -> str:
     return "\n\n".join(improved_parts)
 
 
-def build_feedback_report(analysis: Analysis, text: str, topic: str, audience: str) -> str:
+def build_feedback_report(
+    analysis: Analysis,
+    text: str,
+    topic: str,
+    audience: str,
+    year_level: str = "Year 8",
+) -> str:
     categories = [
         ("Valid reasoning", analysis.reasoning),
-        ("Level 8 Australia Curriculum", analysis.curriculum),
+        (curriculum_label(year_level), analysis.curriculum),
         ("Strong arguments", analysis.arguments),
         ("Use of strong words", analysis.strong_words),
         ("Persuasive technique", analysis.techniques),
@@ -1271,6 +1333,7 @@ def build_feedback_report(analysis: Analysis, text: str, topic: str, audience: s
         "",
         f"Topic: {topic or 'Not provided'}",
         f"Audience: {audience or 'Not provided'}",
+        f"Year level: {year_level}",
         f"Overall score: {analysis.overall_score}/100 ({score_label(analysis.overall_score)})",
         "",
         f"Word count: {len(analysis.words)}",
@@ -1415,7 +1478,7 @@ def render_topic_ideas() -> None:
             st.write(f"- {topic}")
 
 
-def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
+def build_checklist_items(analysis: Analysis, year_level: str = "Year 8") -> list[dict[str, str | bool]]:
     text = " ".join(analysis.sentences)
     evidence_count = count_terms(text, EVIDENCE_MARKERS)
     reasoning_count = count_terms(text, REASONING_MARKERS)
@@ -1423,6 +1486,9 @@ def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
     technique_count = len([hits for hits in analysis.technique_hits.values() if hits])
     has_counterargument = contains_any(text, COUNTER_ARGUMENT_MARKERS)
     has_refutation = contains_any(text, REFUTATION_MARKERS)
+    settings = get_writing_level_settings(year_level)
+    target_paragraphs = int(settings["paragraphs"])
+    workable_words = int(settings["workable_words"])
 
     return [
         {
@@ -1433,9 +1499,9 @@ def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
         },
         {
             "label": "Organised structure",
-            "done": len(analysis.paragraphs) >= 4 and len(analysis.words) >= 180,
+            "done": len(analysis.paragraphs) >= target_paragraphs and len(analysis.words) >= workable_words,
             "checks": "The draft has an introduction, developed body paragraphs, and a conclusion.",
-            "next": "Use at least four paragraphs and develop each body paragraph with more detail.",
+            "next": f"Use at least {target_paragraphs} paragraphs and develop each body paragraph with more detail.",
         },
         {
             "label": "Evidence is specific",
@@ -1468,7 +1534,7 @@ def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
             "next": "Add emotive language, inclusive language, evidence appeal, or a rhetorical question.",
         },
         {
-            "label": "Formal Year 8 tone",
+            "label": f"Formal {year_level} tone",
             "done": not contains_any(text, FORMAL_TONE_WARNINGS) and analysis.curriculum.score >= 60,
             "checks": "The writing sounds formal and controlled.",
             "next": "Remove slang, avoid texting language, and use more precise vocabulary.",
@@ -1476,9 +1542,9 @@ def build_checklist_items(analysis: Analysis) -> list[dict[str, str | bool]]:
     ]
 
 
-def render_checklist(analysis: Analysis) -> None:
+def render_checklist(analysis: Analysis, year_level: str = "Year 8") -> None:
     st.caption("This is a self-check for the submitted draft. Unticked items show what to improve next.")
-    for item in build_checklist_items(analysis):
+    for item in build_checklist_items(analysis, year_level):
         status = "Ready" if item["done"] else "Keep working"
         st.checkbox(f"{item['label']} - {status}", value=bool(item["done"]), disabled=True)
         st.caption(item["checks"] if item["done"] else item["next"])
@@ -1495,11 +1561,12 @@ def run_console_app() -> None:
         print("No writing pasted. Analysing the built-in sample instead.")
         text = SAMPLE_WRITING
 
-    analysis = analyse_text(text)
+    year_level = "Year 8"
+    analysis = analyse_text(text, year_level)
     print()
     print(f"Overall: {analysis.overall_score}/100 ({score_label(analysis.overall_score)})")
     print(f"Valid reasoning: {analysis.reasoning.score}/100")
-    print(f"Level 8 Australia Curriculum: {analysis.curriculum.score}/100")
+    print(f"{curriculum_label(year_level)}: {analysis.curriculum.score}/100")
     print(f"Strong arguments: {analysis.arguments.score}/100")
     print(f"Use of strong words: {analysis.strong_words.score}/100")
     print(f"Persuasive technique: {analysis.techniques.score}/100")
@@ -1507,7 +1574,7 @@ def run_console_app() -> None:
 
     for title, card in [
         ("Valid reasoning", analysis.reasoning),
-        ("Level 8 Australia Curriculum", analysis.curriculum),
+        (curriculum_label(year_level), analysis.curriculum),
         ("Strong arguments", analysis.arguments),
         ("Use of strong words", analysis.strong_words),
         ("Persuasive technique", analysis.techniques),
@@ -1623,6 +1690,7 @@ def render_http_page(
     writing: str = "",
     topic: str = "",
     audience: str = "",
+    year_level: str = "Year 8",
     analysis: Analysis | None = None,
     selected_sample_key: str | None = None,
 ) -> str:
@@ -1639,13 +1707,19 @@ def render_http_page(
         f"{escape_html(sample['label'])}</option>"
         for sample in SAMPLE_LIBRARY
     )
+    level_options = "".join(
+        f"<option value=\"{escape_html(level)}\""
+        f"{' selected' if level == year_level else ''}>"
+        f"{escape_html(level)}</option>"
+        for level in WRITING_LEVELS
+    )
 
     if analysis is not None:
         improved = build_improved_draft(writing, topic, audience)
-        report = build_feedback_report(analysis, writing, topic, audience)
+        report = build_feedback_report(analysis, writing, topic, audience, year_level)
         cards = [
             ("1. Valid reasoning", analysis.reasoning),
-            ("2. Level 8 Australia Curriculum", analysis.curriculum),
+            (f"2. {curriculum_label(year_level)}", analysis.curriculum),
             ("3. Strong arguments", analysis.arguments),
             ("4. Use of strong words", analysis.strong_words),
             ("5. Persuasive technique", analysis.techniques),
@@ -1676,7 +1750,7 @@ def render_http_page(
             </div>
             <div><span>Words</span><strong>{len(analysis.words)}</strong><small>total</small></div>
             <div><span>Sentences</span><strong>{len(analysis.sentences)}</strong><small>total</small></div>
-            <div><span>Paragraphs</span><strong>{len(analysis.paragraphs)}</strong><small>total</small></div>
+            <div><span>{escape_html(year_level)}</span><strong>{analysis.curriculum.score}/100</strong><small>curriculum</small></div>
         </section>
 
         <main class="grid">
@@ -1732,20 +1806,29 @@ def render_http_page(
             --accent: #2563eb;
             --accent-dark: #1e3a8a;
             --green: #0f766e;
+            --gold: #d97706;
         }}
         * {{ box-sizing: border-box; }}
         body {{
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
             color: var(--ink);
-            background: var(--soft);
+            background:
+                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(217, 119, 6, 0.08)),
+                var(--soft);
         }}
         header {{
+            width: min(1180px, calc(100% - 32px));
+            margin: 20px auto 0;
             background: var(--surface);
-            border-bottom: 1px solid var(--line);
-            padding: 24px max(24px, calc((100vw - 1180px) / 2));
+            border: 1px solid var(--line);
+            border-left: 10px solid var(--accent);
+            border-radius: 8px;
+            padding: 20px 22px;
+            box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
         }}
         h1 {{ margin: 0; font-size: 2rem; }}
+        header p {{ color: var(--muted); margin: 8px 0 0; }}
         h2 {{ margin: 0; font-size: 1.15rem; }}
         h3 {{ margin: 18px 0 8px; font-size: 0.95rem; color: var(--accent-dark); }}
         form, .summary, .grid, .two-col, .panel.full {{
@@ -1774,6 +1857,7 @@ def render_http_page(
             border: 1px solid var(--line);
             border-radius: 8px;
             padding: 16px;
+            box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
         }}
         .side label + input, .side label + select {{ margin-bottom: 14px; }}
         .actions {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }}
@@ -1790,6 +1874,11 @@ def render_http_page(
             align-items: center;
             justify-content: center;
             min-height: 40px;
+        }}
+        button.primary {{
+            min-height: 48px;
+            background: linear-gradient(135deg, var(--accent), var(--green));
+            box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
         }}
         .sample-link {{ background: var(--green); }}
         .summary {{
@@ -1870,6 +1959,7 @@ def render_http_page(
 <body>
     <header>
         <h1>Persuasive Writing Coach</h1>
+        <p>Year 7-9 persuasive writing feedback with a strong focus on powerful, precise word choice.</p>
     </header>
 
     <form method="post" action="/analyse">
@@ -1882,10 +1972,12 @@ def render_http_page(
             <input id="topic" name="topic" value="{escape_html(topic)}" placeholder="Example: school uniforms">
             <label for="audience">Audience</label>
             <input id="audience" name="audience" value="{escape_html(audience)}" placeholder="Example: Year 8 students">
+            <label for="year_level">Year level</label>
+            <select id="year_level" name="year_level">{level_options}</select>
             <label for="sample_key">Example</label>
             <select id="sample_key" name="sample_key">{sample_options}</select>
             <div class="actions">
-                <button type="submit">Analyse writing</button>
+                <button class="primary" type="submit">Submit writing</button>
                 <button class="sample-link" type="submit" formaction="/sample">Load selected sample</button>
             </div>
         </div>
@@ -1904,13 +1996,15 @@ class WritingCoachHandler(BaseHTTPRequestHandler):
         path = parsed.path
         if path == "/sample":
             fields = parse_qs(parsed.query)
+            year_level = fields.get("year_level", ["Year 8"])[0]
             sample = get_sample(fields.get("sample_key", [""])[0])
             self.send_html(
                 render_http_page(
                     writing=sample["writing"],
                     topic=sample["topic"],
                     audience=sample["audience"],
-                    analysis=analyse_text(sample["writing"]),
+                    year_level=year_level,
+                    analysis=analyse_text(sample["writing"], year_level),
                     selected_sample_key=sample["key"],
                 )
             )
@@ -1927,13 +2021,15 @@ class WritingCoachHandler(BaseHTTPRequestHandler):
         fields = parse_qs(body)
 
         if path == "/sample":
+            year_level = fields.get("year_level", ["Year 8"])[0]
             sample = get_sample(fields.get("sample_key", [""])[0])
             self.send_html(
                 render_http_page(
                     writing=sample["writing"],
                     topic=sample["topic"],
                     audience=sample["audience"],
-                    analysis=analyse_text(sample["writing"]),
+                    year_level=year_level,
+                    analysis=analyse_text(sample["writing"], year_level),
                     selected_sample_key=sample["key"],
                 )
             )
@@ -1942,9 +2038,19 @@ class WritingCoachHandler(BaseHTTPRequestHandler):
         writing = fields.get("writing", [""])[0]
         topic = fields.get("topic", [""])[0]
         audience = fields.get("audience", [""])[0]
+        year_level = fields.get("year_level", ["Year 8"])[0]
         sample_key = fields.get("sample_key", [""])[0]
-        analysis = analyse_text(writing) if writing.strip() else None
-        self.send_html(render_http_page(writing, topic, audience, analysis, sample_key))
+        analysis = analyse_text(writing, year_level) if writing.strip() else None
+        self.send_html(
+            render_http_page(
+                writing=writing,
+                topic=topic,
+                audience=audience,
+                year_level=year_level,
+                analysis=analysis,
+                selected_sample_key=sample_key,
+            )
+        )
 
     def send_html(self, content: str) -> None:
         encoded = content.encode("utf-8")
@@ -1992,12 +2098,14 @@ def load_sample() -> None:
     st.session_state["submitted_writing"] = sample["writing"]
     st.session_state["submitted_topic"] = sample["topic"]
     st.session_state["submitted_audience"] = sample["audience"]
+    st.session_state["submitted_year_level"] = st.session_state.get("writing_level", "Year 8")
 
 
 def submit_writing() -> None:
     st.session_state["submitted_writing"] = st.session_state.get("writing_text", "")
     st.session_state["submitted_topic"] = st.session_state.get("topic_text", "")
     st.session_state["submitted_audience"] = st.session_state.get("audience_text", "")
+    st.session_state["submitted_year_level"] = st.session_state.get("writing_level", "Year 8")
 
 
 def main() -> None:
@@ -2008,20 +2116,53 @@ def main() -> None:
             run_http_app(get_cli_port())
         return
 
-    st.set_page_config(page_title="Persuasive Writing Coach", layout="wide")
+    st.set_page_config(page_title="Year 7-9 Persuasive Writing Coach", layout="wide")
 
     st.markdown(
         """
         <style>
+        [data-testid="stAppViewContainer"] {
+            background:
+                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(217, 119, 6, 0.08)),
+                #f8fafc;
+        }
         .block-container {
             max-width: 1180px;
-            padding-top: 2rem;
+            padding-top: 1.5rem;
+        }
+        .writing-hero {
+            background: #ffffff;
+            border: 1px solid #d9e2ec;
+            border-left: 10px solid #2563eb;
+            border-radius: 8px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+        }
+        .writing-hero h1 {
+            margin: 0 0 0.35rem 0;
+            color: #172033;
+            font-size: 2.3rem;
+        }
+        .writing-hero p {
+            margin: 0;
+            color: #4b5563;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            border-radius: 8px;
         }
         [data-testid="stMetric"] {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #d9e2ec;
             border-radius: 8px;
             padding: 0.75rem 1rem;
+        }
+        div.stButton > button[kind="primary"] {
+            min-height: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #0f766e);
+            border: 0;
+            box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
         }
         .stProgress > div > div > div > div {
             background-color: #2563eb;
@@ -2031,7 +2172,18 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    st.title("Persuasive Writing Coach")
+    if "writing_level" not in st.session_state:
+        st.session_state["writing_level"] = "Year 8"
+
+    st.markdown(
+        """
+        <div class="writing-hero">
+            <h1>Year 7-9 Persuasive Writing Coach</h1>
+            <p>Polished feedback for reasoning, argument structure, curriculum level and powerful word choice.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     left, right = st.columns([2, 1])
     with left:
@@ -2045,12 +2197,14 @@ def main() -> None:
     with right:
         topic = st.text_input("Topic", placeholder="Example: school uniforms", key="topic_text")
         audience = st.text_input("Audience", placeholder="Example: Year 8 students", key="audience_text")
+        st.selectbox("Year level", WRITING_LEVELS, key="writing_level")
         st.selectbox("Example", get_sample_labels(), key="sample_label")
-        st.button("Load selected sample", on_click=load_sample)
+        st.button("Load selected sample", use_container_width=True, on_click=load_sample)
 
     submitted_writing = st.session_state.get("submitted_writing", "")
     submitted_topic = st.session_state.get("submitted_topic", "")
     submitted_audience = st.session_state.get("submitted_audience", "")
+    submitted_year_level = st.session_state.get("submitted_year_level", st.session_state.get("writing_level", "Year 8"))
 
     if not submitted_writing.strip():
         st.info("Paste a draft or load a sample, then click Submit writing.")
@@ -2059,13 +2213,13 @@ def main() -> None:
     if writing.strip() and writing != submitted_writing:
         st.warning("Draft changed since the last submission. Click Submit writing to refresh the feedback.")
 
-    analysis = analyse_text(submitted_writing)
+    analysis = analyse_text(submitted_writing, submitted_year_level)
 
     st.divider()
     metric_columns = st.columns(6)
     metric_columns[0].metric("Overall", f"{analysis.overall_score}/100", score_label(analysis.overall_score))
     metric_columns[1].metric("Reasoning", f"{analysis.reasoning.score}/100")
-    metric_columns[2].metric("Level 8", f"{analysis.curriculum.score}/100")
+    metric_columns[2].metric(submitted_year_level, f"{analysis.curriculum.score}/100")
     metric_columns[3].metric("Arguments", f"{analysis.arguments.score}/100")
     metric_columns[4].metric("Strong words", f"{analysis.strong_words.score}/100")
     metric_columns[5].metric("Techniques", f"{analysis.techniques.score}/100")
@@ -2079,7 +2233,7 @@ def main() -> None:
             render_score_card("3. Strong arguments", analysis.arguments)
             render_score_card("5. Persuasive technique", analysis.techniques)
         with col_b:
-            render_score_card("2. Level 8 Australia Curriculum", analysis.curriculum)
+            render_score_card(f"2. {curriculum_label(submitted_year_level)}", analysis.curriculum)
             render_score_card("4. Use of strong words", analysis.strong_words)
 
         st.subheader("Technique scan")
@@ -2103,7 +2257,13 @@ def main() -> None:
     with tabs[2]:
         improved = build_improved_draft(submitted_writing, submitted_topic, submitted_audience)
         st.text_area("Improved draft", improved, height=420)
-        report = build_feedback_report(analysis, submitted_writing, submitted_topic, submitted_audience)
+        report = build_feedback_report(
+            analysis,
+            submitted_writing,
+            submitted_topic,
+            submitted_audience,
+            submitted_year_level,
+        )
         st.download_button(
             "Download feedback",
             data=report,
@@ -2112,7 +2272,7 @@ def main() -> None:
         )
 
     with tabs[3]:
-        render_checklist(analysis)
+        render_checklist(analysis, submitted_year_level)
 
     with tabs[4]:
         render_word_bank()
