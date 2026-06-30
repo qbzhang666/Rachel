@@ -4,30 +4,69 @@ from string import Template
 
 
 DIFFICULTIES = {
-    "Chill": {
+    "Easy Flow": {
         "speed": 1.0,
+        "time_limit": 300,
+        "hazard_speed": 0.7,
+        "gravity": 0.62,
+        "jump": 15.8,
+    },
+    "Red Rush": {
+        "speed": 1.06,
         "time_limit": 240,
         "hazard_speed": 0.9,
-        "gravity": 0.82,
+        "gravity": 0.66,
+        "jump": 16.0,
     },
     "Challenge": {
         "speed": 1.12,
-        "time_limit": 180,
-        "hazard_speed": 1.18,
-        "gravity": 0.86,
-    },
-    "Tower Mode": {
-        "speed": 1.25,
-        "time_limit": 135,
-        "hazard_speed": 1.45,
-        "gravity": 0.9,
+        "time_limit": 210,
+        "hazard_speed": 1.05,
+        "gravity": 0.7,
+        "jump": 16.2,
     },
 }
 
 HEIGHTS = {
-    "Short": 5,
-    "Classic": 7,
-    "Tall": 9,
+    "Mini": 4,
+    "Classic": 6,
+    "Big": 8,
+}
+
+PALETTES = {
+    "Neon": {
+        "sky_a": "#111827",
+        "sky_b": "#172033",
+        "sky_c": "#312e81",
+        "platform": "#f8fafc",
+        "edge": "#38bdf8",
+        "player": "#facc15",
+        "player_shadow": "#f97316",
+        "goal": "#a78bfa",
+        "accent": "#22d3ee",
+    },
+    "Arcade": {
+        "sky_a": "#1e1b4b",
+        "sky_b": "#831843",
+        "sky_c": "#0f766e",
+        "platform": "#fff7ed",
+        "edge": "#fb7185",
+        "player": "#67e8f9",
+        "player_shadow": "#0891b2",
+        "goal": "#bef264",
+        "accent": "#f9a8d4",
+    },
+    "Street": {
+        "sky_a": "#0f172a",
+        "sky_b": "#3b0764",
+        "sky_c": "#064e3b",
+        "platform": "#e2e8f0",
+        "edge": "#f59e0b",
+        "player": "#a7f3d0",
+        "player_shadow": "#10b981",
+        "goal": "#f0abfc",
+        "accent": "#fbbf24",
+    },
 }
 
 
@@ -35,25 +74,59 @@ def build_game_html(config: dict[str, object]) -> str:
     config_json = json.dumps(config)
     template = Template(
         r"""
-<div class="obby-shell">
-    <canvas id="obbyCanvas" width="980" height="640" tabindex="0" aria-label="Tower obby game"></canvas>
-    <div class="obby-controls" aria-hidden="true">
-        <button id="btnLeft">A</button>
-        <button id="btnJump">JUMP</button>
-        <button id="btnRight">D</button>
-        <button id="btnReset">R</button>
+<div class="obby-card">
+    <div class="game-toolbar">
+        <button id="playButton" type="button">Play</button>
+        <button id="musicButton" type="button">Music Off</button>
+        <button id="resetButton" type="button">Reset</button>
+    </div>
+    <canvas id="obbyCanvas" width="980" height="640" tabindex="0" aria-label="Red obstacle tower game"></canvas>
+    <div class="mobile-controls" aria-hidden="true">
+        <button id="leftButton" type="button">A</button>
+        <button id="jumpButton" type="button">Jump</button>
+        <button id="rightButton" type="button">D</button>
     </div>
 </div>
 
 <style>
-    .obby-shell {
+    .obby-card {
         width: min(100%, 1080px);
         margin: 0 auto;
-        border: 1px solid #d8dee9;
+        padding: 14px;
+        border: 1px solid #d9e2ec;
         border-radius: 8px;
         background: #ffffff;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-        padding: 14px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    }
+    .game-toolbar {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .game-toolbar button,
+    .mobile-controls button {
+        border: 0;
+        border-radius: 8px;
+        min-height: 46px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #172033, #2563eb);
+        font: 800 0.94rem Arial, sans-serif;
+        cursor: pointer;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
+    }
+    #musicButton {
+        background: linear-gradient(135deg, #be123c, #7c3aed);
+    }
+    #playButton {
+        background: linear-gradient(135deg, #0f766e, #2563eb);
+    }
+    #resetButton {
+        background: linear-gradient(135deg, #d97706, #be123c);
+    }
+    .game-toolbar button:active,
+    .mobile-controls button:active {
+        transform: translateY(1px);
     }
     #obbyCanvas {
         width: 100%;
@@ -64,28 +137,18 @@ def build_game_html(config: dict[str, object]) -> str:
         outline: none;
         touch-action: none;
     }
-    .obby-controls {
+    .mobile-controls {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
         margin-top: 12px;
     }
-    .obby-controls button {
-        border: 0;
-        border-radius: 8px;
-        background: #172033;
-        color: #ffffff;
-        min-height: 48px;
-        font: 800 0.9rem Arial, sans-serif;
-        cursor: pointer;
-        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
-    }
-    .obby-controls button:active {
-        transform: translateY(1px);
-        background: #2563eb;
+    .mobile-controls button {
+        min-height: 54px;
+        font-size: 1rem;
     }
     @media (min-width: 900px) {
-        .obby-controls {
+        .mobile-controls {
             display: none;
         }
     }
@@ -96,15 +159,22 @@ def build_game_html(config: dict[str, object]) -> str:
     const CONFIG = $config_json;
     const canvas = document.getElementById("obbyCanvas");
     const ctx = canvas.getContext("2d");
+    const playButton = document.getElementById("playButton");
+    const musicButton = document.getElementById("musicButton");
+    const resetButton = document.getElementById("resetButton");
     const W = canvas.width;
     const H = canvas.height;
     const worldW = 980;
-    const sectionH = 520;
-    const floorH = 70;
-    const sections = Number(CONFIG.sections || 7);
-    const totalH = sections * sectionH + floorH + 200;
+    const sectionH = 430;
+    const floorH = 76;
+    const sections = Number(CONFIG.sections || 6);
+    const totalH = sections * sectionH + floorH + 180;
+    const palette = CONFIG.palette || {};
     const keys = Object.create(null);
-    const palette = CONFIG.palette || "Neon";
+    const hazards = [];
+    const platforms = [];
+    const particles = [];
+    const confetti = [];
 
     let seed = Number(CONFIG.seed || 2026);
     let cameraY = totalH - H;
@@ -115,74 +185,33 @@ def build_game_html(config: dict[str, object]) -> str:
     let startTime = 0;
     let finishTime = 0;
     let lastTime = performance.now();
-    let checkpoint = { x: 74, y: totalH - floorH - 50 };
+    let checkpoint = { x: 82, y: totalH - floorH - 48 };
     let bestHeight = 0;
-
-    const colours = {
-        Neon: {
-            skyTop: "#0f172a",
-            skyBottom: "#172033",
-            platform: "#e2e8f0",
-            platformEdge: "#38bdf8",
-            player: "#facc15",
-            playerDark: "#f97316",
-            hazard: "#ef4444",
-            hazardGlow: "rgba(239, 68, 68, 0.34)",
-            moving: "#34d399",
-            goal: "#a78bfa",
-            text: "#f8fafc",
-            muted: "#cbd5e1",
-        },
-        Candy: {
-            skyTop: "#1e1b4b",
-            skyBottom: "#312e81",
-            platform: "#fff7ed",
-            platformEdge: "#fb7185",
-            player: "#67e8f9",
-            playerDark: "#06b6d4",
-            hazard: "#f43f5e",
-            hazardGlow: "rgba(244, 63, 94, 0.34)",
-            moving: "#bef264",
-            goal: "#f9a8d4",
-            text: "#ffffff",
-            muted: "#e0e7ff",
-        },
-        Mint: {
-            skyTop: "#042f2e",
-            skyBottom: "#134e4a",
-            platform: "#ecfeff",
-            platformEdge: "#2dd4bf",
-            player: "#fde68a",
-            playerDark: "#f59e0b",
-            hazard: "#fb7185",
-            hazardGlow: "rgba(251, 113, 133, 0.34)",
-            moving: "#93c5fd",
-            goal: "#c4b5fd",
-            text: "#f8fafc",
-            muted: "#ccfbf1",
-        },
-    }[palette];
+    let messageTimer = 0;
+    let audioContext = null;
+    let musicTimer = null;
+    let musicStep = 0;
+    let musicTrack = 0;
 
     const player = {
         x: checkpoint.x,
         y: checkpoint.y,
-        w: 30,
-        h: 38,
+        w: 34,
+        h: 42,
         vx: 0,
         vy: 0,
         onGround: false,
-        face: 1,
+        jumpsLeft: 2,
+        jumpBuffer: 0,
         coyote: 0,
+        face: 1,
     };
 
-    const platforms = [];
-    const hazards = [];
-    const spinners = [];
     const goal = {
-        x: 388,
-        y: 84,
-        w: 204,
-        h: 26,
+        x: 340,
+        y: 80,
+        w: 300,
+        h: 30,
     };
 
     function rand() {
@@ -201,385 +230,467 @@ def build_game_html(config: dict[str, object]) -> str:
             a.y + a.h > b.y;
     }
 
-    function stageColour(index) {
-        const colours = ["#2563eb", "#0f766e", "#d97706", "#7c3aed", "#be123c", "#0891b2"];
-        return colours[index % colours.length];
+    function roundedRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
     }
 
-    function addPlatform(platform) {
-        platforms.push({
-            type: "solid",
-            x: platform.x,
-            y: platform.y,
-            w: platform.w,
-            h: platform.h || 18,
-            baseX: platform.x,
-            range: platform.range || 0,
-            speed: platform.speed || 0,
-            phase: platform.phase || 0,
-            dx: 0,
-            colour: platform.colour || colours.platform,
-            edge: platform.edge || colours.platformEdge,
-        });
+    function addPlatform(x, y, w, h, edge) {
+        platforms.push({ x, y, w, h, edge });
     }
 
-    function addHazard(hazard) {
+    function addHazard(x, y, w, h, options) {
         hazards.push({
-            x: hazard.x,
-            y: hazard.y,
-            w: hazard.w,
-            h: hazard.h,
-            baseX: hazard.x,
-            baseY: hazard.y,
-            rangeX: hazard.rangeX || 0,
-            rangeY: hazard.rangeY || 0,
-            speed: hazard.speed || 0,
-            phase: hazard.phase || 0,
-        });
-    }
-
-    function addSpinner(spinner) {
-        spinners.push({
-            cx: spinner.cx,
-            cy: spinner.cy,
-            len: spinner.len,
-            thickness: spinner.thickness,
-            speed: spinner.speed,
-            phase: spinner.phase,
+            x,
+            y,
+            w,
+            h,
+            baseX: x,
+            baseY: y,
+            rangeX: options.rangeX || 0,
+            rangeY: options.rangeY || 0,
+            speed: options.speed || 0,
+            phase: options.phase || 0,
         });
     }
 
     function buildTower() {
-        addPlatform({ x: 0, y: totalH - floorH, w: worldW, h: floorH, edge: "#64748b" });
+        addPlatform(0, totalH - floorH, worldW, floorH, "#64748b");
 
         for (let s = 0; s < sections; s += 1) {
             const top = totalH - floorH - (s + 1) * sectionH;
             const base = top + sectionH;
-            const edge = stageColour(s);
-            const pattern = s % 4;
-            const wobble = 30 + rand() * 60;
+            const edge = ["#38bdf8", "#fb7185", "#f59e0b", "#a78bfa", "#22c55e"][s % 5];
+            const rightFirst = s % 2 === 1;
+            const xs = rightFirst ? [620, 360, 95, 415, 650] : [80, 350, 625, 405, 120];
+            const widths = [300, 280, 310, 260, 300];
 
-            if (pattern === 0) {
-                addPlatform({ x: 82, y: base - 88, w: 220, edge });
-                addPlatform({ x: 356, y: base - 168, w: 190, edge, range: 90, speed: 1.1, phase: rand() * 6 });
-                addPlatform({ x: 650, y: base - 248, w: 230, edge });
-                addPlatform({ x: 426, y: base - 340, w: 180, edge });
-                addPlatform({ x: 132, y: base - 430, w: 240, edge, range: 70, speed: 1.4, phase: rand() * 6 });
-                addHazard({ x: 318, y: base - 72, w: 36, h: 28, rangeX: 260, speed: 1.5, phase: rand() * 6 });
-                addHazard({ x: 0, y: base - 304, w: worldW, h: 16, rangeY: wobble, speed: 0.7, phase: rand() * 6 });
-            } else if (pattern === 1) {
-                addPlatform({ x: 688, y: base - 82, w: 200, edge });
-                addPlatform({ x: 444, y: base - 158, w: 160, edge });
-                addPlatform({ x: 174, y: base - 242, w: 180, edge, range: 110, speed: 1.2, phase: rand() * 6 });
-                addPlatform({ x: 480, y: base - 328, w: 190, edge });
-                addPlatform({ x: 742, y: base - 422, w: 156, edge });
-                addSpinner({ cx: 490, cy: base - 244, len: 220, thickness: 14, speed: 1.1, phase: rand() * 6 });
-                addHazard({ x: 104, y: base - 384, w: 44, h: 34, rangeX: 360, speed: 1.35, phase: rand() * 6 });
-            } else if (pattern === 2) {
-                addPlatform({ x: 114, y: base - 80, w: 180, edge });
-                addPlatform({ x: 350, y: base - 150, w: 170, edge });
-                addPlatform({ x: 598, y: base - 220, w: 180, edge });
-                addPlatform({ x: 360, y: base - 310, w: 160, edge, range: 130, speed: 1.55, phase: rand() * 6 });
-                addPlatform({ x: 110, y: base - 414, w: 190, edge });
-                addHazard({ x: 0, y: base - 118, w: 280, h: 16, rangeX: 620, speed: 1.0, phase: rand() * 6 });
-                addSpinner({ cx: 678, cy: base - 338, len: 170, thickness: 14, speed: -1.25, phase: rand() * 6 });
+            addPlatform(xs[0], base - 82, widths[0], 20, edge);
+            addPlatform(xs[1], base - 158, widths[1], 20, edge);
+            addPlatform(xs[2], base - 238, widths[2], 20, edge);
+            addPlatform(xs[3], base - 318, widths[3], 20, edge);
+            addPlatform(xs[4], base - 394, widths[4], 20, edge);
+
+            if (s % 3 === 0) {
+                addHazard(410, base - 124, 150, 18, { rangeX: 210, speed: 0.8, phase: rand() * 6 });
+                addHazard(0, base - 282, 250, 18, { rangeX: 540, speed: 0.65, phase: rand() * 6 });
+            } else if (s % 3 === 1) {
+                addHazard(260, base - 202, 520, 18, { rangeY: 24, speed: 0.7, phase: rand() * 6 });
+                addHazard(700, base - 366, 68, 48, { rangeX: 110, speed: 0.9, phase: rand() * 6 });
             } else {
-                addPlatform({ x: 396, y: base - 84, w: 170, edge, range: 150, speed: 1.25, phase: rand() * 6 });
-                addPlatform({ x: 146, y: base - 176, w: 180, edge });
-                addPlatform({ x: 654, y: base - 260, w: 176, edge });
-                addPlatform({ x: 440, y: base - 348, w: 178, edge });
-                addPlatform({ x: 222, y: base - 430, w: 190, edge, range: 80, speed: 1.4, phase: rand() * 6 });
-                addHazard({ x: 590, y: base - 134, w: 48, h: 36, rangeX: 220, speed: 1.4, phase: rand() * 6 });
-                addSpinner({ cx: 418, cy: base - 276, len: 210, thickness: 14, speed: 1.35, phase: rand() * 6 });
+                addHazard(185, base - 128, 68, 48, { rangeX: 120, speed: 0.75, phase: rand() * 6 });
+                addHazard(520, base - 286, 340, 18, { rangeX: 0, speed: 0 });
             }
 
-            addHazard({ x: 0, y: top + 10, w: worldW, h: 12, rangeX: 0, speed: 0 });
+            addHazard(0, top + 10, worldW, 12, { speed: 0 });
         }
 
-        addPlatform({ x: 322, y: goal.y + 46, w: 336, h: 20, edge: colours.goal });
+        addPlatform(300, goal.y + 54, 380, 22, palette.goal);
+    }
+
+    function makeParticles() {
+        for (let i = 0; i < 88; i += 1) {
+            particles.push({
+                x: rand() * worldW,
+                y: rand() * totalH,
+                r: 1 + rand() * 2.4,
+                speed: 0.08 + rand() * 0.22,
+                alpha: 0.18 + rand() * 0.45,
+            });
+        }
     }
 
     buildTower();
+    makeParticles();
 
-    function resetPlayer(useCheckpoint) {
-        const target = useCheckpoint ? checkpoint : { x: 74, y: totalH - floorH - 50 };
-        player.x = target.x;
-        player.y = target.y;
+    function resetPlayer(toCheckpoint) {
+        const spawn = toCheckpoint ? checkpoint : { x: 82, y: totalH - floorH - 48 };
+        player.x = spawn.x;
+        player.y = spawn.y;
         player.vx = 0;
         player.vy = 0;
         player.onGround = false;
+        player.jumpsLeft = 2;
+        player.jumpBuffer = 0;
         player.coyote = 0;
-        if (!useCheckpoint) {
-            checkpoint = { x: 74, y: totalH - floorH - 50 };
-        }
-    }
-
-    function die() {
-        deaths += 1;
-        resetPlayer(Boolean(CONFIG.practice));
-    }
-
-    function jump() {
-        if (player.onGround || player.coyote > 0) {
-            player.vy = -17.2;
-            player.onGround = false;
-            player.coyote = 0;
-        }
-    }
-
-    function handleKey(event, value) {
-        const code = event.code;
-        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space"].includes(code)) {
-            event.preventDefault();
-        }
-        keys[code] = value;
-        if (value && (code === "Space" || code === "ArrowUp" || code === "KeyW")) {
-            if (!started) startRun();
-            jump();
-        }
-        if (value && code === "KeyR") {
-            deaths += 1;
-            resetPlayer(false);
-            expired = false;
-            won = false;
-            startRun();
+        if (!toCheckpoint) {
+            checkpoint = { x: 82, y: totalH - floorH - 48 };
         }
     }
 
     function startRun() {
-        if (!started || expired || won) {
+        if (!started || won || expired) {
+            const wasFinished = won || expired;
             started = true;
             won = false;
             expired = false;
             startTime = performance.now();
             finishTime = 0;
+            if (wasFinished) {
+                deaths = 0;
+                bestHeight = 0;
+            }
             resetPlayer(false);
+            messageTimer = 80;
+        }
+        canvas.focus();
+    }
+
+    function respawn() {
+        deaths += 1;
+        resetPlayer(Boolean(CONFIG.checkpoints));
+        messageTimer = 90;
+    }
+
+    function queueJump() {
+        player.jumpBuffer = 10;
+    }
+
+    function performJump() {
+        player.vy = -Number(CONFIG.jump || 16);
+        player.onGround = false;
+        player.coyote = 0;
+        player.jumpBuffer = 0;
+        if (player.jumpsLeft > 0) {
+            player.jumpsLeft -= 1;
         }
     }
 
-    window.addEventListener("keydown", (event) => handleKey(event, true), { passive: false });
-    window.addEventListener("keyup", (event) => {
-        keys[event.code] = false;
-    });
-    canvas.addEventListener("pointerdown", () => {
+    function resetRun() {
+        deaths += 1;
+        started = true;
+        won = false;
+        expired = false;
+        startTime = performance.now();
+        finishTime = 0;
+        resetPlayer(false);
         canvas.focus();
-        if (!started) startRun();
-    });
-
-    function bindButton(id, codes) {
-        const button = document.getElementById(id);
-        const setCodes = (value) => {
-            codes.forEach((code) => {
-                keys[code] = value;
-            });
-            if (value && codes.includes("Space")) {
-                if (!started) startRun();
-                jump();
-            }
-            if (value && codes.includes("KeyR")) {
-                deaths += 1;
-                resetPlayer(false);
-                startRun();
-            }
-        };
-        button.addEventListener("pointerdown", (event) => {
-            event.preventDefault();
-            setCodes(true);
-            canvas.focus();
-        });
-        button.addEventListener("pointerup", () => setCodes(false));
-        button.addEventListener("pointerleave", () => setCodes(false));
-        button.addEventListener("pointercancel", () => setCodes(false));
     }
 
-    bindButton("btnLeft", ["ArrowLeft", "KeyA"]);
-    bindButton("btnRight", ["ArrowRight", "KeyD"]);
-    bindButton("btnJump", ["Space"]);
-    bindButton("btnReset", ["KeyR"]);
+    function setKey(code, value) {
+        keys[code] = value;
+    }
 
-    function updateMovingObjects(time) {
-        const hazardSpeed = Number(CONFIG.hazard_speed || 1);
-        platforms.forEach((platform) => {
-            const oldX = platform.x;
-            if (platform.range) {
-                platform.x = platform.baseX + Math.sin(time * platform.speed * 0.001 * hazardSpeed + platform.phase) * platform.range;
-            }
-            platform.dx = platform.x - oldX;
+    window.addEventListener("keydown", (event) => {
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW", "KeyR"].includes(event.code)) {
+            event.preventDefault();
+        }
+        setKey(event.code, true);
+        if (event.code === "Space" || event.code === "ArrowUp" || event.code === "KeyW") {
+            if (!started || won || expired) startRun();
+            queueJump();
+        }
+        if (event.code === "KeyR") {
+            resetRun();
+        }
+    }, { passive: false });
+
+    window.addEventListener("keyup", (event) => {
+        setKey(event.code, false);
+    });
+
+    function bindButton(button, down, up) {
+        button.addEventListener("pointerdown", (event) => {
+            event.preventDefault();
+            down();
+            canvas.focus();
         });
+        button.addEventListener("pointerup", up);
+        button.addEventListener("pointerleave", up);
+        button.addEventListener("pointercancel", up);
+    }
+
+    bindButton(document.getElementById("leftButton"), () => {
+        setKey("ArrowLeft", true);
+        startRun();
+    }, () => setKey("ArrowLeft", false));
+    bindButton(document.getElementById("rightButton"), () => {
+        setKey("ArrowRight", true);
+        startRun();
+    }, () => setKey("ArrowRight", false));
+    bindButton(document.getElementById("jumpButton"), () => {
+        startRun();
+        queueJump();
+    }, () => {});
+
+    playButton.addEventListener("click", startRun);
+    resetButton.addEventListener("click", resetRun);
+    canvas.addEventListener("pointerdown", () => {
+        if (!started || won || expired) startRun();
+        canvas.focus();
+    });
+
+    function ensureAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+    }
+
+    function beep(time, frequency, duration, type, gainValue) {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, time);
+        gain.gain.setValueAtTime(gainValue, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(time);
+        osc.stop(time + duration);
+    }
+
+    function noiseHit(time, duration, gainValue) {
+        const bufferSize = Math.max(1, Math.floor(audioContext.sampleRate * duration));
+        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i += 1) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        const source = audioContext.createBufferSource();
+        const gain = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.value = 1700;
+        gain.gain.setValueAtTime(gainValue, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+        source.buffer = buffer;
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContext.destination);
+        source.start(time);
+        source.stop(time + duration);
+    }
+
+    function playMusicStep() {
+        if (!audioContext || musicTrack === 0) return;
+        const time = audioContext.currentTime + 0.02;
+        const step = musicStep % 16;
+        const tracks = [
+            null,
+            { bass: [55, 55, 65, 55, 73, 65, 55, 49], hat: [2, 6, 10, 14], kick: [0, 4, 8, 12], snare: [4, 12] },
+            { bass: [49, 49, 58, 65, 49, 44, 49, 58], hat: [1, 3, 6, 9, 11, 14], kick: [0, 3, 8, 10], snare: [4, 12] },
+            { bass: [65, 62, 55, 49, 55, 49, 44, 49], hat: [2, 4, 6, 10, 12, 14], kick: [0, 6, 8, 13], snare: [4, 12] },
+        ];
+        const track = tracks[musicTrack];
+
+        if (track.kick.includes(step)) {
+            beep(time, 94, 0.09, "sine", 0.4);
+            beep(time + 0.01, 46, 0.14, "sine", 0.34);
+        }
+        if (track.snare.includes(step)) {
+            noiseHit(time, 0.08, 0.18);
+        }
+        if (track.hat.includes(step)) {
+            noiseHit(time, 0.035, 0.08);
+        }
+        if (step % 2 === 0) {
+            const note = track.bass[Math.floor(step / 2) % track.bass.length];
+            beep(time, note, 0.16, "sawtooth", 0.16);
+            beep(time, note / 2, 0.18, "triangle", 0.12);
+        }
+
+        musicStep += 1;
+    }
+
+    function updateMusicButton() {
+        const labels = ["Music Off", "Phonk 1", "Phonk 2", "Phonk 3"];
+        musicButton.textContent = labels[musicTrack];
+    }
+
+    musicButton.addEventListener("click", () => {
+        ensureAudio();
+        musicTrack = (musicTrack + 1) % 4;
+        musicStep = 0;
+        if (musicTrack === 0) {
+            if (musicTimer) {
+                clearInterval(musicTimer);
+                musicTimer = null;
+            }
+        } else if (!musicTimer) {
+            playMusicStep();
+            musicTimer = setInterval(playMusicStep, 125);
+        }
+        updateMusicButton();
+    });
+
+    function updateHazards(now) {
+        const speed = Number(CONFIG.hazard_speed || 1);
         hazards.forEach((hazard) => {
-            hazard.x = hazard.baseX + Math.sin(time * hazard.speed * 0.001 * hazardSpeed + hazard.phase) * hazard.rangeX;
-            hazard.y = hazard.baseY + Math.sin(time * hazard.speed * 0.001 * hazardSpeed + hazard.phase) * hazard.rangeY;
+            hazard.x = hazard.baseX + Math.sin(now * hazard.speed * 0.001 * speed + hazard.phase) * hazard.rangeX;
+            hazard.y = hazard.baseY + Math.sin(now * hazard.speed * 0.001 * speed + hazard.phase) * hazard.rangeY;
         });
     }
 
     function updatePlayer(dt) {
-        const speed = 6.2 * Number(CONFIG.speed || 1);
+        if (player.jumpBuffer > 0) player.jumpBuffer -= 1;
+        if (player.coyote > 0) player.coyote -= 1;
+
         const left = keys.ArrowLeft || keys.KeyA;
         const right = keys.ArrowRight || keys.KeyD;
-        const desired = (right ? 1 : 0) - (left ? 1 : 0);
+        const direction = (right ? 1 : 0) - (left ? 1 : 0);
+        const maxSpeed = 7.4 * Number(CONFIG.speed || 1);
 
-        if (desired !== 0) {
-            player.face = desired;
+        if (direction !== 0) {
+            player.face = direction;
+            player.vx += direction * (player.onGround ? 1.45 : 1.02);
+        } else {
+            player.vx *= player.onGround ? 0.72 : 0.9;
         }
 
-        player.vx += desired * 1.1;
-        player.vx *= player.onGround ? 0.77 : 0.88;
-        player.vx = clamp(player.vx, -speed, speed);
-        player.vy += Number(CONFIG.gravity || 0.86);
-        player.vy = clamp(player.vy, -22, 22);
+        player.vx = clamp(player.vx, -maxSpeed, maxSpeed);
+        player.vy += Number(CONFIG.gravity || 0.66);
+        player.vy = clamp(player.vy, -22, 20);
+
+        if (player.jumpBuffer > 0 && (player.onGround || player.coyote > 0 || player.jumpsLeft > 0)) {
+            performJump();
+        }
 
         const previous = { x: player.x, y: player.y, w: player.w, h: player.h };
-
         player.x += player.vx * dt;
         player.x = clamp(player.x, 8, worldW - player.w - 8);
-
         player.y += player.vy * dt;
         player.onGround = false;
 
         for (const platform of platforms) {
-            const p = { x: platform.x, y: platform.y, w: platform.w, h: platform.h };
-            const fallingOnto = previous.y + previous.h <= p.y + 4 && player.y + player.h >= p.y && player.vy >= 0;
-            if (fallingOnto && player.x + player.w > p.x && player.x < p.x + p.w) {
-                player.y = p.y - player.h;
+            const landed = previous.y + previous.h <= platform.y + 6 &&
+                player.y + player.h >= platform.y &&
+                player.vy >= 0 &&
+                player.x + player.w > platform.x &&
+                player.x < platform.x + platform.w;
+            if (landed) {
+                player.y = platform.y - player.h;
                 player.vy = 0;
                 player.onGround = true;
-                player.x += platform.dx || 0;
+                player.jumpsLeft = 2;
+                player.coyote = 10;
             }
         }
 
-        if (player.onGround) {
-            player.coyote = 8;
-        } else {
-            player.coyote = Math.max(0, player.coyote - 1);
+        if (!player.onGround && previous.y + previous.h <= player.y + player.h) {
+            player.coyote = Math.max(0, player.coyote);
         }
 
-        if (player.y > totalH + 160) {
-            die();
+        if (player.y > totalH + 120) {
+            respawn();
         }
 
-        const heightNow = Math.max(0, Math.round((totalH - floorH - player.y) / 10));
-        bestHeight = Math.max(bestHeight, heightNow);
+        const climb = Math.max(0, totalH - floorH - player.y);
+        bestHeight = Math.max(bestHeight, Math.round(climb / 10));
 
-        if (CONFIG.practice) {
-            const currentSection = Math.floor((totalH - floorH - player.y) / sectionH);
-            if (currentSection > Math.floor((totalH - floorH - checkpoint.y) / sectionH)) {
+        if (CONFIG.checkpoints) {
+            const currentStage = Math.floor(climb / sectionH);
+            const checkpointStage = Math.floor(Math.max(0, totalH - floorH - checkpoint.y) / sectionH);
+            if (currentStage > checkpointStage && player.onGround) {
                 checkpoint = { x: player.x, y: player.y };
+                messageTimer = 80;
             }
         }
     }
 
-    function hitSpinner(spinner) {
-        const time = performance.now();
-        const angle = time * spinner.speed * 0.001 * Number(CONFIG.hazard_speed || 1) + spinner.phase;
-        const ax = spinner.cx - Math.cos(angle) * spinner.len / 2;
-        const ay = spinner.cy - Math.sin(angle) * spinner.len / 2;
-        const bx = spinner.cx + Math.cos(angle) * spinner.len / 2;
-        const by = spinner.cy + Math.sin(angle) * spinner.len / 2;
-        const px = player.x + player.w / 2;
-        const py = player.y + player.h / 2;
-        const abx = bx - ax;
-        const aby = by - ay;
-        const apx = px - ax;
-        const apy = py - ay;
-        const ab2 = abx * abx + aby * aby;
-        const t = clamp((apx * abx + apy * aby) / ab2, 0, 1);
-        const cx = ax + abx * t;
-        const cy = ay + aby * t;
-        const dx = px - cx;
-        const dy = py - cy;
-        return Math.sqrt(dx * dx + dy * dy) < spinner.thickness + 16;
-    }
-
-    function updateHazards() {
-        const body = { x: player.x + 4, y: player.y + 4, w: player.w - 8, h: player.h - 8 };
+    function updateCollisions() {
+        const body = {
+            x: player.x + 7,
+            y: player.y + 6,
+            w: player.w - 14,
+            h: player.h - 12,
+        };
         for (const hazard of hazards) {
             if (rectsOverlap(body, hazard)) {
-                die();
-                return;
-            }
-        }
-        for (const spinner of spinners) {
-            if (hitSpinner(spinner)) {
-                die();
+                respawn();
                 return;
             }
         }
         if (rectsOverlap(player, goal)) {
             won = true;
+            started = false;
             finishTime = performance.now();
+            for (let i = 0; i < 80; i += 1) {
+                confetti.push({
+                    x: goal.x + goal.w / 2,
+                    y: goal.y,
+                    vx: -7 + Math.random() * 14,
+                    vy: -9 + Math.random() * 6,
+                    life: 70 + Math.random() * 60,
+                    colour: ["#facc15", "#22d3ee", "#fb7185", "#a78bfa", "#34d399"][i % 5],
+                });
+            }
         }
     }
 
     function remainingSeconds(now) {
-        if (!started) return Number(CONFIG.time_limit || 180);
-        if (won) {
-            return Math.max(0, Math.ceil((Number(CONFIG.time_limit || 180) * 1000 - (finishTime - startTime)) / 1000));
+        const total = Number(CONFIG.time_limit || 240);
+        if (!started) return total;
+        return Math.max(0, Math.ceil((total * 1000 - (now - startTime)) / 1000));
+    }
+
+    function updateTimers(now) {
+        if (messageTimer > 0) messageTimer -= 1;
+        if (started && remainingSeconds(now) <= 0) {
+            expired = true;
+            started = false;
+            respawn();
         }
-        return Math.max(0, Math.ceil((Number(CONFIG.time_limit || 180) * 1000 - (now - startTime)) / 1000));
     }
 
-    function drawRoundedRect(x, y, w, h, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + w - radius, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-        ctx.lineTo(x + w, y + h - radius);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-        ctx.lineTo(x + radius, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
-        ctx.fill();
-    }
-
-    function drawBackground() {
-        const sky = ctx.createLinearGradient(0, 0, 0, H);
-        sky.addColorStop(0, colours.skyTop);
-        sky.addColorStop(1, colours.skyBottom);
-        ctx.fillStyle = sky;
+    function drawBackground(now) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, H);
+        gradient.addColorStop(0, palette.sky_a);
+        gradient.addColorStop(0.55, palette.sky_b);
+        gradient.addColorStop(1, palette.sky_c);
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, W, H);
 
         ctx.save();
         ctx.translate(0, -cameraY);
+        for (const particle of particles) {
+            particle.y += particle.speed;
+            if (particle.y > totalH) particle.y = 0;
+            ctx.globalAlpha = particle.alpha;
+            ctx.fillStyle = palette.accent;
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
         for (let s = 0; s < sections; s += 1) {
             const y = totalH - floorH - (s + 1) * sectionH;
             ctx.fillStyle = s % 2 === 0 ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.065)";
             ctx.fillRect(0, y, worldW, sectionH);
-            ctx.fillStyle = stageColour(s);
-            ctx.globalAlpha = 0.28;
-            ctx.fillRect(0, y + 4, worldW, 5);
-            ctx.globalAlpha = 1;
-        }
-
-        ctx.strokeStyle = "rgba(255,255,255,0.06)";
-        ctx.lineWidth = 1;
-        for (let x = 0; x <= worldW; x += 70) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, totalH);
-            ctx.stroke();
         }
         ctx.restore();
+
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        for (let i = 0; i < 7; i += 1) {
+            const x = (i * 170 + (now * 0.018)) % (W + 200) - 100;
+            roundedRect(x, 90 + i * 72, 120, 10, 999);
+        }
     }
 
     function drawPlatforms() {
         ctx.save();
         ctx.translate(0, -cameraY);
-        for (const p of platforms) {
-            ctx.shadowColor = "rgba(0,0,0,0.18)";
+        for (const platform of platforms) {
+            ctx.shadowColor = "rgba(0, 0, 0, 0.22)";
             ctx.shadowBlur = 10;
-            ctx.fillStyle = p.colour;
-            drawRoundedRect(p.x, p.y, p.w, p.h, 8);
+            ctx.fillStyle = palette.platform;
+            roundedRect(platform.x, platform.y, platform.w, platform.h, 8);
             ctx.shadowBlur = 0;
-            ctx.fillStyle = p.edge;
-            ctx.fillRect(p.x, p.y, p.w, 5);
-            if (p.range) {
-                ctx.fillStyle = colours.moving;
-                ctx.globalAlpha = 0.22;
-                ctx.fillRect(p.baseX - p.range, p.y + p.h + 7, p.range * 2 + p.w, 4);
-                ctx.globalAlpha = 1;
-            }
+            ctx.fillStyle = platform.edge || palette.edge;
+            ctx.fillRect(platform.x, platform.y, platform.w, 5);
         }
         ctx.restore();
     }
@@ -587,173 +698,162 @@ def build_game_html(config: dict[str, object]) -> str:
     function drawHazards(now) {
         ctx.save();
         ctx.translate(0, -cameraY);
-        for (const h of hazards) {
-            ctx.fillStyle = colours.hazardGlow;
-            drawRoundedRect(h.x - 6, h.y - 6, h.w + 12, h.h + 12, 10);
-            ctx.fillStyle = colours.hazard;
-            drawRoundedRect(h.x, h.y, h.w, h.h, 6);
+        for (const hazard of hazards) {
+            const pulse = 0.55 + Math.sin(now * 0.01 + hazard.phase) * 0.18;
+            ctx.fillStyle = "rgba(239, 68, 68, " + pulse + ")";
+            roundedRect(hazard.x - 7, hazard.y - 7, hazard.w + 14, hazard.h + 14, 10);
+            ctx.fillStyle = "#ef4444";
+            roundedRect(hazard.x, hazard.y, hazard.w, hazard.h, 7);
+            ctx.fillStyle = "rgba(255,255,255,0.36)";
+            ctx.fillRect(hazard.x + 8, hazard.y + 4, Math.max(8, hazard.w - 16), 3);
         }
-        for (const s of spinners) {
-            const angle = now * s.speed * 0.001 * Number(CONFIG.hazard_speed || 1) + s.phase;
-            const ax = s.cx - Math.cos(angle) * s.len / 2;
-            const ay = s.cy - Math.sin(angle) * s.len / 2;
-            const bx = s.cx + Math.cos(angle) * s.len / 2;
-            const by = s.cy + Math.sin(angle) * s.len / 2;
-            ctx.lineCap = "round";
-            ctx.strokeStyle = colours.hazardGlow;
-            ctx.lineWidth = s.thickness + 12;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(bx, by);
-            ctx.stroke();
-            ctx.strokeStyle = colours.hazard;
-            ctx.lineWidth = s.thickness;
-            ctx.beginPath();
-            ctx.moveTo(ax, ay);
-            ctx.lineTo(bx, by);
-            ctx.stroke();
-            ctx.fillStyle = "#ffffff";
-            ctx.globalAlpha = 0.9;
-            ctx.beginPath();
-            ctx.arc(s.cx, s.cy, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalAlpha = 1;
-        }
-        ctx.restore();
-    }
-
-    function drawPlayer() {
-        ctx.save();
-        ctx.translate(0, -cameraY);
-        ctx.shadowColor = "rgba(250, 204, 21, 0.55)";
-        ctx.shadowBlur = 18;
-        ctx.fillStyle = colours.player;
-        drawRoundedRect(player.x, player.y, player.w, player.h, 8);
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = colours.playerDark;
-        drawRoundedRect(player.x + 7, player.y + 8, player.w - 14, 7, 4);
-        ctx.fillStyle = "#172033";
-        const eyeX = player.face > 0 ? player.x + 20 : player.x + 8;
-        ctx.fillRect(eyeX, player.y + 10, 4, 4);
         ctx.restore();
     }
 
     function drawGoal(now) {
         ctx.save();
         ctx.translate(0, -cameraY);
-        const pulse = 0.75 + Math.sin(now * 0.006) * 0.25;
-        ctx.fillStyle = "rgba(167, 139, 250, " + (0.22 + pulse * 0.18) + ")";
-        drawRoundedRect(goal.x - 18, goal.y - 20, goal.w + 36, goal.h + 44, 12);
-        ctx.fillStyle = colours.goal;
-        drawRoundedRect(goal.x, goal.y, goal.w, goal.h, 10);
-        ctx.fillStyle = colours.text;
-        ctx.font = "800 18px Arial";
+        const pulse = 0.28 + Math.sin(now * 0.006) * 0.08;
+        ctx.fillStyle = "rgba(167, 139, 250, " + pulse + ")";
+        roundedRect(goal.x - 24, goal.y - 24, goal.w + 48, goal.h + 58, 14);
+        ctx.fillStyle = palette.goal;
+        roundedRect(goal.x, goal.y, goal.w, goal.h, 12);
+        ctx.fillStyle = "#111827";
+        ctx.font = "900 18px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("FINISH", goal.x + goal.w / 2, goal.y - 8);
+        ctx.fillText("FINISH", goal.x + goal.w / 2, goal.y + 21);
         ctx.restore();
+    }
+
+    function drawPlayer() {
+        ctx.save();
+        ctx.translate(0, -cameraY);
+        ctx.shadowColor = palette.player;
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = palette.player;
+        roundedRect(player.x, player.y, player.w, player.h, 9);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = palette.player_shadow;
+        roundedRect(player.x + 7, player.y + 28, player.w - 14, 8, 5);
+        ctx.fillStyle = "#111827";
+        const eyeX = player.face > 0 ? player.x + 22 : player.x + 9;
+        ctx.fillRect(eyeX, player.y + 11, 5, 5);
+        ctx.restore();
+    }
+
+    function drawConfetti() {
+        ctx.save();
+        ctx.translate(0, -cameraY);
+        for (const bit of confetti) {
+            bit.x += bit.vx;
+            bit.y += bit.vy;
+            bit.vy += 0.22;
+            bit.life -= 1;
+            ctx.globalAlpha = clamp(bit.life / 80, 0, 1);
+            ctx.fillStyle = bit.colour;
+            ctx.fillRect(bit.x, bit.y, 9, 9);
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        for (let i = confetti.length - 1; i >= 0; i -= 1) {
+            if (confetti[i].life <= 0) confetti.splice(i, 1);
+        }
     }
 
     function drawHud(now) {
         const remaining = remainingSeconds(now);
-        const level = Math.min(sections, Math.max(1, Math.floor((totalH - floorH - player.y) / sectionH) + 1));
+        const stage = Math.min(sections, Math.max(1, Math.floor(Math.max(0, totalH - floorH - player.y) / sectionH) + 1));
         const chips = [
-            "Stage " + level + "/" + sections,
-            "Time " + remaining + "s",
+            "Stage " + stage + "/" + sections,
+            "Time " + remaining,
             "Falls " + deaths,
             "Height " + bestHeight,
         ];
-        ctx.font = "800 15px Arial";
+        ctx.font = "900 15px Arial";
         ctx.textAlign = "left";
         let x = 18;
         for (const chip of chips) {
             const width = ctx.measureText(chip).width + 26;
             ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
-            drawRoundedRect(x, 18, width, 34, 10);
-            ctx.fillStyle = colours.text;
+            roundedRect(x, 18, width, 34, 10);
+            ctx.fillStyle = "#ffffff";
             ctx.fillText(chip, x + 13, 40);
             x += width + 10;
         }
 
         const progress = clamp((totalH - floorH - player.y) / (totalH - floorH - goal.y), 0, 1);
         ctx.fillStyle = "rgba(255,255,255,0.16)";
-        drawRoundedRect(W - 34, 74, 12, H - 140, 999);
-        ctx.fillStyle = colours.goal;
-        drawRoundedRect(W - 34, 74 + (H - 140) * (1 - progress), 12, (H - 140) * progress, 999);
+        roundedRect(W - 32, 78, 12, H - 150, 999);
+        ctx.fillStyle = palette.goal;
+        roundedRect(W - 32, 78 + (H - 150) * (1 - progress), 12, (H - 150) * progress, 999);
 
-        if (remaining <= 0 && started && !won) {
-            expired = true;
-            started = false;
-            deaths += 1;
-            resetPlayer(false);
+        if (messageTimer > 0 && CONFIG.checkpoints) {
+            ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+            roundedRect(W / 2 - 130, 68, 260, 38, 10);
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.font = "900 15px Arial";
+            ctx.fillText("Checkpoint saved", W / 2, 93);
         }
     }
 
-    function drawOverlay(now) {
+    function drawOverlay() {
         if (started && !won && !expired) return;
-        ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+        ctx.fillStyle = "rgba(15, 23, 42, 0.68)";
         ctx.fillRect(0, 0, W, H);
         ctx.textAlign = "center";
-        ctx.fillStyle = colours.text;
-        ctx.font = "900 44px Arial";
-        let title = "Tower Rush Obby";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "900 46px Arial";
+        let title = "Red Rush Tower";
         if (won) title = "Tower cleared";
         if (expired) title = "Time reset";
-        ctx.fillText(title, W / 2, H / 2 - 64);
+        ctx.fillText(title, W / 2, H / 2 - 58);
 
-        ctx.font = "700 18px Arial";
-        ctx.fillStyle = colours.muted;
-        let subtitle = "A D to move, Space to jump, R to reset";
-        if (won) {
-            const elapsed = Math.round((finishTime - startTime) / 1000);
-            subtitle = "Clear time " + elapsed + "s with " + deaths + " falls";
-        }
-        if (expired) {
-            subtitle = "Start again before the timer runs out";
-        }
-        ctx.fillText(subtitle, W / 2, H / 2 - 24);
+        ctx.font = "800 18px Arial";
+        ctx.fillStyle = "#e2e8f0";
+        const detail = won ? "Clear time " + Math.round((finishTime - startTime) / 1000) + "s" : "Tap Play when ready";
+        ctx.fillText(detail, W / 2, H / 2 - 20);
 
-        ctx.fillStyle = colours.goal;
-        drawRoundedRect(W / 2 - 110, H / 2 + 14, 220, 52, 14);
+        ctx.fillStyle = palette.goal;
+        roundedRect(W / 2 - 112, H / 2 + 18, 224, 54, 14);
         ctx.fillStyle = "#111827";
-        ctx.font = "900 17px Arial";
-        ctx.fillText(won ? "RUN AGAIN" : "START RUN", W / 2, H / 2 + 47);
+        ctx.font = "900 18px Arial";
+        ctx.fillText(won ? "PLAY AGAIN" : "PLAY", W / 2, H / 2 + 52);
     }
 
     canvas.addEventListener("click", (event) => {
         const rect = canvas.getBoundingClientRect();
-        const scaleX = W / rect.width;
-        const scaleY = H / rect.height;
-        const x = (event.clientX - rect.left) * scaleX;
-        const y = (event.clientY - rect.top) * scaleY;
+        const x = (event.clientX - rect.left) * (W / rect.width);
+        const y = (event.clientY - rect.top) * (H / rect.height);
         if (!started || won || expired) {
-            if (x >= W / 2 - 130 && x <= W / 2 + 130 && y >= H / 2 && y <= H / 2 + 86) {
+            if (x > W / 2 - 130 && x < W / 2 + 130 && y > H / 2 + 4 && y < H / 2 + 90) {
                 startRun();
             }
         }
     });
 
     function loop(now) {
-        const dt = Math.min(1.6, (now - lastTime) / 16.67);
+        const dt = Math.min(1.7, (now - lastTime) / 16.67);
         lastTime = now;
 
+        updateHazards(now);
         if (started && !won && !expired) {
-            updateMovingObjects(now);
             updatePlayer(dt);
-            updateHazards();
-        } else {
-            updateMovingObjects(now);
+            updateCollisions();
+            updateTimers(now);
         }
 
-        const targetCamera = clamp(player.y - 400, 0, totalH - H);
-        cameraY += (targetCamera - cameraY) * 0.08;
+        const targetCamera = clamp(player.y - 405, 0, totalH - H);
+        cameraY += (targetCamera - cameraY) * 0.09;
 
-        drawBackground();
+        drawBackground(now);
         drawGoal(now);
         drawPlatforms();
         drawHazards(now);
         drawPlayer();
+        drawConfetti();
         drawHud(now);
-        drawOverlay(now);
+        drawOverlay();
         requestAnimationFrame(loop);
     }
 
@@ -770,7 +870,7 @@ def main() -> None:
     import streamlit.components.v1 as components
 
     st.set_page_config(
-        page_title="Tower Rush Obby",
+        page_title="Red Rush Tower",
         layout="wide",
     )
 
@@ -779,7 +879,7 @@ def main() -> None:
         <style>
         [data-testid="stAppViewContainer"] {
             background:
-                linear-gradient(90deg, rgba(37, 99, 235, 0.09), rgba(15, 118, 110, 0.09), rgba(217, 119, 6, 0.09)),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.09), rgba(15, 118, 110, 0.09), rgba(190, 18, 60, 0.09)),
                 #f8fafc;
         }
         .block-container {
@@ -813,7 +913,7 @@ def main() -> None:
         div.stButton > button[kind="primary"] {
             min-height: 44px;
             font-weight: 800;
-            background: linear-gradient(135deg, #2563eb, #0f766e);
+            background: linear-gradient(135deg, #be123c, #2563eb);
             border: 0;
         }
         @media (max-width: 720px) {
@@ -831,28 +931,27 @@ def main() -> None:
         st.session_state.obby_seed = random.randint(10_000, 999_999)
 
     with st.sidebar:
-        st.header("Tower setup")
-        difficulty_name = st.selectbox("Difficulty", list(DIFFICULTIES), index=1)
+        st.header("Game setup")
+        difficulty_name = st.selectbox("Difficulty", list(DIFFICULTIES), index=0)
         height_name = st.selectbox("Tower height", list(HEIGHTS), index=1)
-        palette = st.selectbox("Style", ["Neon", "Candy", "Mint"], index=0)
-        practice = st.toggle("Practice checkpoints", value=False)
+        palette_name = st.selectbox("Style", list(PALETTES), index=0)
+        checkpoints = st.toggle("Checkpoints", value=True)
         if st.button("Build new tower", type="primary", use_container_width=True):
             st.session_state.obby_seed = random.randint(10_000, 999_999)
 
-    difficulty = DIFFICULTIES[difficulty_name]
     config = {
-        **difficulty,
+        **DIFFICULTIES[difficulty_name],
         "sections": HEIGHTS[height_name],
-        "palette": palette,
-        "practice": practice,
+        "palette": PALETTES[palette_name],
+        "checkpoints": checkpoints,
         "seed": st.session_state.obby_seed,
     }
 
     st.markdown(
         f"""
         <div class="game-topbar">
-            <h1>Tower Rush Obby</h1>
-            <span>{difficulty_name} | {height_name} tower</span>
+            <h1>Red Rush Tower</h1>
+            <span>Ages 12-15 | {difficulty_name} | {height_name}</span>
         </div>
         """,
         unsafe_allow_html=True,

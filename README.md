@@ -38,13 +38,14 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - Worked solutions after submission
 - Score, accuracy, topic summary and solution review table
 
-## Tower Rush Obby
+## Red Rush Tower obby
 
 - Streamlit-hosted browser game in `obby_game.py`
-- Free movement with keyboard controls and mobile buttons
+- Smoother controls for ages 12-15, with double jump and mobile buttons
 - Vertical tower climb inspired by Roblox-style obby games
-- Moving platforms, lava bars, spinning hazards and timed runs
-- Difficulty, tower height, visual style and practice checkpoint options
+- Only red hazards to avoid, with wider platforms and optional checkpoints
+- Difficulty, tower height and visual style options
+- Original browser-generated phonk-style music loops
 
 ## Run locally
 
