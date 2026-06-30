@@ -38,6 +38,14 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - Worked solutions after submission
 - Score, accuracy, topic summary and solution review table
 
+## Tower Rush Obby
+
+- Streamlit-hosted browser game in `obby_game.py`
+- Free movement with keyboard controls and mobile buttons
+- Vertical tower climb inspired by Roblox-style obby games
+- Moving platforms, lava bars, spinning hazards and timed runs
+- Difficulty, tower height, visual style and practice checkpoint options
+
 ## Run locally
 
 ```powershell
@@ -56,5 +64,13 @@ For the AMC Years 7-9 maths prep app:
 ```powershell
 python -m streamlit run Math.py
 ```
+
+For the obby game:
+
+```powershell
+python -m streamlit run obby_game.py
+```
+
+On Streamlit Community Cloud, choose `obby_game.py` as the main file.
 
 Then open the local URL shown in the terminal, usually `http://localhost:8501`.
