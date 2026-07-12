@@ -1,5 +1,9 @@
+import csv
+import io
+import json
 import random
 from collections import Counter
+from datetime import datetime
 
 import streamlit as st
 
@@ -1101,8 +1105,321 @@ QUESTIONS = [
     },
 ]
 
+QUESTIONS.extend(
+    [
+        {
+            "min_year": 7,
+            "skill": "Apostrophes",
+            "prompt": "Choose the sentence that correctly distinguishes its and it's.",
+            "choices": [
+                "The club changed its rules because it's growing quickly.",
+                "The club changed it's rules because its growing quickly.",
+                "The club changed its' rules because it's growing quickly.",
+                "The club changed it's rules because its' growing quickly.",
+            ],
+            "answer": "The club changed its rules because it's growing quickly.",
+            "explanation": "Its is possessive, while it's is the contraction of it is.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Subject-verb agreement",
+            "prompt": "Which sentence has correct subject-verb agreement?",
+            "choices": [
+                "The collection of old maps belongs in the library.",
+                "The collection of old maps belong in the library.",
+                "The collection of old maps belonging in the library.",
+                "The collection of old maps have belong in the library.",
+            ],
+            "answer": "The collection of old maps belongs in the library.",
+            "explanation": "The head noun collection is singular, so it takes the singular verb belongs.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Commas",
+            "prompt": "Choose the sentence with the introductory phrase punctuated correctly.",
+            "choices": [
+                "After the final bell, the team met in the gym.",
+                "After the final bell the team, met in the gym.",
+                "After, the final bell the team met in the gym.",
+                "After the final, bell the team met in the gym.",
+            ],
+            "answer": "After the final bell, the team met in the gym.",
+            "explanation": "A comma separates the introductory phrase from the main clause.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Tense consistency",
+            "prompt": "Which sentence keeps the past tense consistent?",
+            "choices": [
+                "Amir opened the gate and waited for the others.",
+                "Amir opened the gate and waits for the others.",
+                "Amir opens the gate and waited for the others.",
+                "Amir had open the gate and waits for the others.",
+            ],
+            "answer": "Amir opened the gate and waited for the others.",
+            "explanation": "Opened and waited are both in the simple past tense.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Direct speech",
+            "prompt": "Choose the correctly punctuated direct speech.",
+            "choices": [
+                "'Please bring your notes,' Ms Chen said.",
+                "'Please bring your notes' Ms Chen said.",
+                "'Please bring your notes', Ms Chen said.",
+                "Please bring your notes, 'Ms Chen said.'",
+            ],
+            "answer": "'Please bring your notes,' Ms Chen said.",
+            "explanation": "The comma belongs inside the closing quotation mark before the reporting clause.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Commonly confused words",
+            "prompt": "Choose the sentence that uses affect and effect correctly.",
+            "choices": [
+                "The new timetable may affect attendance, but its full effect is not yet known.",
+                "The new timetable may effect attendance, but its full affect is not yet known.",
+                "The new timetable may affect attendance, but its full affect is not yet known.",
+                "The new timetable may effect attendance, but its full effect is not yet known.",
+            ],
+            "answer": "The new timetable may affect attendance, but its full effect is not yet known.",
+            "explanation": "Affect is usually a verb meaning influence; effect is usually a noun meaning result.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Pronouns",
+            "prompt": "Which sentence has a clear pronoun reference?",
+            "choices": [
+                "When Leila spoke to Rosa, Leila explained the new rule.",
+                "When Leila spoke to Rosa, she explained it to her.",
+                "Leila told Rosa that she had changed her mind about her idea.",
+                "After she met her, she explained what she meant.",
+            ],
+            "answer": "When Leila spoke to Rosa, Leila explained the new rule.",
+            "explanation": "Repeating the name removes uncertainty about who explained the rule.",
+        },
+        {
+            "min_year": 7,
+            "skill": "Run-on sentences",
+            "prompt": "Which option correctly repairs the run-on sentence: The rain stopped we continued the match?",
+            "choices": [
+                "The rain stopped, so we continued the match.",
+                "The rain stopped, we continued the match.",
+                "The rain stopped and, we continued the match.",
+                "The rain stopped we, continued the match.",
+            ],
+            "answer": "The rain stopped, so we continued the match.",
+            "explanation": "A comma plus the coordinating conjunction so correctly joins the two complete clauses.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Semicolons",
+            "prompt": "Choose the sentence that correctly joins two closely related independent clauses.",
+            "choices": [
+                "The evidence was convincing; the audience changed its view.",
+                "The evidence was convincing; because the audience changed its view.",
+                "The evidence; was convincing the audience changed its view.",
+                "The evidence was; convincing, the audience changed its view.",
+            ],
+            "answer": "The evidence was convincing; the audience changed its view.",
+            "explanation": "A semicolon can join two complete clauses that express closely connected ideas.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Colons",
+            "prompt": "Which sentence correctly introduces a list with a colon?",
+            "choices": [
+                "The proposal has three strengths: clarity, fairness and affordability.",
+                "The proposal has: clarity, fairness and affordability.",
+                "The proposal: has three strengths clarity, fairness and affordability.",
+                "The proposal has three: strengths, clarity, fairness and affordability.",
+            ],
+            "answer": "The proposal has three strengths: clarity, fairness and affordability.",
+            "explanation": "A colon may introduce a list after a complete clause.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Relative clauses",
+            "prompt": "Choose the sentence with a correctly punctuated non-essential relative clause.",
+            "choices": [
+                "The library, which reopened in May, now stays open later.",
+                "The library which reopened in May, now stays open later.",
+                "The library, which reopened in May now stays open later.",
+                "The library which, reopened in May, now stays open later.",
+            ],
+            "answer": "The library, which reopened in May, now stays open later.",
+            "explanation": "The extra information can be removed, so the clause is set off with a pair of commas.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Active and passive voice",
+            "prompt": "Which sentence uses active voice to make responsibility clearest?",
+            "choices": [
+                "The council approved the new crossing.",
+                "The new crossing was approved.",
+                "Approval was given to the new crossing.",
+                "The new crossing had been being approved.",
+            ],
+            "answer": "The council approved the new crossing.",
+            "explanation": "Active voice names the actor, the council, and gives the sentence a direct verb.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Parallel structure",
+            "prompt": "Which sentence uses parallel structure?",
+            "choices": [
+                "The program aims to reduce waste, improve safety and support students.",
+                "The program aims to reduce waste, improving safety and student support.",
+                "The program aims at reducing waste, to improve safety and supports students.",
+                "The program aims to reduce waste, safety improvement and supporting students.",
+            ],
+            "answer": "The program aims to reduce waste, improve safety and support students.",
+            "explanation": "Each item follows the same verb pattern: reduce, improve and support.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Misplaced modifiers",
+            "prompt": "Choose the sentence in which the modifier clearly describes the correct noun.",
+            "choices": [
+                "Wearing a bright vest, the cyclist was easy for drivers to see.",
+                "Wearing a bright vest, drivers could easily see the cyclist.",
+                "The cyclist was easy, wearing a bright vest, for drivers to see.",
+                "Drivers wearing a bright vest could easily see the cyclist.",
+            ],
+            "answer": "Wearing a bright vest, the cyclist was easy for drivers to see.",
+            "explanation": "The cyclist immediately follows the phrase wearing a bright vest, so the meaning is clear.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Reported speech",
+            "prompt": "Choose the best reported version of: 'Where did you put the survey?' the teacher asked Mia.",
+            "choices": [
+                "The teacher asked Mia where she had put the survey.",
+                "The teacher asked Mia where did she put the survey.",
+                "The teacher asked Mia where had she put the survey.",
+                "The teacher asked Mia where she has putted the survey.",
+            ],
+            "answer": "The teacher asked Mia where she had put the survey.",
+            "explanation": "Reported questions use statement word order and usually backshift the tense.",
+        },
+        {
+            "min_year": 8,
+            "skill": "Cohesion",
+            "prompt": "Which transition best completes the contrast? The plan is affordable. ___, it may take months to organise.",
+            "choices": ["However", "For example", "Therefore", "Similarly"],
+            "answer": "However",
+            "explanation": "However signals a contrast between affordability and the time needed to organise the plan.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Nominalisation",
+            "prompt": "Which sentence uses nominalisation to create a concise academic tone?",
+            "choices": [
+                "The committee's rejection of the proposal caused concern.",
+                "The committee rejected the proposal and this made people concerned about it.",
+                "The committee did a reject of the proposal, causing concernment.",
+                "The proposal was rejectingly concerning to the committee.",
+            ],
+            "answer": "The committee's rejection of the proposal caused concern.",
+            "explanation": "Rejection turns the process into a noun and creates a concise academic expression.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Conditionals",
+            "prompt": "Which sentence correctly uses the third conditional?",
+            "choices": [
+                "If the team had checked the data, it would have noticed the error.",
+                "If the team checked the data, it would have noticed the error yesterday.",
+                "If the team had checked the data, it will notice the error.",
+                "If the team would have checked the data, it had noticed the error.",
+            ],
+            "answer": "If the team had checked the data, it would have noticed the error.",
+            "explanation": "The third conditional uses if + past perfect and would have + past participle.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Perfect aspect",
+            "prompt": "Which sentence correctly uses the future perfect?",
+            "choices": [
+                "By Friday, we will have completed the investigation.",
+                "By Friday, we will completed the investigation.",
+                "By Friday, we have will complete the investigation.",
+                "By Friday, we will had completed the investigation.",
+            ],
+            "answer": "By Friday, we will have completed the investigation.",
+            "explanation": "The future perfect uses will have followed by the past participle.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Dangling modifiers",
+            "prompt": "Which sentence correctly repairs the dangling modifier?",
+            "choices": [
+                "After reviewing the evidence, the students revised their conclusion.",
+                "After reviewing the evidence, the conclusion was revised.",
+                "After reviewing the evidence, there was a revised conclusion.",
+                "After reviewing the evidence, revision of the conclusion occurred.",
+            ],
+            "answer": "After reviewing the evidence, the students revised their conclusion.",
+            "explanation": "The students are the people who reviewed the evidence, so they must follow the opening phrase.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Embedded clauses",
+            "prompt": "Choose the sentence that correctly embeds a clause as the object of the verb.",
+            "choices": [
+                "Researchers predict that the results will change over time.",
+                "Researchers predict that will the results change over time.",
+                "Researchers predict, that the results will change over time.",
+                "Researchers predict the results that will change over time are.",
+            ],
+            "answer": "Researchers predict that the results will change over time.",
+            "explanation": "The clause that the results will change over time functions as the object of predict.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Mood",
+            "prompt": "Which sentence uses the subjunctive mood correctly in formal English?",
+            "choices": [
+                "The principal recommended that every student be present.",
+                "The principal recommended that every student is present.",
+                "The principal recommended that every student was present tomorrow.",
+                "The principal recommended every student to being present.",
+            ],
+            "answer": "The principal recommended that every student be present.",
+            "explanation": "After a formal recommendation, the subjunctive uses the base form be.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Apposition",
+            "prompt": "Which sentence correctly punctuates a non-essential appositive?",
+            "choices": [
+                "Our captain, Maya Singh, addressed the assembly.",
+                "Our captain Maya Singh, addressed the assembly.",
+                "Our captain, Maya Singh addressed the assembly.",
+                "Our, captain Maya Singh, addressed the assembly.",
+            ],
+            "answer": "Our captain, Maya Singh, addressed the assembly.",
+            "explanation": "The name is extra identifying information and is set off with a pair of commas.",
+        },
+        {
+            "min_year": 9,
+            "skill": "Ellipsis",
+            "prompt": "Which sentence correctly omits repeated words while keeping the meaning clear?",
+            "choices": [
+                "The Year 8 team chose solar power; the Year 9 team, wind power.",
+                "The Year 8 team chose solar power; the Year 9 team wind power chose.",
+                "The Year 8 team chose solar power, the Year 9 team, wind power.",
+                "The Year 8 team chose solar power; chose the Year 9 team wind power.",
+            ],
+            "answer": "The Year 8 team chose solar power; the Year 9 team, wind power.",
+            "explanation": "The repeated verb chose is omitted from the second clause and represented by a comma.",
+        },
+    ]
+)
+
 QUIZ_SIZE = 10
 YEAR_LEVELS = ["Year 7", "Year 8", "Year 9"]
+GRAMMAR_PRACTICE_MODES = ["Smart mix", "Review my mistakes", "Fresh questions"]
 
 YEAR_SKILLS = {
     "Year 7": {
@@ -1157,21 +1474,124 @@ YEAR_SKILLS = {
         "Tense consistency",
     },
 }
+
+for question in QUESTIONS:
+    if "min_year" not in question:
+        if question["skill"] in YEAR_SKILLS["Year 7"]:
+            question["min_year"] = 7
+        elif question["skill"] in YEAR_SKILLS["Year 8"]:
+            question["min_year"] = 8
+        else:
+            question["min_year"] = 9
+
 YEAR_SKILLS["Year 9"] = {question["skill"] for question in QUESTIONS}
 
+SKILL_TIPS = {
+    "Apostrophes": "Decide whether the word shows possession, a contraction or a simple plural before adding an apostrophe.",
+    "Commas": "Read the sentence aloud and identify introductions, extra information and clause boundaries.",
+    "Subject-verb agreement": "Ignore words between the subject and verb, then match the verb to the head noun.",
+    "Tense consistency": "Mark the time frame first, then check that every main verb stays in that frame.",
+    "Direct speech": "Keep spoken punctuation inside the quotation marks and separate the reporting clause correctly.",
+    "Commonly confused words": "Substitute a short definition for each option and choose the word whose meaning fits.",
+    "Run-on sentences": "Find each complete thought, then join them with a full stop, semicolon or comma plus conjunction.",
+    "Semicolons": "Check that the words on both sides could stand as complete sentences.",
+    "Colons": "Make sure the words before the colon form a complete clause that introduces what follows.",
+    "Relative clauses": "Ask whether the clause identifies the noun or only adds extra information.",
+    "Parallel structure": "Make every item in a list follow the same grammatical pattern.",
+    "Reported speech": "Change pronouns and time references, then use statement word order.",
+    "Conditionals": "Identify whether the condition is real, imagined now or imagined in the past before choosing verb forms.",
+    "Dangling modifiers": "Place the person or thing doing the opening action immediately after the comma.",
+    "Formal language": "Prefer precise verbs and nouns; remove slang, repetition and vague fillers.",
+}
 
-def available_indexes_for_level(level: str) -> list[int]:
+
+def level_number(level: str) -> int:
+    return int(level.split()[-1])
+
+
+def skills_for_level(level: str) -> list[str]:
+    return sorted(
+        {
+            question["skill"]
+            for question in QUESTIONS
+            if question["min_year"] <= level_number(level)
+            and question["skill"] in YEAR_SKILLS.get(level, YEAR_SKILLS["Year 9"])
+        }
+    )
+
+
+def available_indexes_for_level(level: str, focus: str = "All skills") -> list[int]:
     skills = YEAR_SKILLS.get(level, YEAR_SKILLS["Year 9"])
     return [
         index
         for index, question in enumerate(QUESTIONS)
         if question["skill"] in skills
+        and question["min_year"] <= level_number(level)
+        and (focus == "All skills" or question["skill"] == focus)
     ]
+
+
+def choose_grammar_indexes(
+    level: str,
+    quiz_size: int,
+    focus: str = "All skills",
+    review_skills: list[str] | None = None,
+    review_ratio: float = 0.4,
+    exclude_indexes: list[int] | None = None,
+    seed: int | None = None,
+) -> list[int]:
+    rng = random.Random(seed)
+    available = available_indexes_for_level(level, focus)
+    quiz_size = min(quiz_size, len(available))
+    if quiz_size <= 0:
+        return []
+
+    excluded = set(exclude_indexes or [])
+    fresh = [index for index in available if index not in excluded]
+    pool = fresh if len(fresh) >= quiz_size else available
+    review_set = set(review_skills or [])
+    priority = [index for index in pool if QUESTIONS[index]["skill"] in review_set]
+    target_count = min(len(priority), round(quiz_size * review_ratio)) if review_set else 0
+    if review_set and priority and target_count == 0:
+        target_count = 1
+    selected = rng.sample(priority, target_count) if target_count else []
+    remaining = [index for index in pool if index not in set(selected)]
+    selected.extend(rng.sample(remaining, min(quiz_size - len(selected), len(remaining))))
+    rng.shuffle(selected)
+    return selected
+
+
+def grammar_rank(xp: int) -> str:
+    if xp >= 1200:
+        return "Editor"
+    if xp >= 700:
+        return "Sentence Architect"
+    if xp >= 350:
+        return "Rule Detective"
+    if xp >= 150:
+        return "Proofreader"
+    return "Starter"
 
 
 def initialise_state() -> None:
     if "grammar_level" not in st.session_state:
         st.session_state.grammar_level = "Year 7"
+    if "grammar_focus" not in st.session_state:
+        st.session_state.grammar_focus = "All skills"
+    if "grammar_size" not in st.session_state:
+        st.session_state.grammar_size = QUIZ_SIZE
+    if "grammar_practice_mode" not in st.session_state:
+        st.session_state.grammar_practice_mode = "Smart mix"
+    if "grammar_review_queue" not in st.session_state:
+        st.session_state.grammar_review_queue = {}
+    if "grammar_history" not in st.session_state:
+        st.session_state.grammar_history = []
+    if "grammar_xp" not in st.session_state:
+        st.session_state.grammar_xp = 0
+    if "grammar_best" not in st.session_state:
+        st.session_state.grammar_best = 0
+    if "grammar_completed" not in st.session_state:
+        st.session_state.grammar_completed = 0
     if "quiz_number" not in st.session_state:
         st.session_state.quiz_number = 0
         start_new_quiz()
@@ -1179,9 +1599,25 @@ def initialise_state() -> None:
 
 def start_new_quiz() -> None:
     st.session_state.quiz_number = st.session_state.get("quiz_number", 0) + 1
-    available_indexes = available_indexes_for_level(st.session_state.get("grammar_level", "Year 7"))
-    quiz_size = min(QUIZ_SIZE, len(available_indexes))
-    st.session_state.quiz_indexes = random.sample(available_indexes, quiz_size)
+    level = st.session_state.get("grammar_level", "Year 7")
+    focus = st.session_state.get("grammar_focus", "All skills")
+    if focus != "All skills" and focus not in skills_for_level(level):
+        focus = "All skills"
+        st.session_state.grammar_focus = focus
+    mode = st.session_state.get("grammar_practice_mode", "Smart mix")
+    review_ratio = {
+        "Smart mix": 0.4,
+        "Review my mistakes": 0.75,
+        "Fresh questions": 0.0,
+    }[mode]
+    st.session_state.quiz_indexes = choose_grammar_indexes(
+        level,
+        st.session_state.get("grammar_size", QUIZ_SIZE),
+        focus=focus,
+        review_skills=list(st.session_state.get("grammar_review_queue", {})) if review_ratio else [],
+        review_ratio=review_ratio,
+        exclude_indexes=st.session_state.get("quiz_indexes", []),
+    )
     st.session_state.choice_orders = {
         question_index: random.sample(
             QUESTIONS[question_index]["choices"],
@@ -1191,6 +1627,17 @@ def start_new_quiz() -> None:
     }
     st.session_state.submitted = False
     st.session_state.answers = {}
+
+
+def change_grammar_level() -> None:
+    st.session_state.grammar_focus = "All skills"
+    start_new_quiz()
+
+
+def start_review_round() -> None:
+    st.session_state.grammar_focus = "All skills"
+    st.session_state.grammar_practice_mode = "Review my mistakes"
+    start_new_quiz()
 
 
 def answer_key(question_index: int) -> str:
@@ -1220,6 +1667,70 @@ def get_score(answers: dict[int, str | None]) -> int:
         answers.get(question_index) == QUESTIONS[question_index]["answer"]
         for question_index in st.session_state.quiz_indexes
     )
+
+
+def update_grammar_progress(answers: dict[int, str | None]) -> None:
+    score = get_score(answers)
+    total = len(st.session_state.quiz_indexes)
+    percentage = round(score / total * 100) if total else 0
+    previous = st.session_state.grammar_history[-1]["accuracy"] if st.session_state.grammar_history else None
+    outcomes = {}
+    for question_index in st.session_state.quiz_indexes:
+        skill = QUESTIONS[question_index]["skill"]
+        outcomes.setdefault(skill, {"correct": 0, "wrong": 0})
+        result_key = "correct" if answers.get(question_index) == QUESTIONS[question_index]["answer"] else "wrong"
+        outcomes[skill][result_key] += 1
+
+    queue = dict(st.session_state.grammar_review_queue)
+    for skill, result in outcomes.items():
+        if result["wrong"]:
+            queue[skill] = min(5, queue.get(skill, 0) + result["wrong"])
+        elif result["correct"] and skill in queue:
+            queue[skill] -= 1
+            if queue[skill] <= 0:
+                queue.pop(skill)
+
+    st.session_state.grammar_review_queue = queue
+    st.session_state.grammar_xp += 20 + score * 8
+    st.session_state.grammar_completed += 1
+    st.session_state.grammar_best = max(st.session_state.grammar_best, percentage)
+    st.session_state.grammar_history.append(
+        {
+            "date": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "level": st.session_state.grammar_level,
+            "focus": st.session_state.grammar_focus,
+            "score": score,
+            "total": total,
+            "accuracy": percentage,
+            "change": None if previous is None else percentage - previous,
+        }
+    )
+
+
+def grammar_results_csv(answers: dict[int, str | None]) -> str:
+    output = io.StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=["Question", "Year", "Skill", "Prompt", "Your answer", "Correct answer", "Result", "Rule", "Practice tip"],
+    )
+    writer.writeheader()
+    for display_number, question_index in enumerate(st.session_state.quiz_indexes, start=1):
+        question = QUESTIONS[question_index]
+        selected = answers.get(question_index)
+        writer.writerow(
+            {
+                "Question": display_number,
+                "Year": st.session_state.grammar_level,
+                "Skill": question["skill"],
+                "Prompt": question["prompt"],
+                "Your answer": selected or "Not answered",
+                "Correct answer": question["answer"],
+                "Result": "Correct" if selected == question["answer"] else "Review",
+                "Rule": question["explanation"],
+                "Practice tip": SKILL_TIPS.get(question["skill"], "Compare the answer choices one feature at a time and explain why each incorrect option fails."),
+            }
+        )
+    return output.getvalue()
 
 
 def encouragement(score: int, total: int) -> tuple[str, str]:
@@ -1264,17 +1775,22 @@ def show_results(answers: dict[int, str | None]) -> None:
     st.subheader("Results")
     st.success(f"{title} {message}")
 
-    col_score, col_accuracy, col_bank = st.columns(3)
+    col_score, col_accuracy, col_best, col_xp = st.columns(4)
     col_score.metric("Score", f"{score}/{total}")
     col_accuracy.metric("Accuracy", f"{percentage}%")
-    col_bank.metric("Question set", f"#{st.session_state.quiz_number}")
+    col_best.metric("Personal best", f"{st.session_state.grammar_best}%")
+    col_xp.metric("Practice XP", st.session_state.grammar_xp)
     st.progress(score / total)
+
+    latest = st.session_state.grammar_history[-1] if st.session_state.grammar_history else None
+    if latest and latest["change"] is not None and latest["change"] > 0:
+        st.success(f"You improved by {latest['change']} percentage points from the previous challenge.")
 
     if missed_skills:
         focus = ", ".join(skill for skill, _ in missed_skills.most_common(3))
-        st.info(f"Focus for your next round: {focus}.")
+        st.info(f"Focus for your next round: {focus}. Fresh examples from these skills are in your review queue.")
     else:
-        st.info("No missed skills in this round. Try a new random set for a bigger challenge.")
+        st.info("No missed skills in this round. Try a fresh set or move up to a more advanced skill.")
 
     st.subheader("Question feedback")
     for display_number, question_index in enumerate(st.session_state.quiz_indexes, start=1):
@@ -1288,9 +1804,49 @@ def show_results(answers: dict[int, str | None]) -> None:
             if is_correct:
                 st.markdown(f"**Your answer:** {selected}")
             else:
-                st.markdown(f"**Your answer:** {selected}")
+                st.markdown(f"**Your answer:** {selected or 'Not answered'}")
                 st.markdown(f"**Correct answer:** {question['answer']}")
-            st.caption(question["explanation"])
+            st.markdown(f"**Rule:** {question['explanation']}")
+            st.caption(
+                "Try next time: "
+                + SKILL_TIPS.get(
+                    question["skill"],
+                    "Compare one grammar feature at a time and explain why the other choices do not work.",
+                )
+            )
+
+    if missed_skills:
+        st.button(
+            "Practise my mistakes now",
+            type="primary",
+            width="stretch",
+            on_click=start_review_round,
+        )
+
+    export_left, export_right = st.columns(2)
+    export_left.download_button(
+        "Export this result (CSV)",
+        data=grammar_results_csv(answers),
+        file_name=f"grammar_result_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv",
+        width="stretch",
+    )
+    progress_payload = {
+        "app": "Year 7-9 Grammar Studio",
+        "exported": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "xp": st.session_state.grammar_xp,
+        "rank": grammar_rank(st.session_state.grammar_xp),
+        "best_accuracy": st.session_state.grammar_best,
+        "review_queue": st.session_state.grammar_review_queue,
+        "history": st.session_state.grammar_history,
+    }
+    export_right.download_button(
+        "Export progress (JSON)",
+        data=json.dumps(progress_payload, indent=2),
+        file_name="grammar_progress.json",
+        mime="application/json",
+        width="stretch",
+    )
 
 
 st.set_page_config(
@@ -1302,59 +1858,67 @@ st.markdown(
     """
     <style>
     [data-testid="stAppViewContainer"] {
-        background:
-            linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
-            #f8fafc;
+        background: #f5f7fa;
     }
     .block-container {
         max-width: 1180px;
         padding-top: 1.5rem;
     }
     .grammar-hero {
-        background: #ffffff;
-        border: 1px solid #d9e2ec;
-        border-left: 10px solid #0f766e;
-        border-radius: 8px;
+        background: #143a3a;
+        border-bottom: 6px solid #f0b84b;
+        border-radius: 6px;
         padding: 1.2rem 1.4rem;
         margin-bottom: 1rem;
-        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+        box-shadow: 0 12px 28px rgba(20, 58, 58, 0.15);
     }
     .grammar-hero h1 {
         margin: 0 0 0.35rem 0;
-        color: #172033;
-        font-size: 2.25rem;
+        color: #ffffff;
+        font-size: 2.15rem;
+        letter-spacing: 0;
     }
     .grammar-hero p {
         margin: 0;
-        color: #4b5563;
+        color: #d8eded;
     }
     div[data-testid="stForm"] {
         background: #ffffff;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
+        border: 1px solid #d7e0e8;
+        border-left: 4px solid #2d8e8b;
+        border-radius: 6px;
         padding: 1rem 1.1rem;
-        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.05);
     }
     div[data-testid="stMetric"] {
         background: #ffffff;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
+        border: 1px solid #d7e0e8;
+        border-top: 4px solid #d85b45;
+        border-radius: 6px;
         padding: 0.8rem;
     }
     div.stButton > button[kind="primary"], div[data-testid="stFormSubmitButton"] button {
         min-height: 46px;
-        font-weight: 700;
+        font-weight: 800;
+        background: #d85b45;
+        border: 1px solid #bd4633;
+        color: #ffffff;
+        box-shadow: 0 8px 16px rgba(189, 70, 51, 0.16);
     }
     .skill-pill {
         display: inline-block;
-        background: #ecfeff;
-        color: #155e75;
-        border: 1px solid #a5f3fc;
+        background: #e9f7f5;
+        color: #175f5d;
+        border: 1px solid #a9d9d5;
         border-radius: 999px;
         padding: 0.2rem 0.65rem;
         font-size: 0.85rem;
         font-weight: 700;
         margin-bottom: 0.35rem;
+    }
+    @media (max-width: 700px) {
+        .grammar-hero h1 { font-size: 1.75rem; }
+        .block-container { padding-top: 0.75rem; }
     }
     </style>
     """,
@@ -1373,21 +1937,44 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-control_col, metric_col = st.columns([2, 1])
+control_col, metric_col = st.columns([3, 1])
 with control_col:
-    st.selectbox(
-        "Year level",
-        YEAR_LEVELS,
-        key="grammar_level",
-        on_change=start_new_quiz,
-    )
-    st.button("Start fresh grammar challenge", type="primary", use_container_width=True, on_click=start_new_quiz)
+    control_1, control_2, control_3, control_4 = st.columns(4)
+    with control_1:
+        st.selectbox(
+            "Year level",
+            YEAR_LEVELS,
+            key="grammar_level",
+            on_change=change_grammar_level,
+        )
+    with control_2:
+        focus_options = ["All skills", *skills_for_level(st.session_state.grammar_level)]
+        if st.session_state.grammar_focus not in focus_options:
+            st.session_state.grammar_focus = "All skills"
+        st.selectbox("Skill focus", focus_options, key="grammar_focus", on_change=start_new_quiz)
+    with control_3:
+        st.selectbox("Questions", [5, 10, 15, 20], key="grammar_size", on_change=start_new_quiz)
+    with control_4:
+        st.selectbox(
+            "Practice mode",
+            GRAMMAR_PRACTICE_MODES,
+            key="grammar_practice_mode",
+            on_change=start_new_quiz,
+            help="Smart mix adds fresh examples from skills missed earlier.",
+        )
+    st.button("Start fresh grammar challenge", type="primary", width="stretch", on_click=start_new_quiz)
 with metric_col:
-    level_bank = len(available_indexes_for_level(st.session_state.grammar_level))
+    level_bank = len(available_indexes_for_level(st.session_state.grammar_level, st.session_state.grammar_focus))
     metric_1, metric_2 = st.columns(2)
     metric_1.metric("Questions", len(st.session_state.quiz_indexes))
     metric_2.metric("Level bank", level_bank)
     st.caption(f"Current set #{st.session_state.quiz_number} for {st.session_state.grammar_level}.")
+
+progress_1, progress_2, progress_3, progress_4 = st.columns(4)
+progress_1.metric("Rank", grammar_rank(st.session_state.grammar_xp))
+progress_2.metric("Practice XP", st.session_state.grammar_xp)
+progress_3.metric("Completed", st.session_state.grammar_completed)
+progress_4.metric("Review queue", sum(st.session_state.grammar_review_queue.values()))
 
 if st.session_state.submitted:
     st.info("This challenge has been submitted. Start a fresh grammar challenge when you are ready for another set.")
@@ -1409,7 +1996,7 @@ with st.form("grammar_quiz"):
 
     submitted = st.form_submit_button(
         "Submit grammar challenge",
-        use_container_width=True,
+        width="stretch",
         disabled=st.session_state.submitted,
     )
 
@@ -1429,6 +2016,7 @@ if submitted:
         )
     else:
         st.session_state.answers = answers
+        update_grammar_progress(answers)
         st.session_state.submitted = True
         st.rerun()
 

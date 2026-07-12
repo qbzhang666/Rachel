@@ -5,13 +5,15 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 ## Grammar practice
 
 - Year 7, 8 and 9 level selector
-- 10 random questions per test
-- Expanded grammar bank with beginner-to-advanced coverage
+- 5, 10, 15 or 20 questions per test
+- 121-question grammar bank with beginner-to-advanced coverage
 - Australian English examples
 - Multiple choice answers with shuffled options
-- Score, accuracy and encouragement after submission
-- Question-by-question feedback with explanations
-- New random test button
+- Skill focus and smart, review or fresh practice modes
+- Mistake memory that adds fresh questions from weaker skills
+- Question-by-question rules, next-time strategies and progress feedback
+- Practice XP, personal bests and calm progress encouragement
+- Per-test CSV and progress JSON exports
 
 ## Persuasive writing coach
 
@@ -21,22 +23,27 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - Strong word suggestions, weak word replacements and persuasive phrase banks
 - Persuasive technique scan
 - 15 sample persuasive writing examples
-- Topic idea lists for extra practice
+- 24 levelled writing missions and expanded topic idea lists
 - Child-friendly Submit writing button
-- Self-check checklist with next-step guidance
-- Improved draft and downloadable feedback report
+- Prioritised three-step revision plan and remembered weak areas
+- Revision score comparisons, practice XP and personal bests
+- Automatic diagnosis table with clear next-step guidance
+- Improved draft plus TXT, CSV, JSON and print-ready HTML exports
 
 ## AMC Years 7-9 maths prep
 
-- Original AMC-style practice questions
+- 154 original AMC-style practice questions and fresh number variants
 - Years 7, 8 and 9 levels
 - Topics including number, fractions, algebra, geometry, measurement, data and problem solving
 - AMC level, topic, difficulty and question-count filters
 - Blank answer choices so students can see what they have answered
 - Bright Take challenge button
 - Clear Submit answers button with confirmation
-- Worked solutions after submission
-- Score, accuracy, topic summary and solution review table
+- Smart, review or fresh practice modes
+- Mistake memory that adds similar questions with different values
+- Worked solutions and next-time strategies after submission
+- Score, accuracy, personal best, topic summary and solution review table
+- Per-test CSV and progress JSON exports
 
 ## Red Rush Tower obby
 
@@ -46,6 +53,17 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - Only red hazards to avoid, with wider platforms and optional checkpoints
 - Difficulty, tower height and visual style options
 - Original browser-generated phonk-style music loops
+
+## DELF Junior A1 French prep
+
+- Current four-skill DELF Junior A1 exam overview
+- 10 listening challenges using selected audio from the completed local French course
+- 10 original everyday reading documents with detailed answer evidence
+- 48-question grammar and vocabulary lab with smart mistake review
+- Two-part writing practice: form completion and a message of at least 40 words
+- Automatic writing feedback by criterion, with TXT, CSV and printable HTML exports
+- All three speaking tasks: guided interview, information cards and interactive roleplay
+- Unticked answers, clear submission confirmation, progress XP and downloadable records
 
 ## Run locally
 
@@ -70,6 +88,12 @@ For the obby game:
 
 ```powershell
 python -m streamlit run obby_game.py
+```
+
+For the DELF Junior A1 French preparation app:
+
+```powershell
+python -m streamlit run Delf_A1.py
 ```
 
 On Streamlit Community Cloud, choose `obby_game.py` as the main file.

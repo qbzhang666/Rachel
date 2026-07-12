@@ -1,6 +1,11 @@
+import csv
 import html
+import io
+import json
 import random
 import sys
+from collections import Counter
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -746,8 +751,170 @@ QUESTION_BANK.extend(
     ]
 )
 
+
+def _integer_choices(answer, candidates, suffix=""):
+    values = []
+    for value in [answer, *candidates]:
+        if value >= 0 and value not in values:
+            values.append(value)
+    probe = 1
+    while len(values) < 4:
+        value = answer + probe
+        if value not in values:
+            values.append(value)
+        probe += 1
+    return [f"{value}{suffix}" for value in values[:4]]
+
+
+def build_variant_questions():
+    """Create fresh, fully worked variants for repeated targeted practice."""
+    variants = []
+    levels = ["AMC 7", "AMC 8", "AMC 9"]
+    difficulties = ["Warm-up", "Core", "Core", "Challenge"]
+
+    for level_offset, level in enumerate(levels, start=1):
+        for variant in range(1, 5):
+            difficulty = difficulties[variant - 1]
+
+            divisor = 5 + level_offset + variant
+            quotient = 7 + 2 * level_offset + variant
+            remainder = level_offset + variant
+            number = divisor * quotient + remainder
+            variants.append(
+                {
+                    "id": f"v{level_offset}n{variant:02d}",
+                    "level": level,
+                    "topic": "Number",
+                    "difficulty": difficulty,
+                    "practice_family": "remainders",
+                    "prompt": f"What is the remainder when {number} is divided by {divisor}?",
+                    "choices": _integer_choices(remainder, [remainder + 1, divisor - remainder, divisor]),
+                    "answer": str(remainder),
+                    "hint": "Write the number as divisor x quotient + remainder.",
+                    "solution": f"{divisor} x {quotient} = {divisor * quotient}. The difference between {number} and {divisor * quotient} is {remainder}, so the remainder is {remainder}.",
+                }
+            )
+
+            percentage = [15, 20, 25, 30][variant - 1]
+            original = 200 + 200 * level_offset
+            discount = original * percentage // 100
+            sale_price = original - discount
+            variants.append(
+                {
+                    "id": f"v{level_offset}f{variant:02d}",
+                    "level": level,
+                    "topic": "Fractions, decimals and percentages",
+                    "difficulty": difficulty,
+                    "practice_family": "percentage-change",
+                    "prompt": f"An item costs ${original} and is discounted by {percentage}%. What is the sale price?",
+                    "choices": [f"${value}" for value in [sale_price, discount, original + discount, sale_price + percentage]],
+                    "answer": f"${sale_price}",
+                    "hint": "Find the discount, then subtract it from the original price.",
+                    "solution": f"{percentage}% of ${original} is ${discount}. Subtract the discount: ${original} - ${discount} = ${sale_price}.",
+                }
+            )
+
+            solution_value = 4 + level_offset + variant
+            coefficient = 2 + level_offset + variant
+            constant = 3 + 2 * variant
+            right_side = coefficient * solution_value + constant
+            variants.append(
+                {
+                    "id": f"v{level_offset}a{variant:02d}",
+                    "level": level,
+                    "topic": "Algebra and patterns",
+                    "difficulty": difficulty,
+                    "practice_family": "linear-equations",
+                    "prompt": f"Solve {coefficient}x + {constant} = {right_side}.",
+                    "choices": _integer_choices(solution_value, [solution_value - 2, solution_value + 2, coefficient + solution_value]),
+                    "answer": str(solution_value),
+                    "hint": "Undo the addition before undoing the multiplication.",
+                    "solution": f"Subtract {constant}: {coefficient}x = {right_side - constant}. Divide by {coefficient}, so x = {solution_value}.",
+                }
+            )
+
+            angle_a = 30 + 5 * variant
+            angle_b = 50 + 5 * level_offset
+            missing_angle = 180 - angle_a - angle_b
+            variants.append(
+                {
+                    "id": f"v{level_offset}g{variant:02d}",
+                    "level": level,
+                    "topic": "Geometry",
+                    "difficulty": difficulty,
+                    "practice_family": "triangle-angles",
+                    "prompt": f"Two angles in a triangle are {angle_a} degrees and {angle_b} degrees. What is the third angle?",
+                    "choices": _integer_choices(missing_angle, [180 - angle_a, 180 - angle_b, missing_angle + 10], " degrees"),
+                    "answer": f"{missing_angle} degrees",
+                    "hint": "The interior angles of a triangle total 180 degrees.",
+                    "solution": f"Subtract the known angles from 180: 180 - {angle_a} - {angle_b} = {missing_angle} degrees.",
+                }
+            )
+
+            speed = 35 + 10 * level_offset + 5 * variant
+            travel_time = 2 + variant
+            distance = speed * travel_time
+            variants.append(
+                {
+                    "id": f"v{level_offset}m{variant:02d}",
+                    "level": level,
+                    "topic": "Measurement",
+                    "difficulty": difficulty,
+                    "practice_family": "speed-distance-time",
+                    "prompt": f"A vehicle travels at {speed} km/h for {travel_time} hours. How far does it travel?",
+                    "choices": _integer_choices(distance, [speed + travel_time, distance - speed, distance + travel_time * 10], " km"),
+                    "answer": f"{distance} km",
+                    "hint": "Distance equals speed multiplied by time.",
+                    "solution": f"Distance = speed x time = {speed} x {travel_time} = {distance} km.",
+                }
+            )
+
+            known = [8 + level_offset, 10 + variant, 12 + level_offset + variant, 14 + 2 * variant]
+            target_mean = 13 + level_offset + variant
+            missing_value = 5 * target_mean - sum(known)
+            known_text = ", ".join(str(value) for value in known)
+            variants.append(
+                {
+                    "id": f"v{level_offset}d{variant:02d}",
+                    "level": level,
+                    "topic": "Data and chance",
+                    "difficulty": difficulty,
+                    "practice_family": "missing-mean",
+                    "prompt": f"Five numbers have a mean of {target_mean}. Four are {known_text}. What is the fifth number?",
+                    "choices": _integer_choices(missing_value, [target_mean, missing_value - 3, missing_value + 3]),
+                    "answer": str(missing_value),
+                    "hint": "Find the required total, then subtract the four known values.",
+                    "solution": f"The required total is 5 x {target_mean} = {5 * target_mean}. The known values total {sum(known)}, so the missing number is {5 * target_mean} - {sum(known)} = {missing_value}.",
+                }
+            )
+
+            first_term = level_offset + variant
+            step = 2 + level_offset
+            term_number = 5 + variant
+            term_value = first_term + (term_number - 1) * step
+            variants.append(
+                {
+                    "id": f"v{level_offset}p{variant:02d}",
+                    "level": level,
+                    "topic": "Problem solving",
+                    "difficulty": difficulty,
+                    "practice_family": "arithmetic-sequences",
+                    "prompt": f"A sequence starts at {first_term} and increases by {step} each time. What is term {term_number}?",
+                    "choices": _integer_choices(term_value, [first_term + term_number * step, term_value - step, term_value + step]),
+                    "answer": str(term_value),
+                    "hint": "From term 1 to term n, the step is added n - 1 times.",
+                    "solution": f"Add {step} a total of {term_number - 1} times: {first_term} + {term_number - 1} x {step} = {term_value}.",
+                }
+            )
+
+    return variants
+
+
+QUESTION_BANK.extend(build_variant_questions())
+
 for question in QUESTION_BANK:
     question.setdefault("level", "AMC 7")
+    question.setdefault("practice_family", question["topic"])
 
 
 def answer_choices(question):
@@ -775,6 +942,17 @@ for question in QUESTION_BANK:
 AMC_LEVELS = ["All levels", "AMC 7", "AMC 8", "AMC 9"]
 TOPICS = ["All topics"] + sorted({question["topic"] for question in QUESTION_BANK})
 DIFFICULTIES = ["All difficulties", "Warm-up", "Core", "Challenge"]
+PRACTICE_MODES = ["Smart mix", "Review my mistakes", "Fresh questions"]
+
+TOPIC_STRATEGIES = {
+    "Number": "Estimate first, show each operation, then check the result with the inverse operation.",
+    "Fractions, decimals and percentages": "Write every quantity in the same form before comparing or calculating.",
+    "Algebra and patterns": "Keep both sides balanced and reverse operations one step at a time.",
+    "Geometry": "Mark the known facts, write the relevant angle or shape rule, then substitute values.",
+    "Measurement": "Write the formula and units before substituting numbers.",
+    "Data and chance": "List the total outcomes or required total before calculating the final value.",
+    "Problem solving": "Translate the wording into a small diagram, table, sequence or equation before calculating.",
+}
 
 
 def get_question(question_id):
@@ -799,11 +977,41 @@ def filter_questions(level, topic, difficulty):
     return questions
 
 
-def choose_quiz(level, topic, difficulty, length, seed=None):
+def choose_quiz(
+    level,
+    topic,
+    difficulty,
+    length,
+    seed=None,
+    review_families=None,
+    review_ratio=0.4,
+    exclude_ids=None,
+):
     questions = filter_questions(level, topic, difficulty)
     rng = random.Random(seed)
     length = min(length, len(questions))
-    return rng.sample(questions, length)
+    if length <= 0:
+        return []
+
+    excluded = set(exclude_ids or [])
+    fresh_questions = [question for question in questions if question["id"] not in excluded]
+    working_pool = fresh_questions if len(fresh_questions) >= length else questions
+    review_set = set(review_families or [])
+    priority_pool = [
+        question
+        for question in working_pool
+        if question.get("practice_family", question["topic"]) in review_set
+    ]
+    target_count = min(len(priority_pool), round(length * review_ratio)) if review_set else 0
+    if review_set and priority_pool and target_count == 0:
+        target_count = 1
+
+    selected = rng.sample(priority_pool, target_count) if target_count else []
+    selected_ids = {question["id"] for question in selected}
+    remaining = [question for question in working_pool if question["id"] not in selected_ids]
+    selected.extend(rng.sample(remaining, min(length - len(selected), len(remaining))))
+    rng.shuffle(selected)
+    return selected
 
 
 def mark_quiz(questions, answers):
@@ -833,6 +1041,51 @@ def score_message(score, total):
     return "Keep building confidence. The worked solutions will help."
 
 
+def learner_rank(xp):
+    if xp >= 1200:
+        return "Problem Solver"
+    if xp >= 700:
+        return "Strategist"
+    if xp >= 350:
+        return "Pattern Hunter"
+    if xp >= 150:
+        return "Explorer"
+    return "Starter"
+
+
+def results_to_csv(results):
+    output = io.StringIO()
+    fieldnames = [
+        "Question",
+        "Level",
+        "Topic",
+        "Difficulty",
+        "Your answer",
+        "Correct answer",
+        "Result",
+        "Worked solution",
+        "Next-time strategy",
+    ]
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    for index, result in enumerate(results, start=1):
+        question = result["question"]
+        writer.writerow(
+            {
+                "Question": index,
+                "Level": question["level"],
+                "Topic": question["topic"],
+                "Difficulty": question["difficulty"],
+                "Your answer": result["selected"] or "Not answered",
+                "Correct answer": question["answer"],
+                "Result": "Correct" if result["correct"] else "Review",
+                "Worked solution": question["solution"],
+                "Next-time strategy": TOPIC_STRATEGIES[question["topic"]],
+            }
+        )
+    return output.getvalue()
+
+
 def topic_summary(results):
     summary = {}
     for result in results:
@@ -851,48 +1104,66 @@ def render_streamlit_app():
         """
         <style>
         [data-testid="stAppViewContainer"] {
-            background:
-                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(245, 158, 11, 0.08)),
-                #f8fafc;
+            background: #f4f7fb;
         }
         .block-container { max-width: 1180px; padding-top: 1.5rem; }
         .math-hero {
-            background: #ffffff;
-            border: 1px solid #d9e2ec;
-            border-left: 10px solid #2563eb;
-            border-radius: 8px;
+            background: #17263a;
+            border-bottom: 6px solid #f4c95d;
+            border-radius: 6px;
             padding: 1.25rem 1.5rem;
             margin-bottom: 1rem;
+            box-shadow: 0 12px 28px rgba(23, 38, 58, 0.14);
         }
         .math-hero h1 {
             margin: 0 0 0.35rem 0;
-            color: #172033;
-            font-size: 2.25rem;
+            color: #ffffff;
+            font-size: 2.15rem;
+            letter-spacing: 0;
         }
         .math-hero p {
             margin: 0;
-            color: #4b5563;
+            color: #dce7f3;
             font-size: 1rem;
         }
         .focus-panel {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            border-radius: 8px;
+            background: #fff9e9;
+            border: 1px solid #efd37e;
+            border-left: 5px solid #e3aa19;
+            border-radius: 6px;
             padding: 1rem;
         }
         .focus-panel strong {
-            color: #9a3412;
+            color: #7a5200;
         }
         [data-testid="stMetric"] {
             background: #ffffff;
-            border: 1px solid #d9e2ec;
-            border-radius: 8px;
+            border: 1px solid #d8e1ea;
+            border-top: 4px solid #179c99;
+            border-radius: 6px;
             padding: 0.75rem 1rem;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: #ffffff;
+            border-left: 4px solid #2f7fba;
+            border-radius: 6px;
+            box-shadow: 0 8px 20px rgba(23, 38, 58, 0.05);
         }
         div.stButton > button[kind="primary"] {
             min-height: 48px;
-            font-weight: 700;
-            background: #2563eb;
+            font-weight: 800;
+            background: #df543f;
+            border: 1px solid #c9402e;
+            color: #ffffff;
+            box-shadow: 0 8px 16px rgba(201, 64, 46, 0.18);
+        }
+        div.stButton > button[kind="primary"]:hover {
+            background: #c9402e;
+            border-color: #ad3222;
+        }
+        @media (max-width: 700px) {
+            .math-hero h1 { font-size: 1.75rem; }
+            .block-container { padding-top: 0.75rem; }
         }
         </style>
         """,
@@ -927,6 +1198,27 @@ def render_streamlit_app():
         st.session_state["math_submitted"] = False
     if "math_confirming" not in st.session_state:
         st.session_state["math_confirming"] = False
+    if "math_practice_mode" not in st.session_state:
+        st.session_state["math_practice_mode"] = "Smart mix"
+    if "math_review_queue" not in st.session_state:
+        st.session_state["math_review_queue"] = {}
+    if "math_history" not in st.session_state:
+        st.session_state["math_history"] = []
+    if "math_xp" not in st.session_state:
+        st.session_state["math_xp"] = 0
+    if "math_streak" not in st.session_state:
+        st.session_state["math_streak"] = 0
+    if "math_best" not in st.session_state:
+        st.session_state["math_best"] = 0
+    if "math_attempt_id" not in st.session_state:
+        st.session_state["math_attempt_id"] = 1
+    if "math_recorded_attempts" not in st.session_state:
+        st.session_state["math_recorded_attempts"] = []
+    if "math_choice_orders" not in st.session_state:
+        st.session_state["math_choice_orders"] = {
+            question_id: random.sample(get_question(question_id)["choices"], len(get_question(question_id)["choices"]))
+            for question_id in st.session_state["math_quiz_ids"]
+        }
     if st.session_state["math_level"] not in AMC_LEVELS:
         st.session_state["math_level"] = "AMC 7"
     if st.session_state["math_difficulty"] not in DIFFICULTIES:
@@ -937,10 +1229,31 @@ def render_streamlit_app():
         topic = st.session_state["math_topic"]
         difficulty = st.session_state["math_difficulty"]
         length = st.session_state["math_length"]
-        questions = choose_quiz(level, topic, difficulty, length)
+        mode = st.session_state.get("math_practice_mode", "Smart mix")
+        review_ratio = {
+            "Smart mix": 0.4,
+            "Review my mistakes": 0.75,
+            "Fresh questions": 0.0,
+        }[mode]
+        review_families = list(st.session_state["math_review_queue"]) if review_ratio else []
+        previous_ids = st.session_state.get("math_quiz_ids", [])
+        questions = choose_quiz(
+            level,
+            topic,
+            difficulty,
+            length,
+            review_families=review_families,
+            review_ratio=review_ratio,
+            exclude_ids=previous_ids,
+        )
         st.session_state["math_quiz_ids"] = [question["id"] for question in questions]
+        st.session_state["math_choice_orders"] = {
+            question["id"]: random.sample(question["choices"], len(question["choices"]))
+            for question in questions
+        }
         st.session_state["math_submitted"] = False
         st.session_state["math_confirming"] = False
+        st.session_state["math_attempt_id"] += 1
         for question in QUESTION_BANK:
             st.session_state.pop(f"answer_{question['id']}", None)
 
@@ -948,11 +1261,59 @@ def render_streamlit_app():
         st.session_state["math_confirming"] = True
 
     def confirm_submit():
+        attempt_id = st.session_state["math_attempt_id"]
+        if attempt_id not in st.session_state["math_recorded_attempts"]:
+            attempt_questions = [get_question(question_id) for question_id in st.session_state["math_quiz_ids"]]
+            attempt_answers = {
+                question["id"]: st.session_state.get(f"answer_{question['id']}")
+                for question in attempt_questions
+            }
+            attempt_results = mark_quiz(attempt_questions, attempt_answers)
+            score = sum(1 for result in attempt_results if result["correct"])
+            percentage = round(score / len(attempt_questions) * 100) if attempt_questions else 0
+            previous_percentage = st.session_state["math_history"][-1]["accuracy"] if st.session_state["math_history"] else None
+
+            by_family = {}
+            for result in attempt_results:
+                family = result["question"]["practice_family"]
+                by_family.setdefault(family, {"correct": 0, "wrong": 0, "topic": result["question"]["topic"]})
+                by_family[family]["correct" if result["correct"] else "wrong"] += 1
+
+            queue = dict(st.session_state["math_review_queue"])
+            for family, data in by_family.items():
+                if data["wrong"]:
+                    queue[family] = min(5, queue.get(family, 0) + data["wrong"])
+                elif data["correct"] and family in queue:
+                    queue[family] -= 1
+                    if queue[family] <= 0:
+                        queue.pop(family)
+
+            st.session_state["math_review_queue"] = queue
+            st.session_state["math_xp"] += 20 + score * 8
+            st.session_state["math_streak"] += 1
+            st.session_state["math_best"] = max(st.session_state["math_best"], percentage)
+            st.session_state["math_history"].append(
+                {
+                    "date": datetime.now().astimezone().isoformat(timespec="seconds"),
+                    "level": st.session_state["math_level"],
+                    "topic": st.session_state["math_topic"],
+                    "difficulty": st.session_state["math_difficulty"],
+                    "score": score,
+                    "total": len(attempt_questions),
+                    "accuracy": percentage,
+                    "change": None if previous_percentage is None else percentage - previous_percentage,
+                }
+            )
+            st.session_state["math_recorded_attempts"].append(attempt_id)
         st.session_state["math_submitted"] = True
         st.session_state["math_confirming"] = False
 
     def cancel_submit():
         st.session_state["math_confirming"] = False
+
+    def practise_mistakes():
+        st.session_state["math_practice_mode"] = "Review my mistakes"
+        new_quiz()
 
     controls, tips = st.columns([2, 1])
     with controls:
@@ -978,17 +1339,29 @@ def render_streamlit_app():
             if st.session_state["math_length"] > max_length:
                 st.session_state["math_length"] = max_length
             st.number_input("Questions", min_value=1, max_value=max_length, step=1, key="math_length")
-        st.button("Take challenge!", type="primary", use_container_width=True, on_click=new_quiz)
+        st.selectbox(
+            "Practice mode",
+            PRACTICE_MODES,
+            key="math_practice_mode",
+            help="Smart mix adds a few questions related to earlier mistakes. Review mode adds more.",
+        )
+        st.button("Take challenge!", type="primary", width="stretch", on_click=new_quiz)
     with tips:
         st.markdown(
             """
             <div class="focus-panel">
                 <strong>Practice focus</strong>
-                <p>Read carefully, choose an answer for each question, then use the worked solutions after submitting.</p>
+                <p>Smart mix remembers weak question families and adds fresh versions to your next challenge.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
+
+    progress_columns = st.columns(4)
+    progress_columns[0].metric("Rank", learner_rank(st.session_state["math_xp"]))
+    progress_columns[1].metric("Practice XP", st.session_state["math_xp"])
+    progress_columns[2].metric("Completed", st.session_state["math_streak"])
+    progress_columns[3].metric("Review queue", sum(st.session_state["math_review_queue"].values()))
 
     questions = [get_question(question_id) for question_id in st.session_state["math_quiz_ids"]]
     if not questions:
@@ -1002,19 +1375,21 @@ def render_streamlit_app():
             st.caption(f"{question['level']} | {question['topic']} | {question['difficulty']}")
             answers[question["id"]] = st.radio(
                 "Choose one answer",
-                question["choices"],
+                st.session_state["math_choice_orders"].get(question["id"], question["choices"]),
                 index=None,
                 key=f"answer_{question['id']}",
                 horizontal=True,
+                disabled=st.session_state["math_submitted"],
                 label_visibility="collapsed",
             )
 
             if st.session_state["math_submitted"]:
                 if answers[question["id"]] == question["answer"]:
-                    st.success("Correct")
+                    st.success("Correct. Your method reached the right result.")
                 else:
                     st.error(f"Not quite. Correct answer: {question['answer']}")
                 st.write(f"**Worked solution:** {question['solution']}")
+                st.caption(f"Next-time strategy: {TOPIC_STRATEGIES[question['topic']]}")
 
     st.divider()
     unanswered = [
@@ -1031,20 +1406,25 @@ def render_streamlit_app():
                 st.warning("Ready to submit? You will see your score and worked solutions.")
             c1, c2 = st.columns(2)
             with c1:
-                st.button("Yes, submit now", type="primary", use_container_width=True, on_click=confirm_submit)
+                st.button("Yes, submit now", type="primary", width="stretch", on_click=confirm_submit)
             with c2:
-                st.button("Keep working", use_container_width=True, on_click=cancel_submit)
+                st.button("Keep working", width="stretch", on_click=cancel_submit)
         else:
-            st.button("Submit answers", type="primary", use_container_width=True, on_click=request_submit)
+            st.button("Submit answers", type="primary", width="stretch", on_click=request_submit)
 
     if st.session_state["math_submitted"]:
         results = mark_quiz(questions, answers)
         score = sum(1 for result in results if result["correct"])
-        m1, m2, m3 = st.columns(3)
+        m1, m2, m3, m4 = st.columns(4)
         m1.metric("Score", f"{score}/{len(questions)}")
         m2.metric("Accuracy", f"{round(score / len(questions) * 100)}%")
-        m3.metric("Questions", len(questions))
-        st.info(score_message(score, len(questions)))
+        m3.metric("Personal best", f"{st.session_state['math_best']}%")
+        m4.metric("Practice XP", st.session_state["math_xp"])
+        latest = st.session_state["math_history"][-1] if st.session_state["math_history"] else None
+        if latest and latest["change"] is not None and latest["change"] > 0:
+            st.success(f"Progress update: accuracy improved by {latest['change']} percentage points from your previous challenge.")
+        else:
+            st.info(score_message(score, len(questions)))
 
         rows = []
         for topic, data in topic_summary(results).items():
@@ -1056,7 +1436,7 @@ def render_streamlit_app():
                     "Accuracy": f"{round(data['correct'] / data['total'] * 100)}%",
                 }
             )
-        st.dataframe(rows, hide_index=True, use_container_width=True)
+        st.dataframe(rows, hide_index=True, width="stretch")
 
         review_rows = []
         for index, result in enumerate(results, start=1):
@@ -1073,7 +1453,46 @@ def render_streamlit_app():
                 }
             )
         st.subheader("Solution review")
-        st.dataframe(review_rows, hide_index=True, use_container_width=True)
+        st.dataframe(review_rows, hide_index=True, width="stretch")
+
+        missed = [result for result in results if not result["correct"]]
+        if missed:
+            focus_topics = Counter(result["question"]["topic"] for result in missed)
+            focus_text = ", ".join(topic for topic, _ in focus_topics.most_common(3))
+            st.warning(f"Next focus: {focus_text}. New questions from these families are now in your review queue.")
+            st.button(
+                "Practise my mistakes now",
+                type="primary",
+                width="stretch",
+                on_click=practise_mistakes,
+            )
+        else:
+            st.success("Review queue win: this set was fully correct. Try a fresh challenge or raise the difficulty.")
+
+        export_left, export_right = st.columns(2)
+        export_left.download_button(
+            "Export this result (CSV)",
+            data=results_to_csv(results),
+            file_name=f"math_result_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+            mime="text/csv",
+            width="stretch",
+        )
+        progress_payload = {
+            "app": "AMC Years 7-9 Maths Prep",
+            "exported": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "xp": st.session_state["math_xp"],
+            "rank": learner_rank(st.session_state["math_xp"]),
+            "best_accuracy": st.session_state["math_best"],
+            "review_queue": st.session_state["math_review_queue"],
+            "history": st.session_state["math_history"],
+        }
+        export_right.download_button(
+            "Export progress (JSON)",
+            data=json.dumps(progress_payload, indent=2),
+            file_name="math_progress.json",
+            mime="application/json",
+            width="stretch",
+        )
 
 
 def escape_html(value):

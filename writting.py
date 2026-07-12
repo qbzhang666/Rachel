@@ -1,8 +1,13 @@
+import csv
 import html
+import io
+import json
+import random
 import re
 import sys
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -280,6 +285,43 @@ PERSUASIVE_WORD_BANK = {
     ],
 }
 
+PERSUASIVE_WORD_BANK["High modality"].extend(
+    ["it is imperative that", "has a responsibility to", "cannot afford to", "is urgently needed"]
+)
+PERSUASIVE_WORD_BANK["Emotive words"].extend(
+    ["preventable", "devastating", "vulnerable", "secure", "dignified", "transformative"]
+)
+PERSUASIVE_WORD_BANK["Evaluative words"].extend(
+    ["equitable", "credible", "short-sighted", "ineffective", "proportionate", "far-reaching"]
+)
+PERSUASIVE_WORD_BANK["Evidence words"].extend(
+    ["survey findings demonstrate", "available data indicates", "a clear pattern emerges", "documented examples show"]
+)
+PERSUASIVE_WORD_BANK["Ethical appeal"] = [
+    "a matter of fairness",
+    "we have a responsibility",
+    "students have a right to",
+    "the ethical choice",
+    "no group should be disadvantaged",
+    "respect and dignity require",
+]
+PERSUASIVE_WORD_BANK["Measured certainty"] = [
+    "the evidence strongly suggests",
+    "it is highly likely",
+    "in most cases",
+    "a reasonable conclusion",
+    "the strongest available evidence",
+    "this is more likely to",
+]
+PERSUASIVE_WORD_BANK["Contrast"] = [
+    "by contrast",
+    "whereas",
+    "rather than",
+    "on the other hand",
+    "the more convincing view",
+    "despite this concern",
+]
+
 PERSUASIVE_SENTENCE_STARTERS = [
     "It is clear that...",
     "The evidence suggests that...",
@@ -290,6 +332,11 @@ PERSUASIVE_SENTENCE_STARTERS = [
     "This demonstrates that...",
     "For this reason, we must...",
     "Ultimately, the most reasonable choice is...",
+    "The immediate benefit is clear; more importantly...",
+    "A fair policy must consider...",
+    "The strongest available evidence indicates...",
+    "Critics are right to question..., yet this concern can be addressed by...",
+    "If we fail to act, the likely consequence is...",
 ]
 
 TOPIC_IDEAS = {
@@ -324,6 +371,82 @@ TOPIC_IDEAS = {
         "Public spaces should be safer and more inclusive",
     ],
 }
+
+TOPIC_IDEAS["School life"].extend(
+    [
+        "Schools should offer a four-day learning week",
+        "Every student should complete a practical life-skills subject",
+        "Assessment should include more projects and fewer timed tests",
+        "Students should help design school wellbeing policies",
+    ]
+)
+TOPIC_IDEAS["Technology"].extend(
+    [
+        "Algorithms that recommend content need stronger regulation",
+        "Schools should teach students how to verify online information",
+        "Facial recognition should not be used in schools",
+        "Influencers should clearly label edited or sponsored content",
+    ]
+)
+TOPIC_IDEAS["Environment"].extend(
+    [
+        "Fast fashion should face stronger environmental rules",
+        "New buildings should be required to include green spaces",
+        "Major events should eliminate single-use plastics",
+        "Households should receive incentives to reduce energy use",
+    ]
+)
+TOPIC_IDEAS["Community"].extend(
+    [
+        "Teenagers should have a formal voice in local council decisions",
+        "Community sport should receive more public funding",
+        "Public libraries should provide free digital skills programs",
+        "Cities should create more safe spaces for teenagers",
+    ]
+)
+TOPIC_IDEAS["Health and wellbeing"] = [
+    "Schools should start later for teenage students",
+    "Energy drink advertising should not target teenagers",
+    "Mental health education should be taught every year",
+    "Competitive sport should include stronger wellbeing safeguards",
+    "Healthy food should be more affordable than highly processed food",
+    "Students need protected time without homework during holidays",
+]
+TOPIC_IDEAS["Media and society"] = [
+    "News platforms should label AI-generated images",
+    "Celebrities have a responsibility to challenge harmful misinformation",
+    "Streaming services should provide clearer age guidance",
+    "Online anonymity should have limits when serious harm occurs",
+    "Advertising aimed at children should face stricter rules",
+    "Public debate should give greater attention to young people's views",
+]
+
+WRITING_MISSIONS = [
+    {"id": "y7-reading", "year": "Year 7", "topic": "daily independent reading", "audience": "Year 7 students", "focus": "Strong words", "brief": "Convince students that ten minutes of daily reading is worth protecting.", "targets": ["high modality", "inclusive language", "one vivid benefit"]},
+    {"id": "y7-lunch", "year": "Year 7", "topic": "a longer lunch break", "audience": "the school principal", "focus": "Reasoning", "brief": "Argue whether a longer lunch break would improve the school day.", "targets": ["clear contention", "two because chains", "practical example"]},
+    {"id": "y7-uniform", "year": "Year 7", "topic": "school uniform choices", "audience": "the school council", "focus": "Arguments", "brief": "Persuade the council to keep, change or remove part of the uniform policy.", "targets": ["two distinct reasons", "topic sentences", "clear conclusion"]},
+    {"id": "y7-plastic", "year": "Year 7", "topic": "reducing plastic at school", "audience": "students and teachers", "focus": "Techniques", "brief": "Call on the school community to reduce single-use plastic.", "targets": ["rhetorical question", "emotive language", "call to action"]},
+    {"id": "y7-sport", "year": "Year 7", "topic": "protecting school sport", "audience": "school leaders", "focus": "Reasoning", "brief": "Explain why school sport should or should not receive more timetable space.", "targets": ["specific example", "cause and effect", "fair qualification"]},
+    {"id": "y7-first-aid", "year": "Year 7", "topic": "first aid lessons", "audience": "parents and school leaders", "focus": "Strong words", "brief": "Convince the audience that basic first aid belongs in the curriculum.", "targets": ["precise verbs", "high modality", "ethical appeal"]},
+    {"id": "y7-homework", "year": "Year 7", "topic": "reasonable homework limits", "audience": "teachers", "focus": "Arguments", "brief": "Argue for a homework policy that is effective and fair.", "targets": ["claim-evidence-reasoning", "counterargument", "recommendation"]},
+    {"id": "y7-parks", "year": "Year 7", "topic": "better local parks for teenagers", "audience": "local council", "focus": "Techniques", "brief": "Persuade the council to improve local parks for young people.", "targets": ["inclusive language", "rule of three", "direct call to action"]},
+    {"id": "y8-phones", "year": "Year 8", "topic": "phone use during lessons", "audience": "students, parents and teachers", "focus": "Arguments", "brief": "Propose a balanced and enforceable classroom phone policy.", "targets": ["two developed arguments", "counterargument", "practical solution"]},
+    {"id": "y8-ai", "year": "Year 8", "topic": "responsible AI use at school", "audience": "the school community", "focus": "Reasoning", "brief": "Argue how schools should allow, limit or teach the use of AI tools.", "targets": ["qualified claim", "specific scenario", "reasoned consequence"]},
+    {"id": "y8-transport", "year": "Year 8", "topic": "cheaper public transport for students", "audience": "the state government", "focus": "Strong words", "brief": "Persuade the government to make student travel more affordable.", "targets": ["ethical vocabulary", "precise evaluative words", "high modality"]},
+    {"id": "y8-cyberbullying", "year": "Year 8", "topic": "stronger responses to cyberbullying", "audience": "social media companies", "focus": "Techniques", "brief": "Demand a stronger and fairer response to cyberbullying.", "targets": ["emotive appeal", "evidence appeal", "call to action"]},
+    {"id": "y8-tests", "year": "Year 8", "topic": "projects compared with timed tests", "audience": "school leaders", "focus": "Arguments", "brief": "Argue what balance of projects and timed tests produces fair assessment.", "targets": ["comparison", "acknowledged limitation", "clear recommendation"]},
+    {"id": "y8-sleep", "year": "Year 8", "topic": "later secondary school start times", "audience": "parents and school leaders", "focus": "Reasoning", "brief": "Make a case for or against starting the school day later.", "targets": ["evidence link", "cause and effect", "response to inconvenience"]},
+    {"id": "y8-fast-fashion", "year": "Year 8", "topic": "the environmental cost of fast fashion", "audience": "teenage consumers", "focus": "Strong words", "brief": "Persuade teenagers to change one fast-fashion habit.", "targets": ["precise impact words", "inclusive language", "achievable action"]},
+    {"id": "y8-libraries", "year": "Year 8", "topic": "funding modern public libraries", "audience": "local ratepayers", "focus": "Techniques", "brief": "Convince the community that modern libraries deserve continued funding.", "targets": ["rule of three", "evidence appeal", "counterargument"]},
+    {"id": "y9-algorithms", "year": "Year 9", "topic": "regulation of recommendation algorithms", "audience": "technology policymakers", "focus": "Reasoning", "brief": "Argue what responsibility platforms have for content recommended to teenagers.", "targets": ["qualified reasoning", "long-term consequence", "feasible policy"]},
+    {"id": "y9-energy", "year": "Year 9", "topic": "energy drink marketing to teenagers", "audience": "advertising regulators", "focus": "Arguments", "brief": "Argue whether energy drink advertising to teenagers should be restricted.", "targets": ["credible evidence", "counterclaim and rebuttal", "proportionate solution"]},
+    {"id": "y9-misinformation", "year": "Year 9", "topic": "teaching verification of online information", "audience": "education ministers", "focus": "Strong words", "brief": "Persuade governments to strengthen media-literacy education.", "targets": ["measured certainty", "precise academic verbs", "ethical appeal"]},
+    {"id": "y9-four-day", "year": "Year 9", "topic": "a four-day school week", "audience": "families and education leaders", "focus": "Arguments", "brief": "Evaluate and argue for or against a four-day school week.", "targets": ["weighed benefits and costs", "rebuttal", "conditional recommendation"]},
+    {"id": "y9-facial", "year": "Year 9", "topic": "facial recognition in schools", "audience": "school boards", "focus": "Reasoning", "brief": "Argue whether facial recognition technology should be permitted in schools.", "targets": ["privacy principle", "risk-benefit reasoning", "qualified conclusion"]},
+    {"id": "y9-voice", "year": "Year 9", "topic": "formal youth representation in local councils", "audience": "local councillors", "focus": "Techniques", "brief": "Persuade councillors to create a meaningful role for teenage representatives.", "targets": ["inclusive appeal", "ethical appeal", "memorable call to action"]},
+    {"id": "y9-anonymity", "year": "Year 9", "topic": "limits on online anonymity after serious harm", "audience": "lawmakers and platform leaders", "focus": "Strong words", "brief": "Argue for a balanced policy on anonymity, accountability and safety.", "targets": ["precise legal-ethical words", "measured modality", "contrast"]},
+    {"id": "y9-green-space", "year": "Year 9", "topic": "green-space requirements for new developments", "audience": "planning authorities", "focus": "Techniques", "brief": "Convince planning authorities to require useful green space in major developments.", "targets": ["evidence appeal", "future consequence", "direct recommendation"]},
+]
 
 OVERCLAIM_WORDS = [
     "always",
@@ -701,6 +824,26 @@ def get_sample_by_label(label: str) -> dict[str, str]:
     return SAMPLE_LIBRARY[0]
 
 
+def mission_label(mission: dict[str, str | list[str]]) -> str:
+    topic = str(mission["topic"])
+    return f"{topic[:1].upper()}{topic[1:]} | {mission['focus']}"
+
+
+def get_mission_labels(year_level: str) -> list[str]:
+    return [
+        mission_label(mission)
+        for mission in WRITING_MISSIONS
+        if mission["year"] == year_level
+    ]
+
+
+def get_mission_by_label(label: str, year_level: str) -> dict[str, str | list[str]]:
+    for mission in WRITING_MISSIONS:
+        if mission["year"] == year_level and mission_label(mission) == label:
+            return mission
+    return next(mission for mission in WRITING_MISSIONS if mission["year"] == year_level)
+
+
 @dataclass
 class ScoreCard:
     score: int
@@ -722,6 +865,49 @@ class Analysis:
     weak_word_hits: dict[str, int]
     overclaims: list[str]
     overall_score: int
+
+
+def analysis_dimensions(analysis: Analysis) -> list[tuple[str, str, ScoreCard]]:
+    return [
+        ("Reasoning", "Valid reasoning", analysis.reasoning),
+        ("Curriculum", "Curriculum control", analysis.curriculum),
+        ("Arguments", "Strong arguments", analysis.arguments),
+        ("Strong words", "Persuasive word choice", analysis.strong_words),
+        ("Techniques", "Persuasive techniques", analysis.techniques),
+    ]
+
+
+def priority_focus(analysis: Analysis) -> str:
+    focus, _, _ = min(analysis_dimensions(analysis), key=lambda item: item[2].score)
+    return "Arguments" if focus == "Curriculum" else focus
+
+
+def build_revision_actions(analysis: Analysis, limit: int = 3) -> list[dict[str, str | int]]:
+    ordered = sorted(analysis_dimensions(analysis), key=lambda item: item[2].score)
+    actions = []
+    for priority, (_, label, card) in enumerate(ordered[:limit], start=1):
+        action = card.improvements[0] if card.improvements else "Strengthen this area with one more precise, purposeful example."
+        actions.append(
+            {
+                "Priority": priority,
+                "Area": label,
+                "Score": card.score,
+                "Do this next": action,
+            }
+        )
+    return actions
+
+
+def writing_rank(xp: int) -> str:
+    if xp >= 1400:
+        return "Editorial Voice"
+    if xp >= 800:
+        return "Persuasive Strategist"
+    if xp >= 400:
+        return "Argument Builder"
+    if xp >= 160:
+        return "Draft Developer"
+    return "Starter"
 
 
 def tokenize_words(text: str) -> list[str]:
@@ -1342,6 +1528,13 @@ def build_feedback_report(
         "",
     ]
 
+    lines.append("Priority revision plan:")
+    for action in build_revision_actions(analysis):
+        lines.append(
+            f"  {action['Priority']}. {action['Area']} ({action['Score']}/100): {action['Do this next']}"
+        )
+    lines.append("")
+
     for title, card in categories:
         lines.append(f"{title}: {card.score}/100 ({score_label(card.score)})")
         for item in card.strengths:
@@ -1376,14 +1569,114 @@ def build_feedback_report(
         lines.append(f"  - {starter}")
     lines.append("")
 
+    lines.append("Original submitted draft:")
+    lines.append(text)
+    lines.append("")
+
     lines.append("Improved draft:")
     lines.append(build_improved_draft(text, topic, audience))
     return "\n".join(lines)
 
 
+def build_writing_record(
+    analysis: Analysis,
+    text: str,
+    topic: str,
+    audience: str,
+    year_level: str,
+    change: int | None = None,
+) -> dict[str, str | int | None]:
+    return {
+        "date": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "year_level": year_level,
+        "topic": topic or "Not provided",
+        "audience": audience or "Not provided",
+        "overall": analysis.overall_score,
+        "reasoning": analysis.reasoning.score,
+        "curriculum": analysis.curriculum.score,
+        "arguments": analysis.arguments.score,
+        "strong_words": analysis.strong_words.score,
+        "techniques": analysis.techniques.score,
+        "word_count": len(analysis.words),
+        "paragraph_count": len(analysis.paragraphs),
+        "priority_focus": priority_focus(analysis),
+        "change": change,
+        "draft": text,
+    }
+
+
+def writing_history_csv(history: list[dict[str, str | int | None]]) -> str:
+    output = io.StringIO()
+    fields = [
+        "date",
+        "year_level",
+        "topic",
+        "audience",
+        "overall",
+        "reasoning",
+        "curriculum",
+        "arguments",
+        "strong_words",
+        "techniques",
+        "word_count",
+        "paragraph_count",
+        "priority_focus",
+        "change",
+    ]
+    writer = csv.DictWriter(output, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(history)
+    return output.getvalue()
+
+
+def build_html_feedback_report(
+    analysis: Analysis,
+    text: str,
+    topic: str,
+    audience: str,
+    year_level: str,
+) -> str:
+    categories = analysis_dimensions(analysis)
+    score_rows = "".join(
+        f"<tr><td>{html.escape(label)}</td><td>{card.score}/100</td><td>{html.escape(score_label(card.score))}</td></tr>"
+        for _, label, card in categories
+    )
+    action_items = "".join(
+        f"<li><strong>{html.escape(str(action['Area']))}:</strong> {html.escape(str(action['Do this next']))}</li>"
+        for action in build_revision_actions(analysis)
+    )
+    original = html.escape(text).replace("\n", "<br>")
+    improved = html.escape(build_improved_draft(text, topic, audience)).replace("\n", "<br>")
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Persuasive writing feedback</title>
+<style>
+body {{ font-family: Arial, sans-serif; color: #1d2939; max-width: 900px; margin: 32px auto; padding: 0 24px; line-height: 1.55; }}
+header {{ background: #173f3f; color: white; padding: 24px; border-bottom: 6px solid #efbd54; }}
+h1 {{ margin: 0 0 6px; font-size: 28px; }} h2 {{ margin-top: 28px; color: #173f3f; }}
+.score {{ font-size: 34px; font-weight: 800; color: #c94f3d; }}
+table {{ width: 100%; border-collapse: collapse; }} th, td {{ padding: 10px; border-bottom: 1px solid #d7e0e8; text-align: left; }}
+.draft {{ background: #f5f7fa; border-left: 4px solid #2d8e8b; padding: 16px; }}
+@media print {{ body {{ margin: 0; max-width: none; }} }}
+</style>
+</head>
+<body>
+<header><h1>Persuasive Writing Feedback</h1><div>{html.escape(year_level)} | {html.escape(topic or 'Topic not provided')}</div></header>
+<p class="score">{analysis.overall_score}/100</p>
+<p><strong>Audience:</strong> {html.escape(audience or 'Not provided')} &nbsp; <strong>Words:</strong> {len(analysis.words)} &nbsp; <strong>Paragraphs:</strong> {len(analysis.paragraphs)}</p>
+<h2>Score profile</h2><table><thead><tr><th>Area</th><th>Score</th><th>Stage</th></tr></thead><tbody>{score_rows}</tbody></table>
+<h2>Three revision priorities</h2><ol>{action_items}</ol>
+<h2>Original draft</h2><div class="draft">{original}</div>
+<h2>Coach's improved model</h2><div class="draft">{improved}</div>
+</body></html>"""
+
+
 def render_score_card(title: str, card: ScoreCard) -> None:
     st.subheader(title)
-    st.metric("Score", f"{card.score}/100", score_label(card.score))
+    st.metric("Score", f"{card.score}/100")
+    st.caption(f"Stage: {score_label(card.score)}")
     st.progress(card.score)
 
     if card.strengths:
@@ -1408,7 +1701,7 @@ def render_technique_table(analysis: Analysis) -> None:
                 "Examples": examples,
             }
         )
-    st.dataframe(rows, hide_index=True, use_container_width=True)
+    st.dataframe(rows, hide_index=True, width="stretch")
 
 
 def render_word_choice_scan(text: str, weak_word_hits: dict[str, int]) -> None:
@@ -1422,7 +1715,7 @@ def render_word_choice_scan(text: str, weak_word_hits: dict[str, int]) -> None:
                 "Try adding": ", ".join(PERSUASIVE_WORD_BANK[category][:4]),
             }
         )
-    st.dataframe(rows, hide_index=True, use_container_width=True)
+    st.dataframe(rows, hide_index=True, width="stretch")
 
     if weak_word_hits:
         st.markdown("**Weak-to-strong upgrades found in this draft**")
@@ -1435,7 +1728,7 @@ def render_word_choice_scan(text: str, weak_word_hits: dict[str, int]) -> None:
                     "Stronger options": ", ".join(WEAK_WORD_REPLACEMENTS[weak]),
                 }
             )
-        st.dataframe(upgrade_rows, hide_index=True, use_container_width=True)
+        st.dataframe(upgrade_rows, hide_index=True, width="stretch")
 
 
 def render_word_bank() -> None:
@@ -1448,7 +1741,7 @@ def render_word_bank() -> None:
                 "Try": ", ".join(replacements),
             }
         )
-    st.dataframe(rows, hide_index=True, use_container_width=True)
+    st.dataframe(rows, hide_index=True, width="stretch")
 
     st.markdown("**Persuasive words by purpose**")
     bank_rows = []
@@ -1459,7 +1752,7 @@ def render_word_bank() -> None:
                 "Words and phrases": ", ".join(phrases),
             }
         )
-    st.dataframe(bank_rows, hide_index=True, use_container_width=True)
+    st.dataframe(bank_rows, hide_index=True, width="stretch")
 
     st.markdown("**Sentence starters**")
     for starter in PERSUASIVE_SENTENCE_STARTERS:
@@ -1476,6 +1769,18 @@ def render_topic_ideas() -> None:
         st.markdown(f"**{category}**")
         for topic in topics:
             st.write(f"- {topic}")
+
+    st.markdown("**Levelled writing missions**")
+    mission_rows = [
+        {
+            "Year": mission["year"],
+            "Topic": mission["topic"],
+            "Main focus": mission["focus"],
+            "Challenge": mission["brief"],
+        }
+        for mission in WRITING_MISSIONS
+    ]
+    st.dataframe(mission_rows, hide_index=True, width="stretch")
 
 
 def build_checklist_items(analysis: Analysis, year_level: str = "Year 8") -> list[dict[str, str | bool]]:
@@ -1543,11 +1848,17 @@ def build_checklist_items(analysis: Analysis, year_level: str = "Year 8") -> lis
 
 
 def render_checklist(analysis: Analysis, year_level: str = "Year 8") -> None:
-    st.caption("This is a self-check for the submitted draft. Unticked items show what to improve next.")
+    st.caption("This is an automatic diagnosis of the submitted draft, not a checklist the student has already completed.")
+    rows = []
     for item in build_checklist_items(analysis, year_level):
-        status = "Ready" if item["done"] else "Keep working"
-        st.checkbox(f"{item['label']} - {status}", value=bool(item["done"]), disabled=True)
-        st.caption(item["checks"] if item["done"] else item["next"])
+        rows.append(
+            {
+                "Area": item["label"],
+                "Status": "Secure" if item["done"] else "Revise next",
+                "Feedback": item["checks"] if item["done"] else item["next"],
+            }
+        )
+    st.dataframe(rows, hide_index=True, width="stretch")
 
 
 def run_console_app() -> None:
@@ -2099,13 +2410,84 @@ def load_sample() -> None:
     st.session_state["submitted_topic"] = sample["topic"]
     st.session_state["submitted_audience"] = sample["audience"]
     st.session_state["submitted_year_level"] = st.session_state.get("writing_level", "Year 8")
+    st.session_state["submitted_source"] = "Model sample"
+    st.session_state["writing_mission_brief"] = ""
+    st.session_state["writing_mission_targets"] = []
+    st.session_state["writing_last_change"] = None
 
 
 def submit_writing() -> None:
-    st.session_state["submitted_writing"] = st.session_state.get("writing_text", "")
-    st.session_state["submitted_topic"] = st.session_state.get("topic_text", "")
-    st.session_state["submitted_audience"] = st.session_state.get("audience_text", "")
-    st.session_state["submitted_year_level"] = st.session_state.get("writing_level", "Year 8")
+    text = st.session_state.get("writing_text", "")
+    topic = st.session_state.get("topic_text", "")
+    audience = st.session_state.get("audience_text", "")
+    year_level = st.session_state.get("writing_level", "Year 8")
+    st.session_state["submitted_writing"] = text
+    st.session_state["submitted_topic"] = topic
+    st.session_state["submitted_audience"] = audience
+    st.session_state["submitted_year_level"] = year_level
+    st.session_state["submitted_source"] = "Student draft"
+    if not text.strip():
+        return
+
+    signature = f"{year_level}|{topic}|{audience}|{text}"
+    if signature == st.session_state.get("writing_last_signature"):
+        return
+
+    analysis = analyse_text(text, year_level)
+    previous_score = st.session_state["writing_history"][-1]["overall"] if st.session_state["writing_history"] else None
+    change = None if previous_score is None else analysis.overall_score - previous_score
+    record = build_writing_record(analysis, text, topic, audience, year_level, change)
+    st.session_state["writing_history"].append(record)
+    st.session_state["writing_last_signature"] = signature
+    st.session_state["writing_last_change"] = change
+    st.session_state["writing_completed"] += 1
+    st.session_state["writing_best"] = max(st.session_state["writing_best"], analysis.overall_score)
+    st.session_state["writing_xp"] += 30 + analysis.overall_score // 4 + max(0, change or 0)
+
+    queue = dict(st.session_state["writing_focus_queue"])
+    focus_scores = {}
+    for focus, _, card in analysis_dimensions(analysis):
+        queue_focus = "Arguments" if focus == "Curriculum" else focus
+        focus_scores[queue_focus] = min(card.score, focus_scores.get(queue_focus, 100))
+    for queue_focus, score in focus_scores.items():
+        if score < 75:
+            queue[queue_focus] = min(5, queue.get(queue_focus, 0) + 1)
+        elif queue_focus in queue:
+            queue[queue_focus] -= 1
+            if queue[queue_focus] <= 0:
+                queue.pop(queue_focus)
+    st.session_state["writing_focus_queue"] = queue
+
+
+def load_writing_mission() -> None:
+    year_level = st.session_state.get("writing_level", "Year 8")
+    label = st.session_state.get("writing_mission_label", get_mission_labels(year_level)[0])
+    mission = get_mission_by_label(label, year_level)
+    st.session_state["topic_text"] = mission["topic"]
+    st.session_state["audience_text"] = mission["audience"]
+    st.session_state["writing_text"] = ""
+    st.session_state["submitted_writing"] = ""
+    st.session_state["writing_mission_brief"] = mission["brief"]
+    st.session_state["writing_mission_targets"] = mission["targets"]
+    st.session_state["writing_mission_id"] = mission["id"]
+
+
+def load_next_writing_mission() -> None:
+    year_level = st.session_state.get("writing_level", "Year 8")
+    queue = st.session_state.get("writing_focus_queue", {})
+    target_focus = max(queue, key=queue.get) if queue else "Strong words"
+    candidates = [
+        mission
+        for mission in WRITING_MISSIONS
+        if mission["year"] == year_level and mission["focus"] == target_focus
+    ]
+    if not candidates:
+        candidates = [mission for mission in WRITING_MISSIONS if mission["year"] == year_level]
+    previous_id = st.session_state.get("writing_mission_id")
+    fresh_candidates = [mission for mission in candidates if mission["id"] != previous_id]
+    mission = random.choice(fresh_candidates or candidates)
+    st.session_state["writing_mission_label"] = mission_label(mission)
+    load_writing_mission()
 
 
 def main() -> None:
@@ -2122,50 +2504,70 @@ def main() -> None:
         """
         <style>
         [data-testid="stAppViewContainer"] {
-            background:
-                linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08), rgba(217, 119, 6, 0.08)),
-                #f8fafc;
+            background: #f5f7fa;
         }
         .block-container {
             max-width: 1180px;
             padding-top: 1.5rem;
         }
         .writing-hero {
-            background: #ffffff;
-            border: 1px solid #d9e2ec;
-            border-left: 10px solid #2563eb;
-            border-radius: 8px;
+            background: #26364a;
+            border-bottom: 6px solid #efbd54;
+            border-radius: 6px;
             padding: 1.2rem 1.4rem;
             margin-bottom: 1rem;
-            box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+            box-shadow: 0 12px 28px rgba(38, 54, 74, 0.15);
         }
         .writing-hero h1 {
             margin: 0 0 0.35rem 0;
-            color: #172033;
-            font-size: 2.3rem;
+            color: #ffffff;
+            font-size: 2.15rem;
+            letter-spacing: 0;
         }
         .writing-hero p {
             margin: 0;
-            color: #4b5563;
+            color: #dce6f0;
+        }
+        .mission-panel {
+            background: #eaf7f5;
+            border: 1px solid #acd9d3;
+            border-left: 5px solid #258b86;
+            border-radius: 6px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .mission-panel strong { color: #175e5b; }
+        .mission-panel p { margin: 0.25rem 0; color: #243746; }
+        .mission-panel small { color: #4a5f6e; }
+        div[data-testid="stTextArea"] textarea {
+            background: #ffffff;
+            border-color: #cbd7e2;
+            line-height: 1.6;
         }
         div[data-testid="stVerticalBlockBorderWrapper"] {
-            border-radius: 8px;
+            border-radius: 6px;
         }
         [data-testid="stMetric"] {
             background: #ffffff;
-            border: 1px solid #d9e2ec;
-            border-radius: 8px;
+            border: 1px solid #d7e0e8;
+            border-top: 4px solid #258b86;
+            border-radius: 6px;
             padding: 0.75rem 1rem;
         }
         div.stButton > button[kind="primary"] {
             min-height: 48px;
             font-weight: 800;
-            background: linear-gradient(135deg, #2563eb, #0f766e);
-            border: 0;
-            box-shadow: 0 10px 18px rgba(37, 99, 235, 0.18);
+            background: #d95442;
+            border: 1px solid #bd4231;
+            color: #ffffff;
+            box-shadow: 0 8px 16px rgba(189, 66, 49, 0.17);
         }
         .stProgress > div > div > div > div {
-            background-color: #2563eb;
+            background-color: #258b86;
+        }
+        @media (max-width: 700px) {
+            .writing-hero h1 { font-size: 1.75rem; }
+            .block-container { padding-top: 0.75rem; }
         }
         </style>
         """,
@@ -2174,6 +2576,22 @@ def main() -> None:
 
     if "writing_level" not in st.session_state:
         st.session_state["writing_level"] = "Year 8"
+    if "writing_history" not in st.session_state:
+        st.session_state["writing_history"] = []
+    if "writing_focus_queue" not in st.session_state:
+        st.session_state["writing_focus_queue"] = {}
+    if "writing_xp" not in st.session_state:
+        st.session_state["writing_xp"] = 0
+    if "writing_best" not in st.session_state:
+        st.session_state["writing_best"] = 0
+    if "writing_completed" not in st.session_state:
+        st.session_state["writing_completed"] = 0
+    if "writing_last_change" not in st.session_state:
+        st.session_state["writing_last_change"] = None
+    if "writing_mission_brief" not in st.session_state:
+        st.session_state["writing_mission_brief"] = ""
+    if "writing_mission_targets" not in st.session_state:
+        st.session_state["writing_mission_targets"] = []
 
     st.markdown(
         """
@@ -2185,21 +2603,51 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
+    progress_columns = st.columns(4)
+    progress_columns[0].metric("Rank", writing_rank(st.session_state["writing_xp"]))
+    progress_columns[1].metric("Practice XP", st.session_state["writing_xp"])
+    progress_columns[2].metric("Drafts reviewed", st.session_state["writing_completed"])
+    progress_columns[3].metric("Personal best", f"{st.session_state['writing_best']}/100")
+    if st.session_state["writing_focus_queue"]:
+        remembered = ", ".join(
+            focus for focus, _ in sorted(st.session_state["writing_focus_queue"].items(), key=lambda item: -item[1])
+        )
+        st.caption(f"Remembered practice focus for the next mission: {remembered}.")
+
     left, right = st.columns([2, 1])
     with left:
+        if st.session_state.get("writing_mission_brief"):
+            targets = " | ".join(st.session_state.get("writing_mission_targets", []))
+            st.markdown(
+                f"""
+                <div class="mission-panel">
+                    <strong>Current writing mission</strong>
+                    <p>{html.escape(st.session_state['writing_mission_brief'])}</p>
+                    <small>Targets: {html.escape(targets)}</small>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         writing = st.text_area(
             "Paste persuasive writing",
             height=360,
             placeholder="Paste an introduction, body paragraphs, or full persuasive essay here.",
             key="writing_text",
         )
-        st.button("Submit writing", type="primary", use_container_width=True, on_click=submit_writing)
+        st.button("Submit writing", type="primary", width="stretch", on_click=submit_writing)
     with right:
+        st.selectbox("Year level", WRITING_LEVELS, key="writing_level")
         topic = st.text_input("Topic", placeholder="Example: school uniforms", key="topic_text")
         audience = st.text_input("Audience", placeholder="Example: Year 8 students", key="audience_text")
-        st.selectbox("Year level", WRITING_LEVELS, key="writing_level")
+        mission_labels = get_mission_labels(st.session_state["writing_level"])
+        if st.session_state.get("writing_mission_label") not in mission_labels:
+            st.session_state["writing_mission_label"] = mission_labels[0]
+        st.selectbox("Writing mission", mission_labels, key="writing_mission_label")
+        mission_col, next_col = st.columns(2)
+        mission_col.button("Load mission", width="stretch", on_click=load_writing_mission)
+        next_col.button("Target weak area", width="stretch", on_click=load_next_writing_mission)
         st.selectbox("Example", get_sample_labels(), key="sample_label")
-        st.button("Load selected sample", use_container_width=True, on_click=load_sample)
+        st.button("Load selected sample", width="stretch", on_click=load_sample)
 
     submitted_writing = st.session_state.get("submitted_writing", "")
     submitted_topic = st.session_state.get("submitted_topic", "")
@@ -2217,16 +2665,40 @@ def main() -> None:
 
     st.divider()
     metric_columns = st.columns(6)
-    metric_columns[0].metric("Overall", f"{analysis.overall_score}/100", score_label(analysis.overall_score))
+    metric_columns[0].metric("Overall", f"{analysis.overall_score}/100")
     metric_columns[1].metric("Reasoning", f"{analysis.reasoning.score}/100")
     metric_columns[2].metric(submitted_year_level, f"{analysis.curriculum.score}/100")
     metric_columns[3].metric("Arguments", f"{analysis.arguments.score}/100")
     metric_columns[4].metric("Strong words", f"{analysis.strong_words.score}/100")
     metric_columns[5].metric("Techniques", f"{analysis.techniques.score}/100")
 
-    tabs = st.tabs(["Feedback", "Word choice", "Improved draft", "Self-check", "Word bank", "Topic ideas"])
+    if st.session_state.get("submitted_source") == "Student draft":
+        change = st.session_state.get("writing_last_change")
+        if change is not None and change > 0:
+            st.success(f"Revision progress: this draft improved by {change} points from your previous submission.")
+        elif analysis.overall_score >= 85:
+            st.success("This is a highly controlled draft. Use the revision plan to polish precision and impact.")
+        else:
+            st.info("Choose the first revision action, improve that part of the draft, then submit again to compare progress.")
+
+    tabs = st.tabs(
+        [
+            "Feedback",
+            "Word choice",
+            "Improved draft",
+            "Revision plan",
+            "Word bank",
+            "Topic ideas",
+            "Export & progress",
+        ]
+    )
 
     with tabs[0]:
+        st.subheader("Your three most useful revisions")
+        st.dataframe(build_revision_actions(analysis), hide_index=True, width="stretch")
+        strongest = max(analysis_dimensions(analysis), key=lambda item: item[2].score)
+        st.caption(f"Current strength: {strongest[1]} ({strongest[2].score}/100). Keep this strength while revising weaker areas.")
+
         col_a, col_b = st.columns(2)
         with col_a:
             render_score_card("1. Valid reasoning", analysis.reasoning)
@@ -2257,19 +2729,7 @@ def main() -> None:
     with tabs[2]:
         improved = build_improved_draft(submitted_writing, submitted_topic, submitted_audience)
         st.text_area("Improved draft", improved, height=420)
-        report = build_feedback_report(
-            analysis,
-            submitted_writing,
-            submitted_topic,
-            submitted_audience,
-            submitted_year_level,
-        )
-        st.download_button(
-            "Download feedback",
-            data=report,
-            file_name="persuasive_writing_feedback.txt",
-            mime="text/plain",
-        )
+        st.caption("Use this as a coach's model. Keep your own ideas and rewrite deliberately rather than copying it unchanged.")
 
     with tabs[3]:
         render_checklist(analysis, submitted_year_level)
@@ -2279,6 +2739,98 @@ def main() -> None:
 
     with tabs[5]:
         render_topic_ideas()
+
+    with tabs[6]:
+        st.subheader("Export this writing result")
+        st.caption("The print-ready HTML report includes the score profile, revision priorities, original draft and improved model.")
+        report = build_feedback_report(
+            analysis,
+            submitted_writing,
+            submitted_topic,
+            submitted_audience,
+            submitted_year_level,
+        )
+        html_report = build_html_feedback_report(
+            analysis,
+            submitted_writing,
+            submitted_topic,
+            submitted_audience,
+            submitted_year_level,
+        )
+        safe_topic = re.sub(r"[^a-z0-9]+", "_", submitted_topic.lower()).strip("_") or "persuasive_writing"
+        current_record = build_writing_record(
+            analysis,
+            submitted_writing,
+            submitted_topic,
+            submitted_audience,
+            submitted_year_level,
+            st.session_state.get("writing_last_change"),
+        )
+        export_1, export_2 = st.columns(2)
+        export_1.download_button(
+            "Download print-ready report",
+            data=html_report,
+            file_name=f"{safe_topic}_feedback.html",
+            mime="text/html",
+            width="stretch",
+        )
+        export_2.download_button(
+            "Download detailed feedback",
+            data=report,
+            file_name=f"{safe_topic}_feedback.txt",
+            mime="text/plain",
+            width="stretch",
+        )
+
+        st.subheader("Export progress")
+        history = st.session_state["writing_history"]
+        progress_1, progress_2 = st.columns(2)
+        progress_1.download_button(
+            "Download this result (CSV)",
+            data=writing_history_csv([current_record]),
+            file_name=f"{safe_topic}_result.csv",
+            mime="text/csv",
+            width="stretch",
+        )
+        progress_2.download_button(
+            "Download all writing results (CSV)",
+            data=writing_history_csv(history),
+            file_name="writing_progress.csv",
+            mime="text/csv",
+            width="stretch",
+            disabled=not history,
+        )
+        portfolio_payload = {
+            "app": "Year 7-9 Persuasive Writing Coach",
+            "exported": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "xp": st.session_state["writing_xp"],
+            "rank": writing_rank(st.session_state["writing_xp"]),
+            "personal_best": st.session_state["writing_best"],
+            "focus_memory": st.session_state["writing_focus_queue"],
+            "history": history,
+        }
+        st.download_button(
+            "Download writing portfolio (JSON)",
+            data=json.dumps(portfolio_payload, indent=2),
+            file_name="writing_portfolio.json",
+            mime="application/json",
+            width="stretch",
+            disabled=not history,
+        )
+
+        if history:
+            history_rows = [
+                {
+                    "Date": item["date"],
+                    "Year": item["year_level"],
+                    "Topic": item["topic"],
+                    "Score": item["overall"],
+                    "Change": item["change"] if item["change"] is not None else "First draft",
+                    "Next focus": item["priority_focus"],
+                }
+                for item in history
+            ]
+            st.dataframe(history_rows, hide_index=True, width="stretch")
 
 
 if __name__ == "__main__":
