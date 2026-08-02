@@ -1014,6 +1014,10 @@ def choose_quiz(
     return selected
 
 
+def count_unseen_questions(level, topic, difficulty, seen_ids):
+    return len([question for question in filter_questions(level, topic, difficulty) if question["id"] not in seen_ids])
+
+
 def mark_quiz(questions, answers):
     results = []
     for question in questions:
@@ -1202,6 +1206,10 @@ def render_streamlit_app():
         st.session_state["math_practice_mode"] = "Smart mix"
     if "math_review_queue" not in st.session_state:
         st.session_state["math_review_queue"] = {}
+    if "math_seen_question_ids" not in st.session_state:
+        st.session_state["math_seen_question_ids"] = []
+    if "math_fresh_notice" not in st.session_state:
+        st.session_state["math_fresh_notice"] = ""
     if "math_history" not in st.session_state:
         st.session_state["math_history"] = []
     if "math_xp" not in st.session_state:
@@ -1219,6 +1227,8 @@ def render_streamlit_app():
             question_id: random.sample(get_question(question_id)["choices"], len(get_question(question_id)["choices"]))
             for question_id in st.session_state["math_quiz_ids"]
         }
+    seen_ids = list(dict.fromkeys(st.session_state["math_seen_question_ids"] + st.session_state["math_quiz_ids"]))
+    st.session_state["math_seen_question_ids"] = seen_ids
     if st.session_state["math_level"] not in AMC_LEVELS:
         st.session_state["math_level"] = "AMC 7"
     if st.session_state["math_difficulty"] not in DIFFICULTIES:
@@ -1236,7 +1246,15 @@ def render_streamlit_app():
             "Fresh questions": 0.0,
         }[mode]
         review_families = list(st.session_state["math_review_queue"]) if review_ratio else []
-        previous_ids = st.session_state.get("math_quiz_ids", [])
+        seen_ids = set(st.session_state.get("math_seen_question_ids", []))
+        available_questions = filter_questions(level, topic, difficulty)
+        unseen_count = len([question for question in available_questions if question["id"] not in seen_ids])
+        exclude_ids = seen_ids
+        st.session_state["math_fresh_notice"] = ""
+        if unseen_count < min(length, len(available_questions)):
+            exclude_ids = set()
+            st.session_state["math_seen_question_ids"] = []
+            st.session_state["math_fresh_notice"] = "You have used all fresh questions for these filters, so this starts a new round."
         questions = choose_quiz(
             level,
             topic,
@@ -1244,9 +1262,12 @@ def render_streamlit_app():
             length,
             review_families=review_families,
             review_ratio=review_ratio,
-            exclude_ids=previous_ids,
+            exclude_ids=exclude_ids,
         )
         st.session_state["math_quiz_ids"] = [question["id"] for question in questions]
+        st.session_state["math_seen_question_ids"] = list(
+            dict.fromkeys(st.session_state.get("math_seen_question_ids", []) + st.session_state["math_quiz_ids"])
+        )
         st.session_state["math_choice_orders"] = {
             question["id"]: random.sample(question["choices"], len(question["choices"]))
             for question in questions
@@ -1346,6 +1367,23 @@ def render_streamlit_app():
             help="Smart mix adds a few questions related to earlier mistakes. Review mode adds more.",
         )
         st.button("Take challenge!", type="primary", width="stretch", on_click=new_quiz)
+        seen_for_filters = set(st.session_state.get("math_seen_question_ids", []))
+        available_for_filters = len(
+            filter_questions(
+                st.session_state["math_level"],
+                st.session_state["math_topic"],
+                st.session_state["math_difficulty"],
+            )
+        )
+        fresh_for_filters = count_unseen_questions(
+            st.session_state["math_level"],
+            st.session_state["math_topic"],
+            st.session_state["math_difficulty"],
+            seen_for_filters,
+        )
+        st.caption(f"Fresh questions left for this selection: {fresh_for_filters}/{available_for_filters}.")
+        if st.session_state["math_fresh_notice"]:
+            st.info(st.session_state["math_fresh_notice"])
     with tips:
         st.markdown(
             """
