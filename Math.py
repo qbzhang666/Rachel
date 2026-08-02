@@ -910,7 +910,291 @@ def build_variant_questions():
     return variants
 
 
+def build_amc_extension_questions():
+    """Create original late-Junior and Intermediate-bridge AMC-style questions."""
+    questions = []
+    levels = ["AMC 7", "AMC 8", "AMC 9"]
+    difficulties = ["Core", "Challenge", "Challenge", "Extension", "Extension"]
+
+    for level_offset, level in enumerate(levels, start=1):
+        for variant in range(1, 6):
+            difficulty = difficulties[variant - 1]
+
+            base = 7 + 2 * level_offset + variant
+            exponent = 11 + 3 * variant + level_offset
+            addend = 3 + 2 * variant
+            units = (pow(base, exponent, 10) + pow(addend, exponent + 1, 10)) % 10
+            questions.append(
+                {
+                    "id": f"e{level_offset}nu{variant:02d}",
+                    "level": level,
+                    "topic": "Number",
+                    "difficulty": difficulty,
+                    "practice_family": "units-digit-cycles",
+                    "prompt": f"What is the units digit of {base}^{exponent} + {addend}^{exponent + 1}?",
+                    "choices": [str(value) for value in [units, (units + 2) % 10, (units + 5) % 10, (units + 7) % 10]],
+                    "answer": str(units),
+                    "hint": "",
+                    "solution": f"Only the units digits matter. The powers of {base % 10} and {addend % 10} repeat in cycles, so {base}^{exponent} has units digit {pow(base, exponent, 10)} and {addend}^{exponent + 1} has units digit {pow(addend, exponent + 1, 10)}. Their sum has units digit {units}.",
+                }
+            )
+
+            twos = 2 + level_offset + (variant % 3)
+            threes = 1 + variant % 3
+            fives = 1 + (level_offset + variant) % 2
+            number = (2**twos) * (3**threes) * (5**fives)
+            even_divisors = twos * (threes + 1) * (fives + 1)
+            questions.append(
+                {
+                    "id": f"e{level_offset}nd{variant:02d}",
+                    "level": level,
+                    "topic": "Number",
+                    "difficulty": difficulty,
+                    "practice_family": "divisor-counting",
+                    "prompt": f"How many positive divisors of {number} are even?",
+                    "choices": _integer_choices(even_divisors, [even_divisors - twos, even_divisors + threes + 1, (twos + 1) * (threes + 1) * (fives + 1)]),
+                    "answer": str(even_divisors),
+                    "hint": "",
+                    "solution": f"{number} = 2^{twos} x 3^{threes} x 5^{fives}. An even divisor must use 2^1 up to 2^{twos}, giving {twos} choices for the power of 2. The powers of 3 and 5 give {threes + 1} and {fives + 1} choices, so there are {twos} x {threes + 1} x {fives + 1} = {even_divisors}.",
+                }
+            )
+
+            blue = 18 + 4 * level_offset + 3 * variant
+            start_red = blue * (variant + 1) // (variant + 2)
+            if start_red * (variant + 2) != blue * (variant + 1):
+                blue = (variant + 2) * (6 + level_offset + variant)
+                start_red = (variant + 1) * (6 + level_offset + variant)
+            target_red = blue * (variant + 3) // (variant + 2)
+            added_red = target_red - start_red
+            questions.append(
+                {
+                    "id": f"e{level_offset}fr{variant:02d}",
+                    "level": level,
+                    "topic": "Fractions, decimals and percentages",
+                    "difficulty": difficulty,
+                    "practice_family": "ratio-change",
+                    "prompt": f"A box has red and blue counters in the ratio {variant + 1}:{variant + 2}. After {added_red} red counters are added, the ratio becomes {variant + 3}:{variant + 2}. How many blue counters are in the box?",
+                    "choices": _integer_choices(blue, [start_red, target_red, blue + added_red]),
+                    "answer": str(blue),
+                    "hint": "",
+                    "solution": f"The blue part stays the same. The red part increases from {variant + 1} parts to {variant + 3} parts, an increase of 2 parts. Since 2 parts equals {added_red}, 1 part is {added_red // 2}. The blue amount is {variant + 2} parts, so {variant + 2} x {added_red // 2} = {blue}.",
+                }
+            )
+
+            marked_price = 120 + 20 * level_offset + 15 * variant
+            discount = 10 + 5 * variant
+            sale_price = marked_price * (100 - discount) // 100
+            increase = 5 + 5 * level_offset
+            final_price = sale_price * (100 + increase) // 100
+            questions.append(
+                {
+                    "id": f"e{level_offset}fp{variant:02d}",
+                    "level": level,
+                    "topic": "Fractions, decimals and percentages",
+                    "difficulty": difficulty,
+                    "practice_family": "successive-percentages",
+                    "prompt": f"A price of ${marked_price} is reduced by {discount}% and then increased by {increase}%. What is the final price?",
+                    "choices": [f"${value}" for value in [final_price, sale_price, marked_price - discount + increase, marked_price]],
+                    "answer": f"${final_price}",
+                    "hint": "",
+                    "solution": f"After the {discount}% reduction, the price is ${marked_price} x {(100 - discount) / 100:g} = ${sale_price}. Increasing that by {increase}% gives ${sale_price} x {(100 + increase) / 100:g} = ${final_price}.",
+                }
+            )
+
+            start = 2 + level_offset
+            step = 2 + variant
+            term_number = 9 + level_offset + variant
+            target = start + (term_number - 1) * step
+            questions.append(
+                {
+                    "id": f"e{level_offset}ap{variant:02d}",
+                    "level": level,
+                    "topic": "Algebra and patterns",
+                    "difficulty": difficulty,
+                    "practice_family": "nth-term-reasoning",
+                    "prompt": f"A sequence starts {start}, {start + step}, {start + 2 * step}, ... Which term is equal to {target}?",
+                    "choices": _integer_choices(term_number, [term_number - 1, term_number + 1, target // step]),
+                    "answer": str(term_number),
+                    "hint": "",
+                    "solution": f"The nth term is {start} + (n - 1) x {step}. Solve {start} + (n - 1) x {step} = {target}. Then (n - 1) x {step} = {target - start}, so n - 1 = {term_number - 1} and n = {term_number}.",
+                }
+            )
+
+            x_value = 3 + level_offset + variant
+            left_mult = 2 + variant
+            right_mult = 4 + level_offset
+            left_add = 5 + 2 * variant
+            right_add = left_mult * x_value + left_add - right_mult * x_value
+            questions.append(
+                {
+                    "id": f"e{level_offset}aw{variant:02d}",
+                    "level": level,
+                    "topic": "Algebra and patterns",
+                    "difficulty": difficulty,
+                    "practice_family": "equations-with-unknowns",
+                    "prompt": f"The expressions {left_mult}x + {left_add} and {right_mult}x + {right_add} have the same value. What is x?",
+                    "choices": _integer_choices(x_value, [x_value - 2, x_value + 2, left_add - right_add]),
+                    "answer": str(x_value),
+                    "hint": "",
+                    "solution": f"Set the expressions equal: {left_mult}x + {left_add} = {right_mult}x + {right_add}. Moving x terms to one side and numbers to the other gives x = {x_value}.",
+                }
+            )
+
+            sides = 7 + level_offset + variant
+            skip = 2 + (variant % 3)
+            angle = (skip * 180) // sides if (skip * 180) % sides == 0 else round(skip * 180 / sides, 1)
+            questions.append(
+                {
+                    "id": f"e{level_offset}gc{variant:02d}",
+                    "level": level,
+                    "topic": "Geometry",
+                    "difficulty": difficulty,
+                    "practice_family": "circle-angle-reasoning",
+                    "prompt": f"{sides} points are equally spaced on a circle. An angle at one point cuts off an arc of {skip} spaces. What is the size of the angle?",
+                    "choices": [f"{value} degrees" for value in [angle, round(360 * skip / sides, 1), round(90 * skip / sides, 1), round(180 * (skip + 1) / sides, 1)]],
+                    "answer": f"{angle} degrees",
+                    "hint": "",
+                    "solution": f"The central angle for {skip} spaces is {skip}/{sides} of 360 degrees. An angle at the circumference is half the central angle, so the angle is {skip}/{sides} x 180 = {angle} degrees.",
+                }
+            )
+
+            polygon_sides = [6, 8, 9, 10, 12][variant - 1]
+            exterior = 360 / polygon_sides
+            steps = polygon_sides + 2 * variant + level_offset
+            total_turn = int(steps * exterior)
+            questions.append(
+                {
+                    "id": f"e{level_offset}gp{variant:02d}",
+                    "level": level,
+                    "topic": "Geometry",
+                    "difficulty": difficulty,
+                    "practice_family": "regular-polygon-turning",
+                    "prompt": f"A student walks around a regular {polygon_sides}-sided polygon, turning through each exterior angle. After turning a total of {total_turn} degrees, how many sides has the student walked?",
+                    "choices": [str(value) for value in [steps, polygon_sides, steps - 1, steps + 1]],
+                    "answer": str(steps),
+                    "hint": "",
+                    "solution": f"Each exterior angle is 360/{polygon_sides} = {exterior:g} degrees. The number of sides walked is {total_turn} divided by {exterior:g}, which is {steps}.",
+                }
+            )
+
+            height = 3 + level_offset
+            width = 5 + variant + level_offset
+            matches = 2 * height * width + height + width
+            questions.append(
+                {
+                    "id": f"e{level_offset}mm{variant:02d}",
+                    "level": level,
+                    "topic": "Measurement",
+                    "difficulty": difficulty,
+                    "practice_family": "matchstick-rectangles",
+                    "prompt": f"A complete grid of unit squares is {height} squares high and {width} squares wide. How many matches are needed to make all grid lines?",
+                    "choices": _integer_choices(matches, [height * width * 4, 2 * height * width, matches - height]),
+                    "answer": str(matches),
+                    "hint": "",
+                    "solution": f"There are {height + 1} horizontal grid lines each using {width} matches, and {width + 1} vertical grid lines each using {height} matches. Total = ({height + 1} x {width}) + ({width + 1} x {height}) = {matches}.",
+                }
+            )
+
+            outer = 12 + 2 * level_offset + 2 * variant
+            inner = outer - 4
+            shaded = outer * outer - inner * inner
+            questions.append(
+                {
+                    "id": f"e{level_offset}ma{variant:02d}",
+                    "level": level,
+                    "topic": "Measurement",
+                    "difficulty": difficulty,
+                    "practice_family": "area-by-subtraction",
+                    "prompt": f"A square frame has outside side length {outer} cm and inside square hole side length {inner} cm. What is the area of the frame?",
+                    "choices": _integer_choices(shaded, [outer * inner, shaded - 8, shaded + 8], " square cm"),
+                    "answer": f"{shaded} square cm",
+                    "hint": "",
+                    "solution": f"Subtract the hole from the outside square: {outer}^2 - {inner}^2 = {outer * outer} - {inner * inner} = {shaded} square cm.",
+                }
+            )
+
+            rows = 4 + level_offset
+            cols = 5 + variant
+            total_paths = 1
+            down_moves = rows - 1
+            right_moves = cols - 1
+            for i in range(1, min(down_moves, right_moves) + 1):
+                total_paths = total_paths * (max(down_moves, right_moves) + i) // i
+            questions.append(
+                {
+                    "id": f"e{level_offset}dc{variant:02d}",
+                    "level": level,
+                    "topic": "Data and chance",
+                    "difficulty": difficulty,
+                    "practice_family": "counting-paths",
+                    "prompt": f"On a grid, a path from the top-left corner to the bottom-right corner of a {rows} by {cols} array of dots uses only moves right or down. How many different shortest paths are possible?",
+                    "choices": _integer_choices(total_paths, [total_paths - rows, total_paths + cols, down_moves * right_moves]),
+                    "answer": str(total_paths),
+                    "hint": "",
+                    "solution": f"A shortest path needs {right_moves} right moves and {down_moves} down moves, {right_moves + down_moves} moves in total. Choose the positions of the {min(down_moves, right_moves)} less frequent moves, giving {total_paths} paths.",
+                }
+            )
+
+            red = 3 + variant
+            blue = 4 + level_offset
+            total = red + blue
+            favourable = red * blue
+            denominator = total * (total - 1)
+            questions.append(
+                {
+                    "id": f"e{level_offset}dp{variant:02d}",
+                    "level": level,
+                    "topic": "Data and chance",
+                    "difficulty": difficulty,
+                    "practice_family": "probability-without-replacement",
+                    "prompt": f"A bag has {red} red counters and {blue} blue counters. Two counters are drawn without replacement. What is the probability that they are different colours?",
+                    "choices": [f"{value}/{denominator}" for value in [2 * favourable, favourable, red * (red - 1) + blue * (blue - 1), denominator - 2 * favourable]],
+                    "answer": f"{2 * favourable}/{denominator}",
+                    "hint": "",
+                    "solution": f"Different colours can be red then blue or blue then red. The number of ordered favourable draws is {red} x {blue} + {blue} x {red} = {2 * favourable}. The number of ordered draws is {total} x {total - 1} = {denominator}, so the probability is {2 * favourable}/{denominator}.",
+                }
+            )
+
+            boxes = 5 + variant + level_offset
+            objects = 2 * boxes + level_offset
+            guarantee = boxes + 1
+            questions.append(
+                {
+                    "id": f"e{level_offset}pg{variant:02d}",
+                    "level": level,
+                    "topic": "Problem solving",
+                    "difficulty": difficulty,
+                    "practice_family": "pigeonhole-guarantee",
+                    "prompt": f"{objects} cards are placed into {boxes} labelled boxes. What is the smallest number of cards that guarantees at least one box contains at least 2 cards?",
+                    "choices": _integer_choices(guarantee, [boxes, boxes + 2, objects - boxes]),
+                    "answer": str(guarantee),
+                    "hint": "",
+                    "solution": f"You can put 1 card in each of the {boxes} boxes without making a pair. The next card, card number {boxes + 1}, must go into a box that already has a card. So the guarantee number is {guarantee}.",
+                }
+            )
+
+            people = 4 + level_offset + variant
+            handshakes = people * (people - 1) // 2
+            questions.append(
+                {
+                    "id": f"e{level_offset}ph{variant:02d}",
+                    "level": level,
+                    "topic": "Problem solving",
+                    "difficulty": difficulty,
+                    "practice_family": "pair-counting",
+                    "prompt": f"At a meeting, each of {people} people shakes hands with every other person exactly once. How many handshakes occur?",
+                    "choices": _integer_choices(handshakes, [people * (people - 1), handshakes - people, handshakes + people]),
+                    "answer": str(handshakes),
+                    "hint": "",
+                    "solution": f"Each handshake is a pair of people. The number of pairs is {people} x {people - 1} / 2 = {handshakes}.",
+                }
+            )
+
+    return questions
+
+
 QUESTION_BANK.extend(build_variant_questions())
+QUESTION_BANK.extend(build_amc_extension_questions())
 
 for question in QUESTION_BANK:
     question.setdefault("level", "AMC 7")
@@ -921,9 +1205,10 @@ def answer_choices(question):
     choices = []
     distractor_count = 0
     for choice in question["choices"]:
+        if choice in choices:
+            continue
         if choice == question["answer"]:
-            if choice not in choices:
-                choices.append(choice)
+            choices.append(choice)
         elif distractor_count < 3:
             choices.append(choice)
             distractor_count += 1
@@ -941,7 +1226,7 @@ for question in QUESTION_BANK:
 
 AMC_LEVELS = ["All levels", "AMC 7", "AMC 8", "AMC 9"]
 TOPICS = ["All topics"] + sorted({question["topic"] for question in QUESTION_BANK})
-DIFFICULTIES = ["All difficulties", "Warm-up", "Core", "Challenge"]
+DIFFICULTIES = ["All difficulties", "Warm-up", "Core", "Challenge", "Extension"]
 PRACTICE_MODES = ["Smart mix", "Review my mistakes", "Fresh questions"]
 
 TOPIC_STRATEGIES = {
@@ -1085,6 +1370,28 @@ def results_to_csv(results):
                 "Result": "Correct" if result["correct"] else "Review",
                 "Worked solution": question["solution"],
                 "Next-time strategy": TOPIC_STRATEGIES[question["topic"]],
+            }
+        )
+    return output.getvalue()
+
+
+def history_to_csv(history):
+    output = io.StringIO()
+    fieldnames = ["Attempt", "Date", "Level", "Topic", "Difficulty", "Score", "Total", "Accuracy", "Change"]
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    for index, item in enumerate(history, start=1):
+        writer.writerow(
+            {
+                "Attempt": index,
+                "Date": item["date"],
+                "Level": item["level"],
+                "Topic": item["topic"],
+                "Difficulty": item["difficulty"],
+                "Score": item["score"],
+                "Total": item["total"],
+                "Accuracy": f"{item['accuracy']}%",
+                "Change": "" if item["change"] is None else f"{item['change']} percentage points",
             }
         )
     return output.getvalue()
@@ -1400,6 +1707,33 @@ def render_streamlit_app():
     progress_columns[1].metric("Practice XP", st.session_state["math_xp"])
     progress_columns[2].metric("Completed", st.session_state["math_streak"])
     progress_columns[3].metric("Review queue", sum(st.session_state["math_review_queue"].values()))
+
+    with st.expander("Practice record", expanded=bool(st.session_state["math_history"])):
+        if st.session_state["math_history"]:
+            record_rows = []
+            for index, item in enumerate(st.session_state["math_history"], start=1):
+                record_rows.append(
+                    {
+                        "Attempt": index,
+                        "Date": item["date"],
+                        "Level": item["level"],
+                        "Topic": item["topic"],
+                        "Difficulty": item["difficulty"],
+                        "Score": f"{item['score']}/{item['total']}",
+                        "Accuracy": f"{item['accuracy']}%",
+                        "Change": "-" if item["change"] is None else f"{item['change']} pts",
+                    }
+                )
+            st.dataframe(record_rows, hide_index=True, width="stretch")
+            st.download_button(
+                "Export practice record (CSV)",
+                data=history_to_csv(st.session_state["math_history"]),
+                file_name=f"math_practice_record_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                mime="text/csv",
+                width="stretch",
+            )
+        else:
+            st.info("Submit a challenge to start the practice record.")
 
     questions = [get_question(question_id) for question_id in st.session_state["math_quiz_ids"]]
     if not questions:
