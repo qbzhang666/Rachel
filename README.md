@@ -65,6 +65,17 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - All three speaking tasks: guided interview, information cards and interactive roleplay
 - Unticked answers, clear submission confirmation, progress XP and downloadable records
 
+## PLC Year 7 level test prep
+
+- Independent PLC-style preparation app in `PLC_Year7.py`
+- Original practice questions only; not official PLC or Studocu material
+- Mixed mock tests for Year 7 entry-level maths, reading, grammar and vocabulary
+- Extension maths questions for stronger placement readiness
+- Reading passages with inference, vocabulary, tone and evidence questions
+- Writing tasks for persuasive, creative and analytical responses
+- Blank answer choices, submission confirmation, worked solutions and exam-trap feedback
+- Practice record and CSV exports for parent/student review
+
 ## Run locally
 
 ```powershell
@@ -94,6 +105,12 @@ For the DELF Junior A1 French preparation app:
 
 ```powershell
 python -m streamlit run Delf_A1.py
+```
+
+For the PLC Year 7 level test preparation app:
+
+```powershell
+python -m streamlit run PLC_Year7.py
 ```
 
 On Streamlit Community Cloud, choose `obby_game.py` as the main file.
