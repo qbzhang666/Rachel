@@ -481,11 +481,794 @@ WRITING_PROMPTS = [
 ]
 
 
+def number_choices(answer, distractors, suffix=""):
+    values = []
+    for value in [answer, *distractors]:
+        if value not in values:
+            values.append(value)
+    probe = 1
+    while len(values) < 4:
+        candidate = answer + probe
+        if candidate not in values:
+            values.append(candidate)
+        probe += 1
+    return [f"{value}{suffix}" for value in values[:4]]
+
+
+def money_choices(answer, distractors):
+    values = []
+    for value in [answer, *distractors]:
+        if value not in values:
+            values.append(value)
+    probe = 5
+    while len(values) < 4:
+        candidate = answer + probe
+        if candidate not in values:
+            values.append(candidate)
+        probe += 5
+    return [f"${value:g}" for value in values[:4]]
+
+
+def build_extra_math_questions():
+    questions = []
+    for variant in range(1, 9):
+        difficulty = "Core" if variant <= 2 else "Challenge" if variant <= 5 else "Extension"
+
+        start = 14 + variant
+        count = 3 + (variant % 3)
+        total = count * start + count * (count - 1) // 2
+        largest = start + count - 1
+        questions.append(
+            {
+                "id": f"mx_num_consecutive_{variant}",
+                "topic": "Number reasoning",
+                "difficulty": difficulty,
+                "prompt": f"The sum of {count} consecutive whole numbers is {total}. What is the largest number?",
+                "choices": number_choices(largest, [start, largest - 1, largest + count]),
+                "answer": str(largest),
+                "solution": f"The numbers start at {start} and run for {count} terms, so they are {', '.join(str(start + i) for i in range(count))}. The largest is {largest}.",
+                "trap": "Use the average to locate the middle, then check the whole set.",
+            }
+        )
+
+        divisor = 6 + variant
+        quotient = 8 + 2 * variant
+        remainder = variant % divisor
+        value = divisor * quotient + remainder
+        questions.append(
+            {
+                "id": f"mx_num_remainder_{variant}",
+                "topic": "Number reasoning",
+                "difficulty": difficulty,
+                "prompt": f"What is the remainder when {value} is divided by {divisor}?",
+                "choices": number_choices(remainder, [remainder + 1, divisor - remainder, divisor - 1]),
+                "answer": str(remainder),
+                "solution": f"{divisor} x {quotient} = {divisor * quotient}. The difference between {value} and {divisor * quotient} is {remainder}.",
+                "trap": "The remainder must be smaller than the divisor.",
+            }
+        )
+
+        base = 7 + variant
+        exponent = 12 + variant
+        units = pow(base, exponent, 10)
+        questions.append(
+            {
+                "id": f"mx_num_units_{variant}",
+                "topic": "Number reasoning",
+                "difficulty": "Extension",
+                "prompt": f"What is the units digit of {base}^{exponent}?",
+                "choices": number_choices(units, [(units + 2) % 10, (units + 4) % 10, (units + 6) % 10]),
+                "answer": str(units),
+                "solution": f"Only the units digit matters. Powers of {base % 10} repeat in a cycle, and the {exponent}th power has units digit {units}.",
+                "trap": "Look for the units-digit cycle instead of trying to calculate the whole power.",
+            }
+        )
+
+        total_students = 36 + 4 * variant
+        numerator = 2 + variant % 3
+        denominator = 6
+        selected = total_students * numerator // denominator
+        if total_students * numerator % denominator:
+            total_students += denominator - (total_students * numerator % denominator)
+            selected = total_students * numerator // denominator
+        not_selected = total_students - selected
+        questions.append(
+            {
+                "id": f"mx_frac_remaining_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": difficulty,
+                "prompt": f"In a group of {total_students} students, {numerator}/6 join a workshop. How many do not join?",
+                "choices": number_choices(not_selected, [selected, not_selected - 2, not_selected + 3]),
+                "answer": str(not_selected),
+                "solution": f"{numerator}/6 of {total_students} is {selected}. The number who do not join is {total_students} - {selected} = {not_selected}.",
+                "trap": "The question asks for the students who do not join.",
+            }
+        )
+
+        ratio_a = 2 + variant % 4
+        ratio_b = ratio_a + 3
+        part = 4 + variant
+        total = (ratio_a + ratio_b) * part
+        b_amount = ratio_b * part
+        questions.append(
+            {
+                "id": f"mx_frac_ratio_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": difficulty,
+                "prompt": f"The ratio of novels to information books is {ratio_a}:{ratio_b}. If there are {total} books altogether, how many are information books?",
+                "choices": number_choices(b_amount, [ratio_a * part, total - b_amount, b_amount + part]),
+                "answer": str(b_amount),
+                "solution": f"There are {ratio_a + ratio_b} parts. Each part is {total} / {ratio_a + ratio_b} = {part}. Information books are {ratio_b} parts, so {ratio_b} x {part} = {b_amount}.",
+                "trap": "Use the total number of ratio parts first.",
+            }
+        )
+
+        original = 100 + 20 * variant
+        discount = 10 + 5 * (variant % 5)
+        sale = original * (100 - discount) // 100
+        questions.append(
+            {
+                "id": f"mx_frac_percent_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": "Challenge" if variant <= 5 else "Extension",
+                "prompt": f"An item costing ${original} is reduced by {discount}%. What is the sale price?",
+                "choices": money_choices(sale, [original - discount, original + discount, original * discount // 100]),
+                "answer": f"${sale:g}",
+                "solution": f"{discount}% of ${original} is ${original * discount // 100}. The sale price is ${original} - ${original * discount // 100} = ${sale}.",
+                "trap": "The discount amount is not the final price.",
+            }
+        )
+
+        coefficient = 3 + variant
+        answer = 5 + variant
+        constant = 7 + 2 * variant
+        right = coefficient * answer + constant
+        questions.append(
+            {
+                "id": f"mx_alg_linear_{variant}",
+                "topic": "Algebra and patterns",
+                "difficulty": difficulty,
+                "prompt": f"If {coefficient}x + {constant} = {right}, what is x?",
+                "choices": number_choices(answer, [answer - 2, answer + 2, coefficient + answer]),
+                "answer": str(answer),
+                "solution": f"Subtract {constant}: {coefficient}x = {right - constant}. Divide by {coefficient}: x = {answer}.",
+                "trap": "Undo the addition before undoing the multiplication.",
+            }
+        )
+
+        first = 4 + variant
+        step = 3 + variant % 4
+        term_no = 10 + variant
+        term = first + (term_no - 1) * step
+        questions.append(
+            {
+                "id": f"mx_alg_nth_{variant}",
+                "topic": "Algebra and patterns",
+                "difficulty": "Challenge",
+                "prompt": f"A sequence starts {first}, {first + step}, {first + 2 * step}, ... Which term is {term}?",
+                "choices": [f"{item}th" for item in number_choices(term_no, [term_no - 1, term_no + 1, term_no + 2])],
+                "answer": f"{term_no}th",
+                "solution": f"The nth term is {first} + (n - 1) x {step}. Solve {first} + (n - 1) x {step} = {term}, so n = {term_no}.",
+                "trap": "The answer is the term number, not the term value.",
+            }
+        )
+
+        n = 6 + variant
+        added = 2 * n + 1
+        questions.append(
+            {
+                "id": f"mx_alg_squaregrowth_{variant}",
+                "topic": "Algebra and patterns",
+                "difficulty": "Extension",
+                "prompt": f"A square-dot pattern has n^2 dots in figure n. How many dots are added from figure {n} to figure {n + 1}?",
+                "choices": number_choices(added, [2 * n, n + 1, (n + 1) ** 2]),
+                "answer": str(added),
+                "solution": f"Figure {n + 1} has {(n + 1) ** 2} dots and figure {n} has {n ** 2}. The increase is {(n + 1) ** 2} - {n ** 2} = {added}.",
+                "trap": "Find the increase, not the total in the next figure.",
+            }
+        )
+
+        angle_a = 35 + 3 * variant
+        angle_b = 75 - variant
+        third = 180 - angle_a - angle_b
+        questions.append(
+            {
+                "id": f"mx_geo_triangle_{variant}",
+                "topic": "Geometry and measurement",
+                "difficulty": difficulty,
+                "prompt": f"A triangle has angles of {angle_a} degrees and {angle_b} degrees. What is the third angle?",
+                "choices": number_choices(third, [180 - angle_a, 180 - angle_b, third + 10], " degrees"),
+                "answer": f"{third} degrees",
+                "solution": f"Angles in a triangle add to 180 degrees. 180 - {angle_a} - {angle_b} = {third} degrees.",
+                "trap": "Subtract both known angles.",
+            }
+        )
+
+        width = 6 + variant
+        length = width + 4 + variant % 3
+        perimeter = 2 * (width + length)
+        area = width * length
+        questions.append(
+            {
+                "id": f"mx_geo_rectangle_{variant}",
+                "topic": "Geometry and measurement",
+                "difficulty": "Challenge",
+                "prompt": f"A rectangle has perimeter {perimeter} cm and width {width} cm. What is its area?",
+                "choices": number_choices(area, [perimeter * width, area + width, area - length], " square cm"),
+                "answer": f"{area} square cm",
+                "solution": f"Length + width = {perimeter // 2}. The length is {perimeter // 2} - {width} = {length}. Area = {length} x {width} = {area} square cm.",
+                "trap": "Half the perimeter is length plus width.",
+            }
+        )
+
+        outer = 12 + variant
+        inner = outer - 4
+        frame = outer * outer - inner * inner
+        questions.append(
+            {
+                "id": f"mx_geo_frame_{variant}",
+                "topic": "Geometry and measurement",
+                "difficulty": "Extension",
+                "prompt": f"A square frame has outside side length {outer} cm and a square hole of side length {inner} cm. What is the area of the frame?",
+                "choices": number_choices(frame, [outer * inner, frame - 8, frame + 8], " square cm"),
+                "answer": f"{frame} square cm",
+                "solution": f"Subtract the inner square from the outer square: {outer}^2 - {inner}^2 = {outer * outer} - {inner * inner} = {frame}.",
+                "trap": "Use area subtraction, not perimeter.",
+            }
+        )
+
+        known = [8 + variant, 11 + variant, 14 + 2 * variant, 17 + variant]
+        mean = 15 + variant
+        missing = 5 * mean - sum(known)
+        questions.append(
+            {
+                "id": f"mx_data_mean_{variant}",
+                "topic": "Data and probability",
+                "difficulty": difficulty,
+                "prompt": f"Five numbers have a mean of {mean}. Four numbers are {known[0]}, {known[1]}, {known[2]} and {known[3]}. What is the fifth number?",
+                "choices": number_choices(missing, [mean, missing - 2, missing + 3]),
+                "answer": str(missing),
+                "solution": f"The total must be 5 x {mean} = {5 * mean}. The four known numbers total {sum(known)}, so the missing number is {missing}.",
+                "trap": "Mean questions often become total questions.",
+            }
+        )
+
+        red = 3 + variant
+        blue = 5 + variant
+        total_counters = red + blue
+        numerator = blue
+        questions.append(
+            {
+                "id": f"mx_data_probability_{variant}",
+                "topic": "Data and probability",
+                "difficulty": "Challenge",
+                "prompt": f"A bag contains {red} red counters and {blue} blue counters. One counter is chosen. What is the probability it is blue?",
+                "choices": [f"{item}/{total_counters}" for item in number_choices(numerator, [red, numerator - 1, numerator + 1])],
+                "answer": f"{numerator}/{total_counters}",
+                "solution": f"There are {total_counters} counters in total and {blue} are blue, so the probability is {blue}/{total_counters}.",
+                "trap": "Use the total number of counters as the denominator.",
+            }
+        )
+
+        letters = 4 + variant % 4
+        codes = letters * (letters - 1)
+        questions.append(
+            {
+                "id": f"mx_data_codes_{variant}",
+                "topic": "Data and probability",
+                "difficulty": "Extension",
+                "prompt": f"How many different two-letter codes can be made from {letters} different letters if the two letters must be different?",
+                "choices": number_choices(codes, [letters * letters, codes // 2, codes + letters]),
+                "answer": str(codes),
+                "solution": f"There are {letters} choices for the first letter and {letters - 1} for the second, giving {letters} x {letters - 1} = {codes}.",
+                "trap": "Order matters in a code.",
+            }
+        )
+
+        boxes = 5 + variant
+        guarantee = boxes + 1
+        questions.append(
+            {
+                "id": f"mx_logic_guarantee_{variant}",
+                "topic": "Logic and problem solving",
+                "difficulty": "Challenge",
+                "prompt": f"What is the smallest number of pencils needed to guarantee that at least two pencils are in the same one of {boxes} pencil cases?",
+                "choices": number_choices(guarantee, [boxes, boxes + 2, 2 * boxes]),
+                "answer": str(guarantee),
+                "solution": f"You can put one pencil in each of the {boxes} cases without a pair. The next pencil guarantees a repeated case, so {boxes + 1} pencils are needed.",
+                "trap": "Guarantee questions ask for the worst case before success is forced.",
+            }
+        )
+
+        people = 6 + variant
+        handshakes = people * (people - 1) // 2
+        questions.append(
+            {
+                "id": f"mx_logic_pairs_{variant}",
+                "topic": "Logic and problem solving",
+                "difficulty": "Extension",
+                "prompt": f"Each of {people} students sends one message to every other student. How many messages are sent if each pair sends only one message between them?",
+                "choices": number_choices(handshakes, [people * (people - 1), handshakes - people, handshakes + people]),
+                "answer": str(handshakes),
+                "solution": f"This counts pairs of students: {people} x {people - 1} / 2 = {handshakes}.",
+                "trap": "Each pair is counted once, not twice.",
+            }
+        )
+
+        right_moves = 3 + variant % 4
+        down_moves = 2 + variant % 3
+        total_paths = 1
+        for i in range(1, min(right_moves, down_moves) + 1):
+            total_paths = total_paths * (max(right_moves, down_moves) + i) // i
+        questions.append(
+            {
+                "id": f"mx_logic_paths_{variant}",
+                "topic": "Logic and problem solving",
+                "difficulty": "Extension",
+                "prompt": f"A shortest grid path uses {right_moves} moves right and {down_moves} moves down. How many different shortest paths are possible?",
+                "choices": number_choices(total_paths, [right_moves * down_moves, total_paths - 1, total_paths + right_moves]),
+                "answer": str(total_paths),
+                "solution": f"There are {right_moves + down_moves} moves. Choose the positions of the {min(right_moves, down_moves)} less frequent moves, giving {total_paths} paths.",
+                "trap": "Arrange the moves rather than drawing every path.",
+            }
+        )
+
+    return questions
+
+
+def build_extra_reading_tasks():
+    scenarios = [
+        ("The Silent Bell", "Amelia", "the rehearsal room", "the clock above the piano had stopped", "composed", "calm and in control"),
+        ("A Note in the Margin", "Nora", "the library", "someone had written a helpful question beside a difficult paragraph", "perceptive", "noticing details quickly"),
+        ("The Long Way Around", "Sienna", "the sports field", "the usual gate was locked after the storm", "resourceful", "able to find practical solutions"),
+        ("The Unfinished Poster", "Lily", "the art room", "the missing heading changed the meaning of the poster", "ambiguous", "able to mean more than one thing"),
+        ("The Second Attempt", "Grace", "the science lab", "the first model collapsed just before judging", "resilient", "able to recover after difficulty"),
+        ("The Borrowed Compass", "Maya", "the maths classroom", "a classmate returned the compass with a quiet apology", "contrite", "sorry for a mistake"),
+        ("The Garden Roster", "Zoe", "the vegetable beds", "the smallest seedlings needed the most careful watering", "delicate", "easily damaged"),
+        ("The Lost Timetable", "Chloe", "the front office", "the printed timetable had two rooms for the same lesson", "inconsistent", "not matching properly"),
+        ("The Debate Folder", "Isla", "the debating room", "the strongest evidence was hidden behind old notes", "compelling", "powerful and convincing"),
+        ("The Wet Shoes", "Ella", "the bus stop", "the shortest route crossed a flooded path", "prudent", "careful and sensible"),
+        ("The Music Stand", "Ruby", "the auditorium", "one loose screw made the stand lean during practice", "precarious", "not steady or secure"),
+        ("The Paper Crane", "Hannah", "the common room", "a folded crane marked every completed chapter", "methodical", "organised and systematic"),
+        ("The Blue Ribbon", "Ava", "the athletics track", "the winner gave her ribbon to the injured reserve", "generous", "willing to give or share"),
+        ("The Locked Cabinet", "Mila", "the science storeroom", "the key label had faded in the sunlight", "faint", "hard to see clearly"),
+        ("The New Route", "Lucy", "the tram stop", "the replacement bus arrived before the announcement finished", "unexpected", "not planned or predicted"),
+        ("The Shared Desk", "Emily", "the study hall", "two students had prepared different notes on the same topic", "collaborative", "working together"),
+        ("The Missing Line", "Sophie", "the drama room", "the script made no sense until a page was turned over", "crucial", "extremely important"),
+        ("The Quiet Captain", "Aria", "the netball court", "the captain listened before changing the play", "considerate", "thinking about others"),
+        ("The Trial Run", "Violet", "the technology room", "the prototype worked only when the wires were reversed", "experimental", "based on testing"),
+        ("The Lunch Bell", "Olivia", "the canteen", "the queue moved faster after one student organised the orders", "efficient", "working without waste"),
+        ("The Ink Spill", "Charlotte", "the English room", "the spilled ink revealed an old note beneath the worksheet", "curious", "wanting to know more"),
+        ("The Weather Chart", "Matilda", "the geography room", "the trend was clearer when the class used a graph", "evident", "easy to see"),
+        ("The Empty Seat", "Harper", "the assembly hall", "the spare seat let a nervous visitor sit beside a friend", "reassuring", "making someone less worried"),
+        ("The Broken Zipper", "Abigail", "the cloakroom", "a safety pin solved the problem before the excursion", "improvised", "made or done without preparation"),
+        ("The Practice Timer", "Eva", "the music room", "shorter timed drills improved the ensemble's focus", "disciplined", "controlled and well organised"),
+        ("The Old Photograph", "Scarlett", "the archives", "the photograph showed the school garden before the new path existed", "historical", "connected with the past"),
+        ("The Misdirected Email", "Phoebe", "the computer lab", "the mistaken email alerted the club to a room change", "accidental", "happening by chance"),
+        ("The Chess Clock", "Stella", "the games room", "rushing early moves left less time for careful thinking", "strategic", "planned to achieve a goal"),
+        ("The Painted Line", "Alice", "the courtyard", "the new line guided visitors away from the construction area", "visible", "easy to see"),
+        ("The Final Draft", "Georgia", "the English office", "removing one weak paragraph made the whole argument stronger", "concise", "short and clear"),
+        ("The Library Ladder", "Clara", "the shelves", "the book she needed was not high but simply hidden behind another", "misleading", "giving the wrong idea"),
+        ("The Warm-up Lap", "Madison", "the oval", "the coach asked for a slower lap to prevent injuries", "preventive", "designed to stop a problem"),
+    ]
+    tasks = []
+    for index, (title, student, place, discovery, vocab, meaning) in enumerate(scenarios, start=1):
+        passage = (
+            f"{student} paused in {place} because {discovery}. At first, the problem seemed minor, "
+            f"but it changed what the class needed to do next. Instead of guessing, {student} checked the details, "
+            f"asked one careful question and adjusted the plan. The solution was not dramatic, yet it saved time and helped others feel prepared. "
+            f"Her teacher later described the response as {vocab}."
+        )
+        tasks.append(
+            {
+                "title": title,
+                "passage": passage,
+                "questions": [
+                    {
+                        "id": f"rx{index:02d}a",
+                        "skill": "Inference",
+                        "prompt": f"Why does {student} pause?",
+                        "choices": [
+                            f"She notices that {discovery}.",
+                            "She wants to avoid helping the class.",
+                            "She has forgotten where she is going.",
+                            "She is trying to make the problem worse.",
+                        ],
+                        "answer": f"She notices that {discovery}.",
+                        "solution": "The opening sentence gives the reason for the pause.",
+                    },
+                    {
+                        "id": f"rx{index:02d}b",
+                        "skill": "Vocabulary in context",
+                        "prompt": f"In the passage, '{vocab}' most nearly means",
+                        "choices": [meaning, "careless and rushed", "ordinary and unimportant", "confused by every detail"],
+                        "answer": meaning,
+                        "solution": f"The word '{vocab}' describes the quality of the student's helpful response.",
+                    },
+                    {
+                        "id": f"rx{index:02d}c",
+                        "skill": "Text evidence",
+                        "prompt": "Which detail best shows careful problem solving?",
+                        "choices": [
+                            "She checked the details and asked one careful question.",
+                            "The problem seemed minor at first.",
+                            "The solution was not dramatic.",
+                            "Her teacher later described the response.",
+                        ],
+                        "answer": "She checked the details and asked one careful question.",
+                        "solution": "This detail shows the method she used to solve the problem.",
+                    },
+                ],
+            }
+        )
+    return tasks
+
+
+def build_extra_grammar_questions():
+    questions = []
+    vocab_items = [
+        ("meticulous", "very careful", "careless", "ordinary", "brief"),
+        ("resilient", "able to recover", "easily defeated", "silent", "uncertain"),
+        ("lucid", "clear", "hidden", "weak", "angry"),
+        ("tentative", "not yet certain", "completely final", "very loud", "badly damaged"),
+        ("concise", "short and clear", "needlessly long", "confused", "unfair"),
+        ("significant", "important", "tiny", "accidental", "distant"),
+        ("reluctant", "unwilling", "excited", "careless", "certain"),
+        ("plausible", "believable", "impossible", "colourful", "silent"),
+        ("assertive", "confident", "timid", "hidden", "late"),
+        ("innovative", "new and original", "old-fashioned", "ordinary", "unclear"),
+        ("fragile", "easily broken", "very strong", "carefully planned", "bright"),
+        ("coherent", "logical and connected", "messy", "angry", "unfinished"),
+        ("evaluate", "judge the value of", "copy exactly", "hide from view", "speak loudly"),
+        ("infer", "work out from clues", "repeat word for word", "decorate", "measure"),
+        ("justify", "give reasons for", "guess quickly", "avoid explaining", "make shorter"),
+        ("contrast", "show differences", "make identical", "list randomly", "remove detail"),
+        ("emphasise", "give importance to", "ignore", "shorten", "misplace"),
+        ("precise", "exact", "vague", "heavy", "ordinary"),
+        ("subtle", "not obvious", "extremely loud", "simple to count", "broken"),
+        ("credible", "trustworthy", "unlikely", "colourless", "silent"),
+    ]
+    for index, (word, answer, *distractors) in enumerate(vocab_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_vocab_{index:02d}",
+                "skill": "Vocabulary",
+                "difficulty": "Challenge" if index <= 10 else "Extension",
+                "prompt": f"Which meaning is closest to '{word}'?",
+                "choices": [answer, *distractors],
+                "answer": answer,
+                "solution": f"'{word}' means {answer}.",
+            }
+        )
+
+    punctuation_items = [
+        ("Although the room was noisy, Mia finished her paragraph.", "Although the room was noisy Mia, finished her paragraph.", "Although, the room was noisy Mia finished her paragraph.", "Although the room was noisy Mia finished, her paragraph."),
+        ("After the bell rang, the students packed their bags.", "After the bell rang the students, packed their bags.", "After, the bell rang the students packed their bags.", "After the bell, rang the students packed their bags."),
+        ("Because the evidence was strong, the argument was convincing.", "Because the evidence was strong the argument, was convincing.", "Because, the evidence was strong the argument was convincing.", "Because the evidence, was strong the argument was convincing."),
+        ("When the experiment ended, the class recorded its results.", "When the experiment ended the class, recorded its results.", "When, the experiment ended the class recorded its results.", "When the experiment, ended the class recorded its results."),
+        ("If the question includes the word not, read it twice.", "If the question includes the word not read, it twice.", "If, the question includes the word not read it twice.", "If the question, includes the word not read it twice."),
+        ("Before choosing an answer, check the units.", "Before choosing an answer check, the units.", "Before, choosing an answer check the units.", "Before choosing, an answer check the units."),
+        ("While the team waited, the captain checked the notes.", "While the team waited the captain, checked the notes.", "While, the team waited the captain checked the notes.", "While the team, waited the captain checked the notes."),
+        ("Since the path was flooded, we used the side gate.", "Since the path was flooded we, used the side gate.", "Since, the path was flooded we used the side gate.", "Since the path, was flooded we used the side gate."),
+        ("The library was quiet, and the students worked carefully.", "The library was quiet and, the students worked carefully.", "The library was quiet and the students worked carefully.", "The library, was quiet and the students worked carefully."),
+        ("The question looked simple, but it required careful reasoning.", "The question looked simple but, it required careful reasoning.", "The question looked simple but it required careful reasoning.", "The question, looked simple but it required careful reasoning."),
+    ]
+    for index, item in enumerate(punctuation_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_punct_{index:02d}",
+                "skill": "Punctuation",
+                "difficulty": "Core" if index <= 5 else "Challenge",
+                "prompt": "Choose the correctly punctuated sentence.",
+                "choices": list(item),
+                "answer": item[0],
+                "solution": "The correct sentence places commas where they separate clauses or joined ideas.",
+            }
+        )
+
+    apostrophe_nouns = [("students", "lockers"), ("teachers", "meeting"), ("girls", "team"), ("writers", "drafts"), ("players", "uniforms"), ("children", "books"), ("school", "library"), ("Rachel", "notebook")]
+    for index, (owner, object_name) in enumerate(apostrophe_nouns, start=1):
+        if owner.endswith("s"):
+            answer = f"The {owner}' {object_name} were ready."
+            wrong = [f"The {owner}'s {object_name} were ready.", f"The {owner} {object_name} were ready.", f"The {owner}s' {object_name} were ready."]
+        elif owner == "children":
+            answer = f"The children's {object_name} were ready."
+            wrong = [f"The childrens' {object_name} were ready.", f"The children {object_name} were ready.", f"The childrens {object_name} were ready."]
+        else:
+            answer = f"{owner}'s {object_name} was ready."
+            wrong = [f"{owner}s' {object_name} was ready.", f"{owner} {object_name} was ready.", f"{owner}' {object_name} was ready."]
+        questions.append(
+            {
+                "id": f"gx_apos_{index:02d}",
+                "skill": "Apostrophes",
+                "difficulty": "Core",
+                "prompt": "Choose the sentence with the correct apostrophe use.",
+                "choices": [answer, *wrong],
+                "answer": answer,
+                "solution": "Use apostrophes to show ownership, paying attention to singular and plural owners.",
+            }
+        )
+
+    agreement_items = [
+        ("The group of students is ready.", "group", "singular"),
+        ("Neither the captain nor the players are late.", "players", "plural and closest to the verb"),
+        ("Each of the answers is possible.", "Each", "singular"),
+        ("The list of topics was helpful.", "list", "singular"),
+        ("The boxes near the door are heavy.", "boxes", "plural"),
+        ("Either the notes or the folder is missing.", "folder", "singular and closest to the verb"),
+        ("The team of swimmers trains daily.", "team", "singular"),
+        ("Several of the questions require diagrams.", "Several", "plural"),
+        ("The collection of poems belongs on the shelf.", "collection", "singular"),
+        ("Both of the examples support the claim.", "Both", "plural"),
+    ]
+    for index, (answer, subject, rule) in enumerate(agreement_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_agree_{index:02d}",
+                "skill": "Subject-verb agreement",
+                "difficulty": "Core" if index <= 5 else "Challenge",
+                "prompt": "Choose the sentence with correct subject-verb agreement.",
+                "choices": [
+                    answer,
+                    answer.replace(" is ", " are ").replace(" was ", " were ").replace(" trains ", " train ").replace(" belongs ", " belong ").replace(" require ", " requires ").replace(" support ", " supports "),
+                    answer.replace(" are ", " is ").replace(" were ", " was ").replace(" train ", " trains ").replace(" belong ", " belongs "),
+                    answer.replace(".", " yesterday."),
+                ],
+                "answer": answer,
+                "solution": f"The subject is {subject}, which is {rule}.",
+            }
+        )
+
+    concise_items = [
+        ("The argument is convincing because the evidence is specific.", "Due to the fact that the evidence is specific, the argument can be seen as convincing."),
+        ("The experiment failed because the instructions were unclear.", "The experiment was not successful due to the fact that the instructions were unclear."),
+        ("Rachel revised the paragraph to make the idea clearer.", "Rachel made a revision of the paragraph for the purpose of making the idea clearer."),
+        ("The graph shows a steady increase.", "The graph is able to show that there is an increase which is steady."),
+        ("The character changes after the mistake.", "The character goes through a process of change after the mistake happens."),
+        ("The conclusion links back to the question.", "The conclusion is something that makes a link back to the question."),
+        ("The example supports the main point.", "The example is included for the purpose of giving support to the main point."),
+        ("The sentence is vague and needs detail.", "The sentence has a vague quality and is in need of additional detail."),
+        ("The team improved after practising regularly.", "The team became better as a result of the fact that it practised regularly."),
+        ("The setting creates tension.", "The setting is something that creates a feeling of tension."),
+    ]
+    for index, (answer, wordy) in enumerate(concise_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_edit_{index:02d}",
+                "skill": "Editing",
+                "difficulty": "Challenge" if index <= 5 else "Extension",
+                "prompt": "Which sentence is the most concise?",
+                "choices": [answer, wordy, "There is a thing that makes the writing somewhat good.", "The idea is kind of there in a way."],
+                "answer": answer,
+                "solution": "Concise writing keeps the meaning while removing unnecessary words.",
+            }
+        )
+
+    analytical_items = [
+        "This suggests that the character values honesty more than popularity.",
+        "The contrast reveals how pressure changes the narrator's choices.",
+        "The image of the empty room emphasises the character's isolation.",
+        "The writer positions the reader to admire the student's persistence.",
+        "This detail foreshadows the later mistake.",
+        "The dialogue shows tension without directly explaining it.",
+        "The repeated phrase highlights the importance of belonging.",
+        "The setting creates uncertainty before the problem is revealed.",
+        "The evidence strengthens the argument by making the claim specific.",
+        "The conclusion returns to the central idea and gives it impact.",
+    ]
+    for index, answer in enumerate(analytical_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_analysis_{index:02d}",
+                "skill": "Inference language",
+                "difficulty": "Extension",
+                "prompt": "Which sentence uses the strongest analytical expression?",
+                "choices": [answer, "This quote is in the text.", "I think the character is nice.", "The author wrote some words about this."],
+                "answer": answer,
+                "solution": "Strong analysis explains meaning, technique or effect rather than just giving an opinion.",
+            }
+        )
+
+    connectors = [
+        ("however", "The first method is fast; however, the second method is more accurate."),
+        ("therefore", "The evidence is specific; therefore, the claim is more convincing."),
+        ("although", "Although the task looked simple, it required careful reasoning."),
+        ("consequently", "The team ignored the instructions; consequently, the model collapsed."),
+        ("for example", "Specific evidence improves an argument; for example, statistics can make a claim more precise."),
+        ("in contrast", "The first paragraph is descriptive; in contrast, the second paragraph is analytical."),
+    ]
+    for index, (connector, answer) in enumerate(connectors, start=1):
+        questions.append(
+            {
+                "id": f"gx_connect_{index:02d}",
+                "skill": "Sentence structure",
+                "difficulty": "Challenge",
+                "prompt": f"Which sentence uses '{connector}' correctly?",
+                "choices": [answer, f"{connector.title()} the sentence no clear connection.", f"The idea {connector} because.", f"{connector}, and also but the reason."],
+                "answer": answer,
+                "solution": f"'{connector}' must connect ideas logically and grammatically.",
+            }
+        )
+
+    pronoun_items = [
+        ("Sofia and I organised the display.", "Use I as part of the subject."),
+        ("The teacher gave the certificate to Mia and me.", "Use me as part of the object."),
+        ("Whom did you invite to the practice debate?", "Use whom for the object of the verb."),
+        ("Who will present the final paragraph?", "Use who for the subject of the verb."),
+        ("The students completed their reflections.", "Their shows ownership by students."),
+        ("It is important to check its battery before the test.", "Its is possessive; it's means it is."),
+    ]
+    for index, (answer, explanation) in enumerate(pronoun_items, start=1):
+        questions.append(
+            {
+                "id": f"gx_pronoun_{index:02d}",
+                "skill": "Pronouns",
+                "difficulty": "Core" if index <= 2 else "Challenge",
+                "prompt": "Choose the sentence with correct pronoun use.",
+                "choices": [answer, answer.replace(" I ", " me ").replace(" me.", " I."), answer.replace("Who", "Whom").replace("Whom", "Who"), answer.replace("their", "there").replace("Its", "It's")],
+                "answer": answer,
+                "solution": explanation,
+            }
+        )
+
+    return questions
+
+
+def build_final_grammar_questions():
+    questions = []
+    word_choice_items = [
+        ("accept", "I accept your explanation because it is supported by evidence.", "except", "Accept means receive or agree; except means excluding."),
+        ("effect", "The new timetable had a positive effect on study habits.", "affect", "Effect is usually a noun meaning result."),
+        ("affect", "Lack of sleep can affect concentration.", "effect", "Affect is usually a verb meaning influence."),
+        ("practice", "Daily reading practice improves vocabulary.", "practise", "In Australian English, practice is the noun."),
+        ("practise", "Students should practise explaining their reasoning.", "practice", "In Australian English, practise is the verb."),
+        ("advice", "Her advice helped me revise the paragraph.", "advise", "Advice is the noun; advise is the verb."),
+        ("advise", "The teacher will advise the team before the debate.", "advice", "Advise is the verb."),
+        ("principal", "The principal spoke at assembly.", "principle", "Principal can mean the head of a school."),
+        ("principle", "Fairness is an important principle.", "principal", "Principle means a rule or belief."),
+        ("stationary", "The bus was stationary for ten minutes.", "stationery", "Stationary means not moving."),
+        ("stationery", "Rachel packed her stationery before the test.", "stationary", "Stationery means writing materials."),
+        ("complement", "The diagram should complement the explanation.", "compliment", "Complement means complete or go well with."),
+        ("compliment", "The coach gave the team a sincere compliment.", "complement", "Compliment means praise."),
+        ("weather", "The weather changed before sport.", "whether", "Weather refers to conditions such as rain or wind."),
+        ("whether", "Check whether the answer uses the correct unit.", "weather", "Whether introduces a choice or possibility."),
+        ("therefore", "The evidence is reliable; therefore, the claim is stronger.", "however", "Therefore shows a result."),
+        ("however", "The method was quick; however, it was not accurate.", "therefore", "However shows contrast."),
+        ("fewer", "There were fewer errors in the second draft.", "less", "Use fewer for countable things."),
+        ("less", "The second route took less time.", "fewer", "Use less for an amount that is not counted individually."),
+        ("between", "The choice was between two possible answers.", "among", "Use between for two clearly separate items."),
+    ]
+    for index, (answer_word, sentence, wrong_word, explanation) in enumerate(word_choice_items, start=1):
+        wrong_sentence = sentence.replace(answer_word, wrong_word, 1)
+        questions.append(
+            {
+                "id": f"gy_wordchoice_{index:02d}",
+                "skill": "Word choice",
+                "difficulty": "Challenge" if index <= 12 else "Extension",
+                "prompt": "Choose the sentence with the correct word choice.",
+                "choices": [
+                    sentence,
+                    wrong_sentence,
+                    sentence.replace(".", " because."),
+                    wrong_sentence.replace(".", " clearly."),
+                ],
+                "answer": sentence,
+                "solution": explanation,
+            }
+        )
+
+    spelling_items = [
+        ("necessary", "It is necessary to check each answer.", "neccessary", "necesary", "nessessary"),
+        ("separate", "Keep separate notes for maths and English.", "seperate", "seprate", "separete"),
+        ("definitely", "Rachel definitely improved after reviewing mistakes.", "definately", "definatly", "definetely"),
+        ("environment", "The learning environment was calm.", "enviroment", "enviornment", "envirenment"),
+        ("argument", "A persuasive argument needs evidence.", "arguement", "argment", "arguemant"),
+        ("rhythm", "The paragraph had a clear rhythm.", "rythm", "rhythym", "rhythem"),
+        ("receive", "Students receive feedback after submission.", "recieve", "receve", "receieve"),
+        ("believe", "I believe the second reason is stronger.", "beleive", "belive", "believee"),
+        ("achieve", "A plan helps students achieve their goals.", "acheive", "achive", "achievee"),
+        ("curiosity", "Curiosity can make a story engaging.", "curiousity", "curiosty", "curiocity"),
+    ]
+    for index, (word, sentence, *wrong_spellings) in enumerate(spelling_items, start=1):
+        questions.append(
+            {
+                "id": f"gy_spelling_{index:02d}",
+                "skill": "Spelling",
+                "difficulty": "Core" if index <= 4 else "Challenge",
+                "prompt": "Choose the sentence with the correct spelling.",
+                "choices": [sentence, *[sentence.replace(word, wrong, 1) for wrong in wrong_spellings]],
+                "answer": sentence,
+                "solution": f"The correct spelling is '{word}'.",
+            }
+        )
+
+    sentence_function_items = [
+        ("Although the task was difficult, Rachel stayed calm.", "complex sentence", "It has a dependent clause joined to a main clause."),
+        ("Rachel planned carefully, and she checked her answer.", "compound sentence", "It joins two complete ideas with a conjunction."),
+        ("Because the evidence was precise, the paragraph became more convincing.", "complex sentence", "The because-clause depends on the main clause."),
+        ("The answer seemed obvious, but the wording changed the meaning.", "compound sentence", "Two complete ideas are joined by but."),
+        ("After reviewing the graph, Mia changed her conclusion.", "complex sentence", "The opening phrase depends on the main clause for full meaning."),
+        ("The team practised regularly, so their timing improved.", "compound sentence", "The conjunction so links two complete ideas."),
+        ("If the unit is missing, the answer may be incomplete.", "complex sentence", "The if-clause sets a condition for the main clause."),
+        ("The library was quiet, yet the students still whispered.", "compound sentence", "Yet joins two complete contrasting ideas."),
+        ("When the bell rang, the class packed up.", "complex sentence", "The when-clause gives time and depends on the main clause."),
+        ("The claim is clear, and the evidence is specific.", "compound sentence", "Two complete ideas are joined by and."),
+    ]
+    for index, (sentence, answer, explanation) in enumerate(sentence_function_items, start=1):
+        questions.append(
+            {
+                "id": f"gy_sentence_{index:02d}",
+                "skill": "Sentence structure",
+                "difficulty": "Extension" if index > 5 else "Challenge",
+                "prompt": f"What type of sentence is this? {sentence}",
+                "choices": [answer, "fragment", "run-on sentence", "simple sentence"],
+                "answer": answer,
+                "solution": explanation,
+            }
+        )
+
+    return questions
+
+
+def build_extra_writing_prompts():
+    prompts = [
+        ("Persuasive", "Students should learn financial skills before Year 7. Do you agree?", ["clear position", "real-life example", "two reasons", "counterargument", "strong conclusion"]),
+        ("Persuasive", "School libraries are more important than ever. Do you agree?", ["clear position", "evidence", "specific school example", "persuasive vocabulary", "final recommendation"]),
+        ("Persuasive", "Every student should take part in a team activity. Do you agree?", ["clear position", "balanced reasoning", "example", "counterargument", "call to action"]),
+        ("Persuasive", "Tests should reward careful thinking more than speed. Do you agree?", ["clear position", "comparison", "evidence", "precise vocabulary", "conclusion"]),
+        ("Persuasive", "Year 7 students should be taught how to use AI responsibly. Do you agree?", ["clear position", "ethical reason", "school example", "counterargument", "recommendation"]),
+        ("Persuasive", "Outdoor learning should be included in every school week. Do you agree?", ["clear position", "health reason", "learning reason", "example", "conclusion"]),
+        ("Persuasive", "Students should have one device-free lesson each day. Do you agree?", ["clear position", "focus reason", "wellbeing reason", "counterargument", "strong conclusion"]),
+        ("Persuasive", "Schools should teach debating to all students. Do you agree?", ["clear position", "communication reason", "confidence reason", "example", "final judgement"]),
+        ("Persuasive", "Homework should be shorter but more challenging. Do you agree?", ["clear position", "quality over quantity", "example", "counterargument", "recommendation"]),
+        ("Persuasive", "Reading fiction helps students become better thinkers. Do you agree?", ["clear position", "reasoning", "text example", "persuasive vocabulary", "conclusion"]),
+        ("Persuasive", "School canteens should focus on healthy food even if it costs more. Do you agree?", ["clear position", "health reason", "fairness issue", "counterargument", "recommendation"]),
+        ("Persuasive", "Students should learn public speaking from primary school. Do you agree?", ["clear position", "confidence reason", "future reason", "example", "strong ending"]),
+        ("Creative", "Write about a student who finds a message hidden inside an old textbook.", ["controlled opening", "sensory detail", "tension", "turning point", "resolution"]),
+        ("Creative", "Write a story beginning with: The bell rang, but nobody moved.", ["intriguing opening", "character reaction", "specific setting", "problem", "ending"]),
+        ("Creative", "Write about a competition where the most important victory is not winning.", ["character motivation", "conflict", "emotion", "turning point", "reflection"]),
+        ("Creative", "Write about a map that leads to an unexpected place at school.", ["setting", "mystery", "precise detail", "rising tension", "resolution"]),
+        ("Creative", "Write about a student who must apologise before the end of the day.", ["character flaw", "inner conflict", "dialogue", "change", "ending"]),
+        ("Creative", "Write about the moment a quiet student surprises everyone.", ["controlled opening", "character contrast", "build-up", "specific action", "reflection"]),
+        ("Creative", "Write about a storm that changes the plan for an important day.", ["weather detail", "problem", "adaptation", "emotion", "ending"]),
+        ("Creative", "Write about a lost object that reveals something important.", ["object detail", "mystery", "character choice", "turning point", "resolution"]),
+        ("Creative", "Write about two students who solve a problem in completely different ways.", ["character contrast", "dialogue", "problem", "cooperation", "ending"]),
+        ("Creative", "Write about a door at school that is usually locked but is open today.", ["atmosphere", "curiosity", "tension", "discovery", "resolution"]),
+        ("Creative", "Write about a rehearsal that goes wrong before a performance.", ["setting", "mistake", "emotion", "solution", "ending"]),
+        ("Creative", "Write about a student who receives the wrong timetable.", ["clear problem", "school setting", "pace", "character reaction", "resolution"]),
+        ("Analytical", "Explain how a writer can make a setting feel tense.", ["topic sentence", "technique examples", "precise vocabulary", "reader effect", "linked conclusion"]),
+        ("Analytical", "Explain how dialogue can reveal a character's personality.", ["topic sentence", "examples", "inference", "effect", "conclusion"]),
+        ("Analytical", "Explain how a writer can show courage without using the word courage.", ["topic sentence", "behaviour examples", "show not tell", "reader effect", "conclusion"]),
+        ("Analytical", "Explain why specific evidence makes a persuasive argument stronger.", ["topic sentence", "example", "reasoning", "effect on reader", "conclusion"]),
+        ("Analytical", "Explain how contrast can make a story more interesting.", ["topic sentence", "contrast example", "effect", "precise vocabulary", "linked ending"]),
+        ("Analytical", "Explain how a conclusion can strengthen a persuasive response.", ["topic sentence", "summary", "final judgement", "reader effect", "conclusion"]),
+        ("Analytical", "Explain how a writer can create sympathy for a character.", ["topic sentence", "character detail", "inference", "reader effect", "conclusion"]),
+        ("Analytical", "Explain why planning improves writing under exam conditions.", ["topic sentence", "reason one", "reason two", "example", "conclusion"]),
+        ("Analytical", "Explain how word choice can change the tone of a paragraph.", ["topic sentence", "word examples", "tone", "effect", "conclusion"]),
+        ("Analytical", "Explain how a writer can make an ordinary event seem important.", ["topic sentence", "detail", "structure", "reader effect", "conclusion"]),
+        ("Reflective", "Describe a time when careful preparation made a difficult task easier.", ["clear event", "personal reflection", "specific detail", "lesson", "controlled ending"]),
+    ]
+    return [{"type": kind, "prompt": prompt, "success": success} for kind, prompt, success in prompts]
+
+
+MATH_QUESTIONS.extend(build_extra_math_questions())
+READING_TASKS.extend(build_extra_reading_tasks())
+GRAMMAR_QUESTIONS.extend(build_extra_grammar_questions())
+GRAMMAR_QUESTIONS.extend(build_final_grammar_questions())
+WRITING_PROMPTS.extend(build_extra_writing_prompts())
+
+
 def unique_choices(choices, answer):
     cleaned = []
     for choice in [*choices, answer]:
         if choice not in cleaned:
             cleaned.append(choice)
+    fillers = ["No correction needed.", "Cannot be determined.", "Both versions are possible.", "None of these."]
+    for filler in fillers:
+        if len(cleaned) >= 4:
+            break
+        if filler not in cleaned and filler != answer:
+            cleaned.append(filler)
     return cleaned[:4]
 
 
