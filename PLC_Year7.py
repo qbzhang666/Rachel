@@ -1251,10 +1251,340 @@ def build_extra_writing_prompts():
     return [{"type": kind, "prompt": prompt, "success": success} for kind, prompt, success in prompts]
 
 
+def build_learning_sequence_math_questions():
+    questions = []
+    triples = [(3, 4, 5), (5, 12, 13), (8, 15, 17), (7, 24, 25), (9, 40, 41), (12, 35, 37)]
+
+    for variant in range(1, 7):
+        difficulty = "Core" if variant <= 2 else "Challenge" if variant <= 4 else "Extension"
+
+        addend = 5 + variant
+        answer = 8 + variant
+        right_side = answer + addend
+        questions.append(
+            {
+                "id": f"learn_linear_one_{variant}",
+                "topic": "Linear equations",
+                "difficulty": "Core",
+                "prompt": f"Solve x + {addend} = {right_side}.",
+                "choices": number_choices(answer, [answer - 2, answer + 2, right_side]),
+                "answer": str(answer),
+                "solution": f"Subtract {addend} from both sides: x = {right_side} - {addend} = {answer}.",
+                "trap": "Whatever you do to one side of an equation, do to the other side.",
+            }
+        )
+
+        coefficient = 3 + variant
+        constant = 4 + 2 * variant
+        answer = 5 + variant
+        right_side = coefficient * answer + constant
+        questions.append(
+            {
+                "id": f"learn_linear_two_{variant}",
+                "topic": "Linear equations",
+                "difficulty": difficulty,
+                "prompt": f"Solve {coefficient}x + {constant} = {right_side}.",
+                "choices": number_choices(answer, [answer - 1, answer + 2, coefficient + answer]),
+                "answer": str(answer),
+                "solution": f"Subtract {constant}: {coefficient}x = {right_side - constant}. Divide by {coefficient}: x = {answer}.",
+                "trap": "Undo addition or subtraction before multiplication or division.",
+            }
+        )
+
+        left_coefficient = 5 + variant
+        right_coefficient = 2 + variant
+        answer = 4 + variant
+        left_constant = 7 + variant
+        right_constant = (left_coefficient - right_coefficient) * answer + left_constant
+        questions.append(
+            {
+                "id": f"learn_linear_both_{variant}",
+                "topic": "Linear equations",
+                "difficulty": "Challenge" if variant <= 3 else "Extension",
+                "prompt": f"Solve {left_coefficient}x + {left_constant} = {right_coefficient}x + {right_constant}.",
+                "choices": number_choices(answer, [answer - 2, answer + 1, right_constant - left_constant]),
+                "answer": str(answer),
+                "solution": f"Move the x terms to one side: {left_coefficient - right_coefficient}x + {left_constant} = {right_constant}. Then {left_coefficient - right_coefficient}x = {right_constant - left_constant}, so x = {answer}.",
+                "trap": "Collect variables on one side and numbers on the other.",
+            }
+        )
+
+        groups = 3 + variant
+        extra = 6 + variant
+        total = groups * answer + extra
+        questions.append(
+            {
+                "id": f"learn_linear_word_{variant}",
+                "topic": "Linear equations",
+                "difficulty": "Challenge" if variant <= 3 else "Extension",
+                "prompt": f"Rachel thinks of a number. {groups} times the number plus {extra} is {total}. What is the number?",
+                "choices": number_choices(answer, [answer - 2, answer + 2, total // groups]),
+                "answer": str(answer),
+                "solution": f"Let the number be x. The equation is {groups}x + {extra} = {total}. Subtract {extra}, then divide by {groups}: x = {answer}.",
+                "trap": "Translate the words into an equation before calculating.",
+            }
+        )
+
+        first = 9 + 2 * variant
+        total = first + first + 1 + first + 2
+        questions.append(
+            {
+                "id": f"learn_consecutive_int_{variant}",
+                "topic": "Consecutive-number algebra",
+                "difficulty": difficulty,
+                "prompt": f"The sum of three consecutive integers is {total}. What is the largest integer?",
+                "choices": number_choices(first + 2, [first, first + 1, first + 3]),
+                "answer": str(first + 2),
+                "solution": f"Let the integers be n, n + 1 and n + 2. Then 3n + 3 = {total}, so n = {first}. The largest is {first + 2}.",
+                "trap": "Represent consecutive integers as n, n + 1 and n + 2.",
+            }
+        )
+
+        first_odd = 7 + 2 * variant
+        if first_odd % 2 == 0:
+            first_odd += 1
+        total = first_odd + first_odd + 2 + first_odd + 4
+        questions.append(
+            {
+                "id": f"learn_consecutive_odd_{variant}",
+                "topic": "Consecutive-number algebra",
+                "difficulty": "Challenge" if variant <= 3 else "Extension",
+                "prompt": f"The sum of three consecutive odd numbers is {total}. What is the smallest number?",
+                "choices": number_choices(first_odd, [first_odd + 2, first_odd + 4, first_odd - 2]),
+                "answer": str(first_odd),
+                "solution": f"Let the odd numbers be n, n + 2 and n + 4. Then 3n + 6 = {total}, so 3n = {total - 6} and n = {first_odd}.",
+                "trap": "Consecutive odd numbers increase by 2, not by 1.",
+            }
+        )
+
+        a, b, c = triples[variant - 1]
+        scale = 1 + variant % 3
+        short_a = a * scale
+        short_b = b * scale
+        hyp = c * scale
+        questions.append(
+            {
+                "id": f"learn_pyth_hyp_{variant}",
+                "topic": "Pythagoras",
+                "difficulty": "Core" if variant <= 2 else "Challenge",
+                "prompt": f"A right-angled triangle has shorter sides {short_a} cm and {short_b} cm. What is the hypotenuse?",
+                "choices": number_choices(hyp, [short_a + short_b, hyp - scale, hyp + scale], " cm"),
+                "answer": f"{hyp} cm",
+                "solution": f"Use a^2 + b^2 = c^2. {short_a}^2 + {short_b}^2 = {short_a ** 2 + short_b ** 2}, so c = {hyp} cm.",
+                "trap": "The hypotenuse is the longest side and is opposite the right angle.",
+            }
+        )
+
+        questions.append(
+            {
+                "id": f"learn_pyth_side_{variant}",
+                "topic": "Pythagoras",
+                "difficulty": "Challenge" if variant <= 3 else "Extension",
+                "prompt": f"A right-angled triangle has hypotenuse {hyp} cm and one shorter side {short_a} cm. What is the other shorter side?",
+                "choices": number_choices(short_b, [hyp - short_a, short_b + scale, short_b - scale], " cm"),
+                "answer": f"{short_b} cm",
+                "solution": f"Use c^2 - a^2 = b^2. {hyp}^2 - {short_a}^2 = {hyp ** 2 - short_a ** 2}, so the missing side is {short_b} cm.",
+                "trap": "When finding a shorter side, subtract the square of the known side from the square of the hypotenuse.",
+            }
+        )
+
+        questions.append(
+            {
+                "id": f"learn_pyth_word_{variant}",
+                "topic": "Pythagoras",
+                "difficulty": "Extension",
+                "prompt": f"A ladder reaches {short_b} m up a wall. Its foot is {short_a} m from the wall. How long is the ladder?",
+                "choices": number_choices(hyp, [short_b, short_a + short_b, hyp + scale], " m"),
+                "answer": f"{hyp} m",
+                "solution": f"The ladder is the hypotenuse of the right triangle. The matching Pythagorean triple is {short_a}, {short_b}, {hyp}, so the ladder is {hyp} m.",
+                "trap": "Draw the wall, ground and ladder as a right triangle before choosing the side.",
+            }
+        )
+
+    return questions
+
+
+def build_mastered_extension_questions():
+    questions = []
+
+    for variant in range(1, 7):
+        difficulty = "Challenge" if variant <= 3 else "Extension"
+
+        first = 2 + variant
+        common_difference = 3 + variant
+        term_number = 14 + variant
+        term_value = first + (term_number - 1) * common_difference
+        questions.append(
+            {
+                "id": f"master_alg_pattern_{variant}",
+                "topic": "Algebra and patterns",
+                "difficulty": difficulty,
+                "prompt": f"A sequence has nth term {common_difference}n + {first - common_difference}. Which term is {term_value}?",
+                "choices": number_choices(term_number, [term_number - 1, term_number + 1, term_value // common_difference]),
+                "answer": str(term_number),
+                "solution": f"Solve {common_difference}n + {first - common_difference} = {term_value}. This gives {common_difference}n = {term_value - first + common_difference}, so n = {term_number}.",
+                "trap": "Use the nth-term rule; do not just continue the sequence by hand.",
+            }
+        )
+
+        ratio_a = 2 + variant
+        ratio_b = 5 + variant
+        one_part = 4 + variant
+        added = 2 * one_part
+        final_a = ratio_a + 2
+        total_b = ratio_b * one_part
+        questions.append(
+            {
+                "id": f"master_ratio_change_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": difficulty,
+                "prompt": f"The ratio of green to silver beads is {ratio_a}:{ratio_b}. After {added} green beads are added, the ratio is {final_a}:{ratio_b}. How many silver beads are there?",
+                "choices": number_choices(total_b, [ratio_a * one_part, final_a * one_part, total_b + added]),
+                "answer": str(total_b),
+                "solution": f"The silver part stays at {ratio_b}. Green increases by 2 parts, and 2 parts = {added}, so 1 part = {one_part}. Silver beads = {ratio_b} x {one_part} = {total_b}.",
+                "trap": "Only the green amount changes; the silver amount is fixed.",
+            }
+        )
+
+    return questions
+
+
+def build_mastered_reading_tasks():
+    tasks = []
+    entries = [
+        ("A Polished Speech", "a student rewrites a speech so it sounds less dramatic but more convincing", "to show that restraint can make persuasion stronger"),
+        ("The Open Notebook", "a narrator compares messy planning with a confident final answer", "to highlight the hidden work behind success"),
+        ("The Late Bus", "a delayed journey becomes a lesson in patience and preparation", "to suggest that small problems can test character"),
+        ("The Science Display", "two projects are described: one colourful, one carefully explained", "to contrast appearance with substance"),
+        ("The Practice Room", "music practice is shown as repetitive before it becomes expressive", "to show that skill develops through disciplined repetition"),
+        ("The Quiet Helper", "a student solves a problem without asking for praise", "to celebrate quiet responsibility"),
+        ("The Missing Graph", "an argument becomes weaker when its evidence is removed", "to show why evidence matters"),
+        ("The First Draft", "a weak paragraph is improved through precise editing", "to demonstrate the value of revision"),
+    ]
+    for index, (title, situation, purpose) in enumerate(entries, start=1):
+        passage = (
+            f"The passage describes {situation}. The writer gives practical details before offering a reflective final sentence. "
+            f"This structure encourages the reader to look beyond the obvious event and consider the lesson behind it."
+        )
+        tasks.append(
+            {
+                "title": f"Author Purpose Extension: {title}",
+                "passage": passage,
+                "questions": [
+                    {
+                        "id": f"master_author_{index:02d}a",
+                        "skill": "Author purpose",
+                        "prompt": "What is the writer's main purpose?",
+                        "choices": [purpose, "to list unrelated school events", "to entertain with a mystery ending", "to argue that preparation is unnecessary"],
+                        "answer": purpose,
+                        "solution": "The reflective final sentence points to the lesson the writer wants readers to notice.",
+                    },
+                    {
+                        "id": f"master_author_{index:02d}b",
+                        "skill": "Text evidence",
+                        "prompt": "Which feature most clearly supports the writer's purpose?",
+                        "choices": ["The practical details followed by a reflective final sentence.", "The absence of any school setting.", "The use of random facts without connection.", "The refusal to explain the situation."],
+                        "answer": "The practical details followed by a reflective final sentence.",
+                        "solution": "The structure moves from event to meaning, which reveals purpose.",
+                    },
+                ],
+            }
+        )
+    return tasks
+
+
+def build_mastered_grammar_questions():
+    questions = []
+    advanced_apostrophes = [
+        ("The Year 8 students' essays were displayed near the library.", "students' shows plural ownership."),
+        ("The children's debating coach praised their rebuttals.", "children's is the plural possessive because children is already plural."),
+        ("James's explanation was clearer after revision.", "James's is a standard singular possessive form."),
+        ("The two captains' strategies were completely different.", "captains' shows ownership by two captains."),
+        ("Someone else's calculator was left in the room.", "else's shows possession in the phrase someone else."),
+        ("The girls' lockers and the teachers' offices were repainted.", "Both girls and teachers are plural possessive nouns."),
+        ("The school's values were printed on the program.", "school's is singular possessive."),
+        ("The students' and teachers' opinions were both considered.", "Separate apostrophes show two different groups owning opinions."),
+    ]
+    for index, (answer, solution) in enumerate(advanced_apostrophes, start=1):
+        questions.append(
+            {
+                "id": f"master_apos_{index:02d}",
+                "skill": "Apostrophes",
+                "difficulty": "Extension",
+                "prompt": "Choose the sentence with the correct advanced apostrophe use.",
+                "choices": [
+                    answer,
+                    answer.replace("'", ""),
+                    answer.replace("s'", "s's"),
+                    answer.replace("'s", "s'"),
+                ],
+                "answer": answer,
+                "solution": solution,
+            }
+        )
+
+    vocabulary = [
+        ("nuanced", "showing subtle differences", "simple and obvious", "careless", "unrelated"),
+        ("scrutinise", "examine closely", "ignore", "decorate", "repeat loudly"),
+        ("ambivalent", "having mixed feelings", "completely certain", "very noisy", "well organised"),
+        ("substantiate", "support with evidence", "make shorter", "hide from view", "guess quickly"),
+        ("inadvertent", "accidental", "deliberate", "confident", "colourful"),
+        ("concede", "admit a point", "deny every fact", "write quickly", "make louder"),
+        ("cohesive", "well connected", "scattered", "fragile", "late"),
+        ("discerning", "showing good judgement", "careless", "unaware", "ordinary"),
+    ]
+    for index, (word, answer, *distractors) in enumerate(vocabulary, start=1):
+        questions.append(
+            {
+                "id": f"master_vocab_{index:02d}",
+                "skill": "Vocabulary",
+                "difficulty": "Extension",
+                "prompt": f"Which meaning is closest to '{word}'?",
+                "choices": [answer, *distractors],
+                "answer": answer,
+                "solution": f"'{word}' means {answer}.",
+            }
+        )
+
+    spelling = [
+        ("accommodation", "The excursion accommodation was confirmed."),
+        ("recommendation", "Her recommendation was practical and fair."),
+        ("conscience", "His conscience made him apologise."),
+        ("conscious", "She was conscious of the time limit."),
+        ("parallel", "The two lines are parallel."),
+        ("occurrence", "The second occurrence changed the pattern."),
+        ("privilege", "Leadership is a privilege and a responsibility."),
+        ("maintenance", "The equipment needed regular maintenance."),
+    ]
+    for index, (word, sentence) in enumerate(spelling, start=1):
+        questions.append(
+            {
+                "id": f"master_spell_{index:02d}",
+                "skill": "Spelling",
+                "difficulty": "Extension",
+                "prompt": "Choose the sentence with the correct Year 8-9 spelling.",
+                "choices": [
+                    sentence,
+                    sentence.replace(word, word.replace("mm", "m").replace("cc", "c").replace("ai", "ia"), 1),
+                    sentence.replace(word, word + "e", 1),
+                    sentence.replace(word, word[:-1], 1),
+                ],
+                "answer": sentence,
+                "solution": f"The correct spelling is '{word}'.",
+            }
+        )
+
+    return questions
+
+
 MATH_QUESTIONS.extend(build_extra_math_questions())
+MATH_QUESTIONS.extend(build_learning_sequence_math_questions())
+MATH_QUESTIONS.extend(build_mastered_extension_questions())
 READING_TASKS.extend(build_extra_reading_tasks())
+READING_TASKS.extend(build_mastered_reading_tasks())
 GRAMMAR_QUESTIONS.extend(build_extra_grammar_questions())
 GRAMMAR_QUESTIONS.extend(build_final_grammar_questions())
+GRAMMAR_QUESTIONS.extend(build_mastered_grammar_questions())
 WRITING_PROMPTS.extend(build_extra_writing_prompts())
 
 
@@ -1667,6 +1997,46 @@ def render_mock_tab():
 
 def render_practice_tab():
     st.subheader("Targeted skill practice")
+    st.info(
+        "Current plan: completed areas now practise at harder Year 8-9 level. New learning should move through "
+        "linear equations, consecutive-number algebra, then Pythagoras."
+    )
+
+    st.markdown("**Quick starts for completed areas at harder level**")
+    completed_buttons = st.columns(3)
+    if completed_buttons[0].button("Harder algebra", width="stretch"):
+        new_practice("Maths", "Algebra and patterns", "Extension", 12)
+        st.rerun()
+    if completed_buttons[1].button("Harder fractions", width="stretch"):
+        new_practice("Maths", "Fractions and ratios", "Extension", 12)
+        st.rerun()
+    if completed_buttons[2].button("Author purpose", width="stretch"):
+        new_practice("Reading", "Author purpose", "Reading", 10)
+        st.rerun()
+    completed_buttons = st.columns(3)
+    if completed_buttons[0].button("Apostrophes plus", width="stretch"):
+        new_practice("Grammar and vocabulary", "Apostrophes", "Extension", 12)
+        st.rerun()
+    if completed_buttons[1].button("Advanced vocabulary", width="stretch"):
+        new_practice("Grammar and vocabulary", "Vocabulary", "Extension", 12)
+        st.rerun()
+    if completed_buttons[2].button("Advanced spelling", width="stretch"):
+        new_practice("Grammar and vocabulary", "Spelling", "Extension", 10)
+        st.rerun()
+
+    st.markdown("**Next learning sequence**")
+    sequence_buttons = st.columns(3)
+    if sequence_buttons[0].button("1. Linear equations", type="primary", width="stretch"):
+        new_practice("Maths", "Linear equations", "Core", 10)
+        st.rerun()
+    if sequence_buttons[1].button("2. Consecutive numbers", type="primary", width="stretch"):
+        new_practice("Maths", "Consecutive-number algebra", "Challenge", 10)
+        st.rerun()
+    if sequence_buttons[2].button("3. Pythagoras", type="primary", width="stretch"):
+        new_practice("Maths", "Pythagoras", "Core", 10)
+        st.rerun()
+
+    st.divider()
     all_questions = all_mcq_questions()
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -1786,13 +2156,28 @@ def render_writing_tab():
 
 def render_plan_tab():
     st.subheader("Preparation plan")
+    st.markdown("**Current status**")
+    status_rows = [
+        {"Area": "Algebra and patterns", "Status": "Completed", "Next action": "Practise at Year 8-9 extension level"},
+        {"Area": "Apostrophes", "Status": "Completed", "Next action": "Use advanced plural, shared and separate possession"},
+        {"Area": "Author purpose", "Status": "Completed", "Next action": "Practise harder purpose, structure and evidence questions"},
+        {"Area": "Fractions and ratios", "Status": "Completed", "Next action": "Use changing ratios, reverse percentages and multi-step problems"},
+        {"Area": "Vocabulary", "Status": "Completed", "Next action": "Move to nuanced Year 8-9 academic vocabulary"},
+        {"Area": "Spelling", "Status": "Completed", "Next action": "Practise higher-level spelling and commonly confused words"},
+        {"Area": "Linear equations", "Status": "To learn", "Next action": "One-step, two-step, variables both sides, word problems"},
+        {"Area": "Consecutive-number algebra", "Status": "To learn", "Next action": "Integers, odd/even numbers, form and solve equations"},
+        {"Area": "Pythagoras", "Status": "To learn", "Next action": "Hypotenuse, missing shorter side, word problems and diagrams"},
+    ]
+    st.dataframe(status_rows, hide_index=True, width="stretch")
+
+    st.markdown("**Recommended next sequence**")
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown(
             """
             <div class="skill-card">
-            <strong>Weeks 1-2</strong>
-            <p>Diagnostic mock tests, number skills, fractions, punctuation and short reading inference.</p>
+            <strong>Step 1</strong>
+            <p>Linear equations: understand equation balance, solve one-step and two-step equations, then variables on both sides.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1801,8 +2186,8 @@ def render_plan_tab():
         st.markdown(
             """
             <div class="skill-card">
-            <strong>Weeks 3-5</strong>
-            <p>Mixed problem solving, ratios, algebra patterns, vocabulary, paragraph writing and evidence use.</p>
+            <strong>Step 2</strong>
+            <p>Consecutive-number algebra: use n, n+1, n+2 and n, n+2, n+4 to form and solve equations.</p>
             </div>
             """,
             unsafe_allow_html=True,
@@ -1811,15 +2196,16 @@ def render_plan_tab():
         st.markdown(
             """
             <div class="skill-card">
-            <strong>Weeks 6-8</strong>
-            <p>Timed mock tests, extension questions, careful error review and polished persuasive/creative writing.</p>
+            <strong>Step 3</strong>
+            <p>Pythagoras: understand right triangles, find the hypotenuse, find missing shorter sides, then solve word problems.</p>
             </div>
             """,
             unsafe_allow_html=True,
         )
     st.write("Recommended weekly rhythm:")
-    st.write("- 2 maths sessions: one core accuracy, one extension reasoning.")
-    st.write("- 2 English sessions: one reading/grammar, one writing response.")
+    st.write("- 2 new-learning maths sessions: linear equations first, then consecutive-number algebra, then Pythagoras.")
+    st.write("- 1 harder review session from the completed areas: algebra, fractions, apostrophes, author purpose, vocabulary or spelling.")
+    st.write("- 1 English session: reading/grammar plus one short writing response.")
     st.write("- 1 mixed mock test every weekend with corrections written out.")
 
 

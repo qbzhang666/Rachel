@@ -1,6 +1,6 @@
 # Student Practice Apps
 
-Streamlit apps for students to practise Years 7-9 grammar, improve persuasive writing and prepare for Years 7-9 AMC-style maths.
+Streamlit apps for students to practise Years 7-9 grammar, improve persuasive writing, prepare for Years 7-9 AMC-style maths, and prepare for PLC-style Year 7 placement practice.
 
 ## Grammar practice
 
@@ -69,10 +69,10 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 
 - Independent PLC-style preparation app in `PLC_Year7.py`
 - Original practice questions only; not official PLC or Studocu material
-<<<<<<< HEAD
-- Expanded two-month bank: 166 maths questions, 36 reading passages, 108 reading questions, 130 grammar/vocabulary questions and 40 writing prompts
-=======
->>>>>>> 9225c845dc10aadd0b27423253be53f2b997153b
+- Expanded two-month bank: 232 maths questions, 44 reading passages, 124 reading questions, 154 grammar/vocabulary questions and 40 writing prompts
+- Completed areas can now be practised at harder Year 8-9 level: algebra and patterns, apostrophes, author purpose, fractions and ratios, vocabulary and spelling
+- New learning sequence added: linear equations, consecutive-number algebra, then Pythagoras
+- Quick-start buttons for harder completed-topic practice and the next learning sequence
 - Mixed mock tests for Year 7 entry-level maths, reading, grammar and vocabulary
 - Extension maths questions for stronger placement readiness
 - Reading passages with inference, vocabulary, tone and evidence questions
