@@ -1577,9 +1577,125 @@ def build_mastered_grammar_questions():
     return questions
 
 
+<<<<<<< HEAD
+def build_advanced_challenge_math_questions():
+    questions = []
+    triples = [(20, 21, 29), (11, 60, 61), (28, 45, 53), (33, 56, 65), (16, 63, 65), (48, 55, 73)]
+
+    for variant in range(1, 7):
+        difficulty = "Extension"
+
+        answer = 4 + variant
+        left_multiplier = 2 + variant
+        inner_add = 3 + variant
+        right_coefficient = variant
+        right_constant = left_multiplier * (answer + inner_add) - right_coefficient * answer
+        questions.append(
+            {
+                "id": f"adv_linear_brackets_{variant}",
+                "topic": "Linear equations",
+                "difficulty": difficulty,
+                "prompt": f"Solve {left_multiplier}(x + {inner_add}) = {right_coefficient}x + {right_constant}.",
+                "choices": number_choices(answer, [answer - 2, answer + 2, right_constant - inner_add]),
+                "answer": str(answer),
+                "solution": f"Expand the left side: {left_multiplier}x + {left_multiplier * inner_add} = {right_coefficient}x + {right_constant}. Then collect terms to get x = {answer}.",
+                "trap": "Expand brackets before moving terms.",
+            }
+        )
+
+        first = 6 + 2 * variant
+        numbers = [first + 2 * i for i in range(4)]
+        total = sum(numbers)
+        questions.append(
+            {
+                "id": f"adv_consecutive_even_{variant}",
+                "topic": "Consecutive-number algebra",
+                "difficulty": difficulty,
+                "prompt": f"The sum of four consecutive even numbers is {total}. What is the second largest number?",
+                "choices": number_choices(numbers[-2], [numbers[0], numbers[1], numbers[-1]]),
+                "answer": str(numbers[-2]),
+                "solution": f"Let the numbers be n, n + 2, n + 4 and n + 6. Then 4n + 12 = {total}, so n = {first}. The second largest is {numbers[-2]}.",
+                "trap": "Consecutive even numbers increase by 2.",
+            }
+        )
+
+        first_odd = 9 + 2 * variant
+        odd_numbers = [first_odd + 2 * i for i in range(5)]
+        total = sum(odd_numbers)
+        questions.append(
+            {
+                "id": f"adv_consecutive_odd5_{variant}",
+                "topic": "Consecutive-number algebra",
+                "difficulty": difficulty,
+                "prompt": f"Five consecutive odd numbers have a sum of {total}. What is the largest number?",
+                "choices": number_choices(odd_numbers[-1], [odd_numbers[0], odd_numbers[2], odd_numbers[-2]]),
+                "answer": str(odd_numbers[-1]),
+                "solution": f"The middle number is the average: {total} / 5 = {odd_numbers[2]}. The five odd numbers are {', '.join(str(n) for n in odd_numbers)}, so the largest is {odd_numbers[-1]}.",
+                "trap": "For five consecutive odd numbers, the average is the middle number.",
+            }
+        )
+
+        ratio_a = 3 + variant
+        ratio_b = 5 + variant
+        ratio_c = 7 + variant
+        total = (ratio_a + ratio_b + ratio_c) * (4 + variant)
+        target = ratio_c * (4 + variant)
+        questions.append(
+            {
+                "id": f"adv_ratio_threepart_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": difficulty,
+                "prompt": f"The ratio of bronze, silver and gold tokens is {ratio_a}:{ratio_b}:{ratio_c}. There are {total} tokens altogether. How many gold tokens are there?",
+                "choices": number_choices(target, [ratio_a * (4 + variant), ratio_b * (4 + variant), total - target]),
+                "answer": str(target),
+                "solution": f"There are {ratio_a + ratio_b + ratio_c} parts. One part is {total} / {ratio_a + ratio_b + ratio_c} = {4 + variant}. Gold is {ratio_c} parts, so {ratio_c} x {4 + variant} = {target}.",
+                "trap": "Use all three ratio parts to find one part.",
+            }
+        )
+
+        original = 80 + 20 * variant
+        first_discount = 10 + variant
+        second_discount = 5 + variant
+        final = original * (100 - first_discount) * (100 - second_discount) / 10000
+        questions.append(
+            {
+                "id": f"adv_percent_successive_{variant}",
+                "topic": "Fractions and ratios",
+                "difficulty": difficulty,
+                "prompt": f"A ${original} item is reduced by {first_discount}% and then by another {second_discount}%. What is the final price, to the nearest dollar?",
+                "choices": money_choices(round(final), [round(original * (100 - first_discount - second_discount) / 100), original - first_discount - second_discount, round(final) + 5]),
+                "answer": f"${round(final):g}",
+                "solution": f"Successive discounts multiply: {original} x {(100 - first_discount) / 100:g} x {(100 - second_discount) / 100:g} = ${final:.2f}, about ${round(final)}.",
+                "trap": "Two discounts are not the same as adding the percentages first.",
+            }
+        )
+
+        a, b, c = triples[variant - 1]
+        questions.append(
+            {
+                "id": f"adv_pyth_map_{variant}",
+                "topic": "Pythagoras",
+                "difficulty": difficulty,
+                "prompt": f"On a map, Rachel walks {a} m east and then {b} m north. What is her straight-line distance from the starting point?",
+                "choices": number_choices(c, [a + b, c - 2, c + 2], " m"),
+                "answer": f"{c} m",
+                "solution": f"The east and north paths form the shorter sides of a right triangle. The straight-line distance is sqrt({a}^2 + {b}^2) = sqrt({a * a + b * b}) = {c} m.",
+                "trap": "The straight-line distance is the hypotenuse, not the total walking distance.",
+            }
+        )
+
+    return questions
+
+
 MATH_QUESTIONS.extend(build_extra_math_questions())
 MATH_QUESTIONS.extend(build_learning_sequence_math_questions())
 MATH_QUESTIONS.extend(build_mastered_extension_questions())
+MATH_QUESTIONS.extend(build_advanced_challenge_math_questions())
+=======
+MATH_QUESTIONS.extend(build_extra_math_questions())
+MATH_QUESTIONS.extend(build_learning_sequence_math_questions())
+MATH_QUESTIONS.extend(build_mastered_extension_questions())
+>>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
 READING_TASKS.extend(build_extra_reading_tasks())
 READING_TASKS.extend(build_mastered_reading_tasks())
 GRAMMAR_QUESTIONS.extend(build_extra_grammar_questions())
@@ -1612,7 +1728,12 @@ for task in READING_TASKS:
     for question in task["questions"]:
         question["title"] = task["title"]
         question["passage"] = task["passage"]
-        question["difficulty"] = "Reading"
+        if question["id"].startswith("master_author_"):
+            question["difficulty"] = "Extension"
+        elif question["id"].startswith("rx"):
+            question["difficulty"] = "Challenge"
+        else:
+            question["difficulty"] = "Core"
         READING_QUESTIONS.append(question)
 
 for question in GRAMMAR_QUESTIONS:
@@ -1639,6 +1760,15 @@ def all_mcq_questions():
 
 
 QUESTION_LOOKUP = {question["id"]: question for question in all_mcq_questions()}
+ACTIVE_DIFFICULTIES = {"Challenge", "Extension"}
+
+
+def is_active_question(question):
+    return question.get("difficulty") in ACTIVE_DIFFICULTIES
+
+
+def active_mcq_questions():
+    return [question for question in all_mcq_questions() if is_active_question(question)]
 
 
 def css():
@@ -1743,9 +1873,9 @@ def shuffle_orders(questions):
 
 
 def new_mock():
-    maths = choose_questions(MATH_QUESTIONS, 10, "plc_seen_ids")
-    reading = choose_questions(READING_QUESTIONS, 6, "plc_seen_ids")
-    grammar = choose_questions(GRAMMAR_QUESTIONS, 6, "plc_seen_ids")
+    maths = choose_questions([question for question in MATH_QUESTIONS if is_active_question(question)], 10, "plc_seen_ids")
+    reading = choose_questions([question for question in READING_QUESTIONS if is_active_question(question)], 6, "plc_seen_ids")
+    grammar = choose_questions([question for question in GRAMMAR_QUESTIONS if is_active_question(question)], 6, "plc_seen_ids")
     selected = maths + reading + grammar
     random.shuffle(selected)
     st.session_state["plc_mock_ids"] = [question["id"] for question in selected]
@@ -1756,7 +1886,7 @@ def new_mock():
 
 
 def new_practice(domain, topic, difficulty, count):
-    pool = all_mcq_questions()
+    pool = active_mcq_questions()
     if domain != "All":
         pool = [question for question in pool if question["domain"] == domain]
     if topic != "All topics":
@@ -1998,8 +2128,13 @@ def render_mock_tab():
 def render_practice_tab():
     st.subheader("Targeted skill practice")
     st.info(
+<<<<<<< HEAD
+        "Harder mode is now active: Core questions are retired from normal practice. Rachel will see Challenge "
+        "and Extension questions only, including harder Year 8-9 material."
+=======
         "Current plan: completed areas now practise at harder Year 8-9 level. New learning should move through "
         "linear equations, consecutive-number algebra, then Pythagoras."
+>>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
     )
 
     st.markdown("**Quick starts for completed areas at harder level**")
@@ -2027,17 +2162,29 @@ def render_practice_tab():
     st.markdown("**Next learning sequence**")
     sequence_buttons = st.columns(3)
     if sequence_buttons[0].button("1. Linear equations", type="primary", width="stretch"):
+<<<<<<< HEAD
+        new_practice("Maths", "Linear equations", "Challenge", 10)
+=======
         new_practice("Maths", "Linear equations", "Core", 10)
+>>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
         st.rerun()
     if sequence_buttons[1].button("2. Consecutive numbers", type="primary", width="stretch"):
         new_practice("Maths", "Consecutive-number algebra", "Challenge", 10)
         st.rerun()
     if sequence_buttons[2].button("3. Pythagoras", type="primary", width="stretch"):
+<<<<<<< HEAD
+        new_practice("Maths", "Pythagoras", "Challenge", 10)
+        st.rerun()
+
+    st.divider()
+    all_questions = active_mcq_questions()
+=======
         new_practice("Maths", "Pythagoras", "Core", 10)
         st.rerun()
 
     st.divider()
     all_questions = all_mcq_questions()
+>>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         domain = st.selectbox("Area", ["All", "Maths", "Reading", "Grammar and vocabulary"], key="plc_domain")

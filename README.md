@@ -69,7 +69,12 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 
 - Independent PLC-style preparation app in `PLC_Year7.py`
 - Original practice questions only; not official PLC or Studocu material
+<<<<<<< HEAD
+- Expanded two-month bank: 268 maths questions, 44 reading passages, 124 reading questions, 154 grammar/vocabulary questions and 40 writing prompts
+- Harder mode removes Core questions from normal mock tests and targeted practice; active practice now uses Challenge and Extension questions only
+=======
 - Expanded two-month bank: 232 maths questions, 44 reading passages, 124 reading questions, 154 grammar/vocabulary questions and 40 writing prompts
+>>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
 - Completed areas can now be practised at harder Year 8-9 level: algebra and patterns, apostrophes, author purpose, fractions and ratios, vocabulary and spelling
 - New learning sequence added: linear equations, consecutive-number algebra, then Pythagoras
 - Quick-start buttons for harder completed-topic practice and the next learning sequence
