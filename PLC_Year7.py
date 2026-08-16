@@ -1577,7 +1577,6 @@ def build_mastered_grammar_questions():
     return questions
 
 
-<<<<<<< HEAD
 def build_advanced_challenge_math_questions():
     questions = []
     triples = [(20, 21, 29), (11, 60, 61), (28, 45, 53), (33, 56, 65), (16, 63, 65), (48, 55, 73)]
@@ -1691,11 +1690,6 @@ MATH_QUESTIONS.extend(build_extra_math_questions())
 MATH_QUESTIONS.extend(build_learning_sequence_math_questions())
 MATH_QUESTIONS.extend(build_mastered_extension_questions())
 MATH_QUESTIONS.extend(build_advanced_challenge_math_questions())
-=======
-MATH_QUESTIONS.extend(build_extra_math_questions())
-MATH_QUESTIONS.extend(build_learning_sequence_math_questions())
-MATH_QUESTIONS.extend(build_mastered_extension_questions())
->>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
 READING_TASKS.extend(build_extra_reading_tasks())
 READING_TASKS.extend(build_mastered_reading_tasks())
 GRAMMAR_QUESTIONS.extend(build_extra_grammar_questions())
@@ -2128,13 +2122,8 @@ def render_mock_tab():
 def render_practice_tab():
     st.subheader("Targeted skill practice")
     st.info(
-<<<<<<< HEAD
         "Harder mode is now active: Core questions are retired from normal practice. Rachel will see Challenge "
         "and Extension questions only, including harder Year 8-9 material."
-=======
-        "Current plan: completed areas now practise at harder Year 8-9 level. New learning should move through "
-        "linear equations, consecutive-number algebra, then Pythagoras."
->>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
     )
 
     st.markdown("**Quick starts for completed areas at harder level**")
@@ -2162,29 +2151,17 @@ def render_practice_tab():
     st.markdown("**Next learning sequence**")
     sequence_buttons = st.columns(3)
     if sequence_buttons[0].button("1. Linear equations", type="primary", width="stretch"):
-<<<<<<< HEAD
         new_practice("Maths", "Linear equations", "Challenge", 10)
-=======
-        new_practice("Maths", "Linear equations", "Core", 10)
->>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
         st.rerun()
     if sequence_buttons[1].button("2. Consecutive numbers", type="primary", width="stretch"):
         new_practice("Maths", "Consecutive-number algebra", "Challenge", 10)
         st.rerun()
     if sequence_buttons[2].button("3. Pythagoras", type="primary", width="stretch"):
-<<<<<<< HEAD
         new_practice("Maths", "Pythagoras", "Challenge", 10)
         st.rerun()
 
     st.divider()
     all_questions = active_mcq_questions()
-=======
-        new_practice("Maths", "Pythagoras", "Core", 10)
-        st.rerun()
-
-    st.divider()
-    all_questions = all_mcq_questions()
->>>>>>> 7be2ef3e1fef8f1245b2e8414cc1c869cd1bd84b
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         domain = st.selectbox("Area", ["All", "Maths", "Reading", "Grammar and vocabulary"], key="plc_domain")
