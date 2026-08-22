@@ -81,6 +81,20 @@ Streamlit apps for students to practise Years 7-9 grammar, improve persuasive wr
 - Blank answer choices, submission confirmation, worked solutions and exam-trap feedback
 - Practice record and CSV exports for parent/student review
 
+## Notebook practice bank
+
+- Practice app in `bank.py`, built only from the handwritten revision notebook photographed in `bank/`
+- 471 questions across the 26 notebook pages, with no topic added and none left out
+- Power tables for 2 to 10, squares 11 to 26, the fraction and percentage table and factorials
+- Formula pages: BODMAS, profit and discount, consecutive integers, probability, polygon angles, ratio sharing, sequence sums, heads and legs, average speed
+- Geometry pages: triangle types and Heron, Pythagoras, 2D areas, 3D volumes, unit conversion and scaling, compass directions, the distance formula
+- Algebra and data pages: the quadratic formula, rearranging equations, gradient, average word problems, mean, median, mode and range
+- Easy, Medium and Hard follow the one, two and three dot code written beside the squares table
+- Full notebook test, fast memory drill on the four tables, topic practice and quick-start buttons per page
+- Worked solutions that repeat the rule exactly as the notebook states it, plus a watch-out line for each common slip
+- Formula sheet tab with the whole notebook typed out, a table of the nine arithmetic slips found in it, and a bank inventory
+- Blank answer choices, submission confirmation, practice record and CSV exports
+
 ## Run locally
 
 ```powershell
@@ -116,6 +130,12 @@ For the PLC Year 7 level test preparation app:
 
 ```powershell
 python -m streamlit run PLC_Year7.py
+```
+
+For the notebook practice bank:
+
+```powershell
+python -m streamlit run bank.py
 ```
 
 On Streamlit Community Cloud, choose `obby_game.py` as the main file.
